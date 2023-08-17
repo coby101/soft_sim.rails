@@ -1,0 +1,68 @@
+(below instructions came from here: https://linuxhint.com/install-ruby-on-rails/ )
+
+- install dependencies 
+sudo apt—get install curl git gnupg gawk bison libffi-dev libgdbm-dev libncurses5-dev libyaml-dev pkg-config zlib1g-dev libgmp-dev libreadline-dev libssl-dev
+
+(did not include: libsqlite3-dev sqlite3)
+
+- install RVM
+gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+(may give an error, try:
+curl -sSL https://rvm.io/pkuczynski.asc | gpg --import -
+)
+curl -sSL https://get.rvm.io | bash -s stable --ruby
+(run the prompted "source" cmd)
+source /home/coby/.rvm/scripts/rvm
+- check that which rvm returns: /home/coby/.rvm/bin/rvm
+
+- install ruby:
+rvm install ruby-3.0.2
+- set default version
+rvm --default use ruby-3.0.2
+
+- install NodeJS  (not needed for every dev)
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo bash -
+apt-get install -y nodejs
+
+- install Yarn (not needed for every dev)
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt-get update
+sudo apt-get install yarn
+
+- install bundler and rails
+gem install bundler
+gem install rails -v 6.1.4
+gem install pg
+(if that fails, try this first: sudo apt-get install libpq-dev )
+
+
+
+- as user postgres:
+psql
+ create role fy_pcmd with createdb login password 'password1';
+ create role <dev> with superuser createdb login password 'password1';
+
+
+- set up $NEW_USER as a postgres user
+su - postgres
+  psql
+  - maybe update the password if this is the first time
+  \password postgres <postgres> <postgres>
+  -
+  create role $NEW_USER with superuser createdb createrole login password 'n1mda8d';
+  - create the nobody role if this is the first time
+  create role nobody;
+  -
+exit and go back to root user
+
+
+INSTALLATION FILES for Ruby devs
+git clone https://github.com/coby101/fy_pcmd
+rails new fy_pcmd --database=postgresql
+ - allow overwrites for only these file
+    .ruby-version
+    Gemfile
+    package.json
+
+
