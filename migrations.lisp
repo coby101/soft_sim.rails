@@ -261,44 +261,6 @@ for associative tables "id: false"
             (let ((op (operator-key (car (expression default)))))
                    (member op '($current-timestamp $current-date $next-sequence-value))))))))
 
-
-;; https://github.com/rails/rails/blob/88aa2efd692619e87eee88dfc48d608bea9bcdb4/activerecord/lib/active_record/connection_adapters/abstract/schema_definitions.rb#L421
-#|
-def column(name, type, options = {})
-        column = self[name] || ColumnDefinition.new(@base, name, type)
-        if options[:limit]
-          column.limit = options[:limit]
-        elsif native[type.to_sym].is_a?(Hash)
-          column.limit = native[type.to_sym][:limit]
-        end
-        column.precision = options[:precision]
-        column.scale = options[:scale]
-        column.default = options[:default]
-        column.null = options[:null]
-        @columns << column unless @columns.include? column
-        self
-      end
-
- create_table "todos", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "description"
-    t.integer "done"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "user_id", default: 999, null: false
-    t.index ["user_id"], name: "fk_rails_d94154aa95"
-  end
-  create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "first_name"
-    t.string "last_name"
-    t.string "email"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-  add_foreign_key "todos", "users"
-end
-
-|#
-
 (defmethod t.column ((attribute foreign-key) &optional stream)
   (declare (ignorable stream))
   nil)

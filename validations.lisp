@@ -313,7 +313,6 @@ These variables are available to message strings:
      (make-conditional-option condition)
      (make-event-option event))))
 
-; https://github.com/rails/rails/blob/main/activemodel/lib/active_model/validations/numericality.rb
 (defun unparse-comparison-validation (field option arg message &key event condition)
     (if (member (data-type field) '(:date :time :datetime))
         (progn

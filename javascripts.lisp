@@ -138,59 +138,6 @@ window.addEventListener('turbolinks:load', () => new removeFields())
   *javascript-packs* :test #'string-equal :key #'car)
 
 (defun google-address-js (aspect) "")
-;  (let ((instance (instance-name (entity aspect))))
-;    (format nil "<script src=\"https://maps.googleapis.com/maps/api/js?key=AIzaSyB_NNMGbX-53Ud7Vgtg233vHkJDsJq7uLk&libraries=places&callback=initMap&solution_channel=GMP_QB_addressselection_v1_cAC\" async defer></script>")))
-;; <script>
-;;   function initMap() {
-;;     const componentForm = {
-;;       'location': '~a_address1',
-;;       'locality': '~:*~a_locality',
-;;       'administrative_area_level_1': '~:*~a_state',
-;;       'country': '~:*~a_country',
-;;       'postal_code': '~:*~a_post_code',
-;;     };
-;;     const autocompleteInput = document.getElementById('~:*~a_address1');
-;;     const autocomplete = new google.maps.places.Autocomplete(autocompleteInput, {
-;;       fields: [\"address_components\", \"geometry\", \"name\"],
-;;       types: [\"address\"],
-;;     });
-;;     autocomplete.addListener('place_changed', function () {
-;;       const place = autocomplete.getPlace();
-;;       if (!place.geometry) {
-;;         return;
-;;       }
-;;       fillInAddress(place);
-;;     });
-
-;;     function fillInAddress(place) {  
-;;       const addressNameFormat = {
-;;         'street_number': 'short_name',
-;;         'route': 'long_name',
-;;         'locality': 'long_name',
-;;         'administrative_area_level_1': 'short_name',
-;;         'country': 'long_name',
-;;         'postal_code': 'short_name',
-;;       };
-;;       const getAddressComp = function (type) {
-;;         for (const component of place.address_components) {
-;;           if (component.types[0] === type) {
-;;             return component[addressNameFormat[type]];
-;;           }
-;;         }
-;;         return '';
-;;       };
-;;       document.getElementById('~:*~a_address1').value = getAddressComp('street_number') + ' '
-;;                 + getAddressComp('route');
-;;       Object.keys(componentForm).forEach(function (component) { 
-;;         if (component !== 'location') {
-;;           document.getElementById(componentForm[component]).value = getAddressComp(component);
-;;         }
-;;       });
-;;     }
-;;   }
-;; </script>" instance)))
-
-
 
 
 ;;;===========================================================================

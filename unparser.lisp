@@ -43,14 +43,6 @@
                                 (t.add) (t.long-name entity) (schema-name entity))))
              :class *nested-form-class*))))
 
-
-;;;https://api.rubyonrails.org/classes/ActionView/Helpers/FormOptionsHelper.html
-;;;def collection_select(object, method, collection, value_method, text_method, options = {}, html_options = {})
-;;;        Tags::CollectionSelect.new(object, method, self, collection, value_method, text_method, options, html_options).render
-;;;end
-;;;https://github.com/rails/rails/blob/83217025a171593547d1268651b446d3533e2019/actionview/lib/action_view/helpers/form_options_helper.rb#L202
-
-;;;https://guides.rubyonrails.org/form_helpers.html#helpers-for-generating-form-elements
 (defmethod unparse-form-helper ((item attribute) (type t) &key (class (form-field-class item)))
   (declare (ignorable type))
   (text_field (schema-name item) :class class :nullable? (not (require-user-input? item))))
