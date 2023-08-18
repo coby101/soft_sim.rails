@@ -54,7 +54,7 @@
 
 (defmethod test-datum ((type logical-type) (att attribute)) (test-datum (id type) att))
 (defmethod test-datum ((type symbol) (att attribute))
-  (ruby::unparse-data :string (format nil "~a not implemented" type)))
+  (ruby:unparse-data :string (format nil "~a not implemented" type)))
 
 (defmethod test-datum ((type (eql :id-name)) (att attribute))
   (format nil "| i | \"~a #{i}\"" (short-name (my-entity att))))
@@ -62,7 +62,7 @@
   (format nil "| i | \"~a#{i}\"" (short-name att)))
 
 (defmethod test-datum ((type (eql :date)) (att attribute))
-  (ruby::unparse-expression '$current-date))
+  (ruby:unparse-expression '$current-date))
 
 (defmethod test-datum ((type (eql :name)) (att attribute))
   "Faker::Name.first_name")
@@ -81,7 +81,7 @@
          (prefix (if based-on (format nil "#{~a}" (schema-name based-on)) "email"))
          (unique? (unique? att)))
     (strcat (if unique? "| i | " "")
-            (ruby::unparse-data :string
+            (ruby:unparse-data :string
       (format nil "~a~a@email.com"
               prefix
               (if unique? "#{i}" ""))))))

@@ -196,7 +196,7 @@ for associative tables "id: false"
 
 (defmethod t.column ((attribute cached-summary) &optional stream)
   (let ((options (assemble-column-options attribute)))
-    (format stream "t.~a :~a~a" (ruby::unparse-datatype (logical-type attribute))
+    (format stream "t.~a :~a~a" (ruby:unparse-datatype (logical-type attribute))
             (schema-name attribute)
             (if options
                 (format nil ", ~{~a~^, ~}" options)
@@ -207,7 +207,7 @@ for associative tables "id: false"
     (format stream "t.~a :~a~a"
             (if (implement-as-string? attribute)
                 "string"
-                (ruby::unparse-datatype (logical-type attribute)))
+                (ruby:unparse-datatype (logical-type attribute)))
             (schema-name attribute)
             (if options
                 (format nil ", ~{~a~^, ~}" options)
@@ -243,8 +243,8 @@ for associative tables "id: false"
                                 "true" "false"))
                            ((or (stringp default)
                                 (numberp default))
-                            (sql::unparse-expression default))
-                           (t (format nil "-> { \"~a\" }" (sql::unparse-expression default)))))))
+                            (sql:unparse-expression default))
+                           (t (format nil "-> { \"~a\" }" (sql:unparse-expression default)))))))
              (unless (nullable? att)
                (format nil "null: false"))
              (limit-column-option type-id)
@@ -317,7 +317,7 @@ for associative tables "id: false"
             (schema-name (my-entity attribute)) (schema-name attribute)
             (if (implement-as-string? attribute)
                 "string"
-                (ruby::unparse-datatype (logical-type attribute)))
+                (ruby:unparse-datatype (logical-type attribute)))
             (if options
                 (format nil ", ~{~a~^, ~}" options)
                 ""))))

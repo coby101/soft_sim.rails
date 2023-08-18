@@ -55,19 +55,19 @@
     (format stream "~a~a" (make-indent) (model_params-method aspect nil))))
 
 (defmethod get_route_focus ((aspect aspect) &optional (stream t))
-  (format stream "~a" (ruby::unparse-method "get_route_focus" () (as-literal "@current_focus = 'cash_flow'"))))
+  (format stream "~a" (ruby:unparse-method "get_route_focus" () (as-literal "@current_focus = 'cash_flow'"))))
 
 (defmethod index-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a"
           (make-indent)
-          (ruby::unparse-method
+          (ruby:unparse-method
            "index" ()
            (as-literal (format nil "@~a = ~a" (schema-name (entity aspect)) (sort-and-paginate-assignment aspect))))))
 
 (defmethod list-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a"
           (make-indent)
-          (ruby::unparse-method
+          (ruby:unparse-method
            "list" ()
            (as-literal (format nil "@~a = ~a" (schema-name (entity aspect)) (apply-search_assignment aspect)))
            (as-literal (format nil "@~a = ~a" (schema-name (entity aspect)) (sort-and-paginate-assignment aspect :with-params? t)))
@@ -75,7 +75,7 @@
 
 (defmethod delete-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a" (make-indent)
-          (ruby::unparse-method
+          (ruby:unparse-method
            "destroy" nil
            (if (typep (entity aspect) 'attribute-table)
                (as-literal (format nil "@~a.destroy~%    respond_to do |format|~%      format.js"
@@ -85,14 +85,14 @@
 
 (defmethod update-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a" (make-indent)
-          (ruby::unparse-method
+          (ruby:unparse-method
            "update" nil
            (as-literal (respond_to aspect :update))
            (as-literal "end"))))
 
 (defmethod set_index_attributes ((aspect aspect) &optional (stream t))
   (format stream "~a"
-          (ruby::unparse-method
+          (ruby:unparse-method
            "set_index_attributes" ()
            (as-literal
             (format nil "@index_attributes = [~{~a~^, ~}]"
@@ -140,19 +140,19 @@
 (defmethod set_ancestors ((aspect aspect) &optional (stream t))
   (let ((ancestors (list-possible-ancestors aspect)))
     (format stream "~a"
-            (apply #'ruby::unparse-method "set_ancestors" ()
+            (apply #'ruby:unparse-method "set_ancestors" ()
                    (append
                       (loop for ancestor in ancestors
                             collect (format-ancestor-assignment ancestor (view aspect)))
                     (list (as-literal (format nil "@ancestors = [~{@~a~^, ~}].compact" (mapcar #'instance-name ancestors)))))))))
 
 (defmethod set_model-method ((aspect aspect) &optional (stream t))
-  (format stream (ruby::unparse-method (set_model-method-name aspect) nil
+  (format stream (ruby:unparse-method (set_model-method-name aspect) nil
                   (as-literal
                    (with-nesting (main-variable-assignment aspect :show))))))
 
 (defmethod set_models-method ((aspect aspect) &optional (stream t))
-  (format stream (ruby::unparse-method (set_models-method-name aspect) nil
+  (format stream (ruby:unparse-method (set_models-method-name aspect) nil
                   (as-literal
                    (with-nesting (main-variable-assignment aspect :list))))))
 
@@ -167,10 +167,10 @@
             collection find)))
 
 (defmethod show-method ((aspect aspect) &optional (stream t))
-  (format stream "~a~a" (make-indent) (ruby::unparse-method "show" nil)))
+  (format stream "~a~a" (make-indent) (ruby:unparse-method "show" nil)))
 
 (defmethod edit-method ((aspect aspect) &optional (stream t))
-  (format stream "~a~a" (make-indent) (ruby::unparse-method "edit" nil)))
+  (format stream "~a~a" (make-indent) (ruby:unparse-method "edit" nil)))
 
 
 

@@ -24,7 +24,7 @@
 		    (implementation-subdirectory "ror" "config" "locales"))))
     (with-open-file (yml file-path :direction :output :if-exists :supersede)
       (format-file-notice yml "internationalization.lisp")
-      (format yml "~%en:~a" (yml::indent))
+      (format yml "~%en:~a" (yml:indent))
       (terpri yml)
 ;      (with-nesting (format yml (global-translations)))
 ;      (dolist (view (views *application*))
@@ -35,7 +35,7 @@
  ;     (with-nesting (format yml (model-translations))))))
 
 (defun global-translations()
-  (yml::unparse-pair-tree
+  (yml:unparse-pair-tree
    (list :global
 	 `((:actions "")
 	   (:show ,*show-button-text*)
@@ -68,7 +68,7 @@
 (defun t.delete-warning () "t('global.delete_warning')")
 
 (defmethod unparse-translation ((entity entity))
-  (yml::unparse-pair-tree (make-translation-tree entity)))
+  (yml:unparse-pair-tree (make-translation-tree entity)))
 
 (defmethod make-translation-tree ((entity entity) &optional (key (instance-name entity)))
   (list key
@@ -208,7 +208,7 @@
 		       ,(format nil "Your ~a record was successfully deleted" (long-name (entity aspect)))))))))))
 
 (defmethod unparse-translation ((view view))
-  (yml::unparse-pair-tree
+  (yml:unparse-pair-tree
    (list (snake-case (name view))
 	 (append `((:name ,(long-name view))
 		   (:long_name ,(long-name view))
@@ -218,7 +218,7 @@
 ; (with-nesting (format yml (model-translations)))
 (defmethod active-record-translations ()
   (let ((entities (sort (append (framework-entities *application*) (application-entities *application*)) #'string-lessp :key #'name)))
-    (yml::unparse-pair-tree
+    (yml:unparse-pair-tree
      (list :activerecord
            `((:models
               ,(mapcar #'make-translation-tree entities))
@@ -236,12 +236,12 @@
                                  (make-translation-tree att))))))))))
 
 (defmethod model-translations ()
-  (yml::unparse-pair-tree
+  (yml:unparse-pair-tree
    `(:schema
      (,(mapcar #'make-translation-tree (append (application-entities *application*)
                                                (framework-entities *application*)))))))
 (defun pcmd-translations ()
-  (yml::unparse-pair-tree
+  (yml:unparse-pair-tree
    `(:entity
      (,(mapcar #'make-entity-translation (append (application-entities *application*)
                                                  (framework-entities *application*)))))))

@@ -61,7 +61,7 @@ end~%"))))
   (when nil ;(requires-active-model-code? entity)
     (format stream "~%~{~a~%~}"
             (mapcar #'write-validator-method
-                    (remove-if-not #'ror::calls-custom-method?
+                    (remove-if-not #'ror:calls-custom-method?
                                    (apply #'append
                                           (mapcar #'constraints
                                                   (persistent-attributes entity)))))))
@@ -107,7 +107,7 @@ end~%"))))
 
 
 (defun check_deleteable?(entity)
-  (ruby::unparse-method "check_deleteable?" nil
+  (ruby:unparse-method "check_deleteable?" nil
     (as-literal
      (format nil "~{self.~a.empty?~^ && ~}" (mapcar #'schema-name (dependent-children entity))))))
 
@@ -163,7 +163,7 @@ end~%"))))
 
 (defmethod model-state-methods ((ent entity))
   (mapcar #'(lambda(state)
-              (ruby::unparse-method (strcat "is_" (snake-case (name state)) "?") nil
+              (ruby:unparse-method (strcat "is_" (snake-case (name state)) "?") nil
                                     (unparse-attribute-references
                                      (expression (predicate state)) ent)))
           (states ent)))
@@ -174,16 +174,16 @@ end~%"))))
 (defmethod format-model-scope ((state entity-state))
   (let ((lambda-body
          (as-literal (format nil "where(~s)"
-                             (sql::unparse-expression
-                              (sql::unparse-attribute-references (expression (predicate state))
+                             (sql:unparse-expression
+                              (sql:unparse-attribute-references (expression (predicate state))
                                                                  (my-entity state)))))))
     (format nil "scope :~a, ~a" (snake-case (name state))
-            (ruby::unparse-lambda nil lambda-body))))
+            (ruby:unparse-lambda nil lambda-body))))
 
 (defun meta_data(entity &optional stream)
   (format stream "~%~adef self.meta_data" (make-indent))
     (with-nesting
-        (format stream (ruby::unparse-hash (entity-meta-data (find-entity entity)))))
+        (format stream (ruby:unparse-hash (entity-meta-data (find-entity entity)))))
   (format stream "~%~aend~%" (make-indent)))
 
 (defun entity-meta-data (entity)
@@ -210,8 +210,8 @@ end~%"))))
                    (list :source (legal-values domain)))
                   ((typep domain 'referential-enumeration)
                    (let ((data-source (data-source domain)))
-                     (list :source (list (make-symbol (or (ignore-errors (model-name (my-entity data-source))) (name (simian::my-attribute domain))))
-                                         (keywordify (or (ignore-errors (schema-name data-source)) (name (simian::my-attribute domain))))))))
+                     (list :source (list (make-symbol (or (ignore-errors (model-name (my-entity data-source))) (name (simian:my-attribute domain))))
+                                         (keywordify (or (ignore-errors (schema-name data-source)) (name (simian:my-attribute domain))))))))
                   (t nil))
                 (when nil ;; (constraints domain)
                   (list :constraints (mapcar #'formula (constraints domain)))))))
@@ -227,7 +227,7 @@ end~%"))))
       ((or (stringp default)
            (numberp default))
        default)
-      (t (format nil "-> (obj) { \"~a\" }" (ruby::unparse-expression default))))))
+      (t (format nil "-> (obj) { \"~a\" }" (ruby:unparse-expression default))))))
 
 
 ;;;===========================================================================

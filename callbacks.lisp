@@ -157,7 +157,7 @@
 (defmethod on-destroy-methods ((entity entity))
   (let* ((children (dependent-children entity)))
     (when children
-      (list (apply #'ruby::unparse-method "prevent_orphaned_records" nil
+      (list (apply #'ruby:unparse-method "prevent_orphaned_records" nil
              (append
               (loop for child in children
                     collect
@@ -176,7 +176,7 @@
   (cadadr (expression (matchmaker rel))))
 
 (defun unparse-find_calendar_entities (calendar-relationships)
-  (apply #'ruby::unparse-method "find_calendar_entities" nil
+  (apply #'ruby:unparse-method "find_calendar_entities" nil
          (loop for rel in calendar-relationships
                collect
                (let* ((cal-side (lhs rel))
@@ -201,7 +201,7 @@
                                               (unparse-default-value-expression att entity))))
                               attributes)))
     (when attributes
-      (apply #'ruby::unparse-method
+      (apply #'ruby:unparse-method
             "set_interdependent_defaults" nil
             (mapcar #'as-literal expressions)))))
 
@@ -211,9 +211,9 @@
     (unless (typep default 'attribute)
       (error "unhandled default value ~a" (type-of default)))
     (if (eq (my-entity default) context)
-      (ruby::unparse-expression
+      (ruby:unparse-expression
        (unparse-attribute-references default context))
-      (ruby::unparse-expression
+      (ruby:unparse-expression
        (list '$unless
              (as-literal (format nil "~{~a~^.~}.nil?"
                                  (mapcar #'instance-name (butlast (path-to-attribute context default)))))
@@ -223,7 +223,7 @@
   (let* ((attributes (cached-calculations entity))
          (expressions (mapcar #'(lambda (att)
                                   (format nil "self.~a = ~a" (schema-name att)
-                                          (ruby::unparse-expression
+                                          (ruby:unparse-expression
                                            (unparse-attribute-references (expression att) entity))))
                               attributes)))
     (when attributes
@@ -288,7 +288,7 @@
 (defun destroyed_by_parent (parent-relation child-entity)
   (declare (ignorable child-entity))
   (apply
-   #'ruby::unparse-method (destroyed-by-parent-predicate-name parent-relation)
+   #'ruby:unparse-method (destroyed-by-parent-predicate-name parent-relation)
    nil
    (if (cascade-deletes? parent-relation)
        (list (as-literal
@@ -306,10 +306,10 @@
 (defun parent_updates_required (relation child-entity)
   (let ((atts (remove-if-not #'(lambda(a) (eq (my-entity a) (entity relation)))
                              (trigger-dependent-summary-fields child-entity))))
-    (ruby::unparse-method (require-update-predicate-name relation)
+    (ruby:unparse-method (require-update-predicate-name relation)
        nil
        (as-literal (format nil "!saved_changes.keys.intersection(~a).blank?~a"
-                           (ruby::unparse-array
+                           (ruby:unparse-array
                             (list* (strcat (instance-name relation) "_id")
                                    (mapcar #'schema-name (mapcar #'source atts))))
                             (if (required-relation? relation)
@@ -318,7 +318,7 @@
 
 (defun trigger_parent_summary_update (relation child-entity)
   (let* ((rel-name (instance-name relation)))
-    (ruby::unparse-method
+    (ruby:unparse-method
      (summary-update-method-name relation)
      nil
      (as-literal (format nil "self.~a.set_cached_~a_summaries"
@@ -344,14 +344,14 @@
   (let* ((instance (instance-name entity))
          (method (format nil "ensure_~a" instance)))
     (format nil
-            (apply #'ruby::unparse-method method nil (ensure-summary-method-body entity context)))))
+            (apply #'ruby:unparse-method method nil (ensure-summary-method-body entity context)))))
 
 (defmethod ensure-summary-method-body ((entity entity) context)
   (let* ((instance (instance-name entity))
          (model (model-name entity))
          (left-key (car (associates entity)))
          (left-key-name (strcat (instance-name left-key) "_id"))
-         (left-key-ref (ruby::unparse-expression
+         (left-key-ref (ruby:unparse-expression
                         (unparse-attribute-references (primary-key left-key) context)))
          (right-key (cadr (associates entity)))
          (right-key-name (strcat (instance-name right-key) "_id"))
@@ -369,7 +369,7 @@
                        ;; save if new record
                        (with-nesting (make-indent))
                        (with-nesting
-                               (ruby::unparse-if-statement
+                               (ruby:unparse-if-statement
                                 (as-literal "object.new_record?")
                                 (as-literal (format nil "errors.add(:~a_id, \"Unable to create a ~a record\") ~
                                                     unless object.save" instance (long-name entity)))))
@@ -403,7 +403,7 @@
            (other-entity (car (remove period-entity (associates entity))))
            (find-report-args (format nil "~a_id: calendar_object.id, ~a_id: ~:*~a_id"
                                      (instance-name period-entity) (instance-name other-entity))))
-      (ruby::unparse-method
+      (ruby:unparse-method
        "self.period_report" (list "period_id" (strcat (instance-name other-entity) "_id"))
        (as-literal (format nil "~acalendar_object = ~a"
                            warning (find-calendar-object-expression period-entity other-entity)))
@@ -448,7 +448,7 @@
 
 (defun unparse-callback-registration (event timing method &rest options)
   (let* ((args (mapcar #'(lambda(opt)
-                           (format nil "~a: ~a" (car opt) (ruby::unparse (if (eq (cadr opt) t) (cadr opt) (keywordify (cadr opt))))))
+                           (format nil "~a: ~a" (car opt) (ruby:unparse (if (eq (cadr opt) t) (cadr opt) (keywordify (cadr opt))))))
                        options)))
     (format nil "~a_~a :~a~{, ~a~}" timing event method args)))
 #|

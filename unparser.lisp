@@ -14,7 +14,7 @@
 
 
 (defmethod unparse-form-element ((item attribute))
-  (html::div
+  (html:div
    (list (unparse-erb t (format nil "form.label :~a, t('.~a'), class: \"~a\""
                                 (schema-name item) (schema-name item) (form-label-class item)))
          (unparse-erb t (format nil "~a~a" (unparse-form-helper item (logical-type item))
@@ -28,15 +28,15 @@
 (defmethod unparse-form-element ((item multi-valued-attribute))
   (let ((entity (child-entity item)))
     (format nil "<br>~a<br>"
-            (html::div
+            (html:div
              (format nil "~%~a~%~a~a~%~a~a~%~a~a~%~a"
-                     (with-nesting (html::heading 3 (unparse-erb t (t.short-plural entity))))
-                     (html::make-indent)
+                     (with-nesting (html:heading 3 (unparse-erb t (t.short-plural entity))))
+                     (html:make-indent)
                      (unparse-erb t (format nil "form.fields_for :~a do |~a_form|"
                                             (schema-name entity) (instance-name entity)))
-                     (html::make-indent)
+                     (html:make-indent)
                      (unparse-erb t (format nil "render \"~a_fields\", form: ~:*~a_form" (instance-name entity)))
-                     (html::make-indent)
+                     (html:make-indent)
                      (unparse-erb nil "end")
                      (unparse-erb t
                         (format nil "link_to_add_fields ~a + ' ' + ~a, form, :~a"
@@ -193,7 +193,7 @@
             (setf effective-path nil)))
       (reverse (list* source-entity effective-path)))))
 #|
-(setf item simian::@claim.project)
+(setf item simian:@claim.project)
 (setf entity (my-entity item))
 (setf source-entity (my-entity (data-source (domain item))))
 (setf common-ancestor (nearest-common-ancestor entity source-entity 
@@ -207,7 +207,7 @@
 
 (mapcar #'(lambda (item) 
              (format t "~%~a.~a: ~s" (name (my-entity item)) (name item)
-                    (ror::target-data-expression item)))
+                    (ror:target-data-expression item)))
   (list (find-field :codecontroller :estimate)
  (find-field :workitem :estimate)
  (find-field :projectpart :workitem)
@@ -232,7 +232,7 @@
              (path-down (path-down-to-target-data common-ancestor source-entity)))
         (when (> (length path-down) 1)
           (warn "generating select box for ~s: ~%~a~{.~a~} will not work!"
-                (english::unparse item) path-up (mapcar #'schema-name path-down)))
+                (english:unparse item) path-up (mapcar #'schema-name path-down)))
         (format nil "~a~{.~a~}" path-up (mapcar #'schema-name path-down)))))
 
 ;  (format nil "~a~a"  (model-name source-entity)
@@ -261,7 +261,7 @@
 (defmethod unparse-template-element ((item formula) (aspect aspect)
                                         &key obj-var labeled? css-class-string)
   (declare (ignorable obj-var labeled? css-class-string aspect))
-  (ruby::unparse-expression
+  (ruby:unparse-expression
    (unparse-attribute-references
     (expression item) (context item) obj-var)))
 
@@ -287,7 +287,7 @@
                                   (unparse-formatting expression (logical-type (cadr element))))
                                  (t expression))))
     (format nil "~a~a" label
-            (html::div (if (and (typep element 'summary-attribute)
+            (html:div (if (and (typep element 'summary-attribute)
                                 (find-aspect (view aspect) (entity (car (path element)))))
                            (make-linked-element element aspect formatted-expression obj-var)
                            (unparse-erb t formatted-expression))
@@ -302,12 +302,12 @@
 
 ;; can adjust the class value here according to logical type
 (defmethod unparse-template-label ((item attribute))
-  (format nil "<strong>~a</strong>" (html::div (unparse-erb t (t.name item)) :class (field-label-class item))))
+  (format nil "<strong>~a</strong>" (html:div (unparse-erb t (t.name item)) :class (field-label-class item))))
 
 (defmethod unparse-template-label ((item list))
   (if (field-reference-expression? item)
       (format nil "<strong>~a</strong>"
-              (html::div (unparse-erb t (t.name item)) :class (field-label-class item)))
+              (html:div (unparse-erb t (t.name item)) :class (field-label-class item)))
       (error "don't know what to do with this list: ~a" item)))
 
 (defmethod unparse-template-expression ((attribute attribute) &optional obj-var)
@@ -329,7 +329,7 @@
               item)))
 
 (defmethod unparse-template-expression ((item formula) &optional obj-var)
-  (ruby::unparse-expression
+  (ruby:unparse-expression
    (unparse-attribute-references
     (expression item) (context item) obj-var)))
 
@@ -412,12 +412,12 @@
   (format nil "<%~a ~a %>" (if output? "=" "") code))
 
 (defmethod unparse-erb (output? (obj t))
-  (unparse-erb output? (ruby::unparse obj)))
+  (unparse-erb output? (ruby:unparse obj)))
 
 (defmethod unparse-erb (output? (obj list))
   (if (or (typep (car obj) 'operator) (operator-symbol? (car obj)))
-      (unparse-erb output? (ruby::unparse-expression (car obj) (cdr obj)))
-      (ruby::unparse-expression (ruby::unparse obj) output?)))
+      (unparse-erb output? (ruby:unparse-expression (car obj) (cdr obj)))
+      (ruby:unparse-expression (ruby:unparse obj) output?)))
 
 ;; this is not debugged yet, but not used seriously yet either
 (defmethod unparse-formatting ((data t) (type (eql :checkbox)))
@@ -426,7 +426,7 @@
 	  data data data))
 
 (defmethod unparse-formatting ((data t) (type t))
-  (ruby::unparse-formatting data type))
+  (ruby:unparse-formatting data type))
 (defmethod unparse-formatting ((data t) (type logical-type))
   (unparse-formatting data (id type)))
 
@@ -462,8 +462,8 @@
     (if mandatory?
         (let ((record-probe (format nil "~a.~a.blank?"
                                     context-var (instance-name relation))))
-          (ruby::unparse-if-statement (as-literal record-probe) (as-literal (t.no-parent)) field-expr))
-        (ruby::unparse-expression field-expr))))
+          (ruby:unparse-if-statement (as-literal record-probe) (as-literal (t.no-parent)) field-expr))
+        (ruby:unparse-expression field-expr))))
 
 ;; unparse-attribute-references will be called by functions trying to write methods and
 ;; expressions for model class definitions (derived attributes and state predicates)
@@ -552,11 +552,11 @@
   (if (or (typep (car obj) 'operator) (operator-symbol? (car obj)))
       (progn
         (when args (error "we shouldn't have any args here...? (~a)" args))
-        (ruby::unparse-expression (car obj) (cdr obj)))
+        (ruby:unparse-expression (car obj) (cdr obj)))
       (unparse obj))) ;; not sure this UNPARSE will ever be appropriate...
 
 (defmethod unparse-find-condition ((operator (eql '$eql)) &optional args)
-  (format nil "~a: ~a" (ruby::unparse-expression (car args)) (ruby::unparse-expression (cadr args))))
+  (format nil "~a: ~a" (ruby:unparse-expression (car args)) (ruby:unparse-expression (cadr args))))
 
                     
 ;(defvar conditions (cddr expr))
@@ -595,12 +595,12 @@
 
 
 (defmethod unparse-summary-attribute ((att summary-attribute))
-  (ruby::unparse-method (schema-name att) nil
+  (ruby:unparse-method (schema-name att) nil
     (as-literal
      (format nil "self.~a.~a" (schema-name (car (path att))) (unparse-summary-method att)))))
 
 (defmethod unparse-derived-attribute ((att calculated-attribute))
-  (ruby::unparse-method (schema-name att) nil
+  (ruby:unparse-method (schema-name att) nil
        (unparse-attribute-references (expression att) (my-entity att))))
 
 (defun extract-attributes-from-expression (exp &optional  context)
@@ -635,19 +635,19 @@
       (when (vulnerable-to-null? test)
         (incf *nesting-level*)
 	    (format code "~%~aunless ~{~a.blank?~^ || ~}" (make-indent)
-                (mapcar #'ruby::unparse (remove-duplicates nullable-atts))))
+                (mapcar #'ruby:unparse (remove-duplicates nullable-atts))))
 	  (with-nesting
           (format code "~%~aif ~a" (make-indent)
-                  (ruby::unparse-expression
+                  (ruby:unparse-expression
                    (unparse-attribute-references test context)))
         (with-nesting
             (format code "~%~aerrors.add(:~a, ~s)"
                     (make-indent) (if (typep context 'attribute)
-                                      (ruby::unparse context)
-                                      (ruby::unparse (primary-key context)))
+                                      (ruby:unparse context)
+                                      (ruby:unparse (primary-key context)))
                     (or error-msg
                         (format nil "The check to ensure that ~a has failed"
-                                (english::unparse-expression (ruby::negate-expression test))))))
+                                (english:unparse-expression (ruby:negate-expression test))))))
         (format code "~%~aend" (make-indent)))
       (when (vulnerable-to-null? test)
         (format code "~%~aend" (make-indent))
@@ -708,7 +708,7 @@
   (declare (ignorable model-var))
   item)
 '(defmethod unparse-template-item ((item formula) model-var)
-  (ruby::unparse-expression
+  (ruby:unparse-expression
    (unparse-attribute-references
     (expression item) (context item) model-var)))
 '(defmethod unparse-template-item ((item list) model-var)

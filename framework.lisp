@@ -33,19 +33,19 @@
 
 (defun framework-home-method (&optional (stream t))
   (princ (make-indent) stream)
-  (format stream (ruby::unparse-method "home" nil)))
+  (format stream (ruby:unparse-method "home" nil)))
 
 (defun framework-about-method (&optional (stream t))
   (princ (make-indent) stream)
-  (format stream (ruby::unparse-method "about" nil)))
+  (format stream (ruby:unparse-method "about" nil)))
 
 (defun framework-denied-method (&optional (stream t))
   (princ (make-indent) stream)
-  (format stream (ruby::unparse-method "denied" nil)))
+  (format stream (ruby:unparse-method "denied" nil)))
 
 (defun framework-help-method (&optional (stream t))
   (princ (make-indent) stream)
-  (format stream (ruby::unparse-method "help" nil)))
+  (format stream (ruby:unparse-method "help" nil)))
 
 (defun framework-layouts ()
   (let ((file (merge-pathnames
@@ -57,7 +57,7 @@
 
 (defun unparse-application-space (&optional stream)
   (format stream
-          (html::ltag nil
+          (html:ltag nil
                       (mapcar #'(lambda (aspect)
                                   (unparse-template-link aspect :list
                                      :label (format nil "'~a'" (escape-characters (long-name (view aspect)) #\'))))
@@ -67,11 +67,11 @@
   (let ((views (views space))
         (sub-spaces (sub-spaces space)))
     (format stream "~%~a~a" (make-indent)
-            (html::button (long-name space) :class "collapsible"))
+            (html:button (long-name space) :class "collapsible"))
     (format stream "~%~a"
-            (html::div
+            (html:div
              (if (and (null views) (null sub-spaces))
-                 (with-nesting (html::div "(this space has no content)" :class "menuitem"))
+                 (with-nesting (html:div "(this space has no content)" :class "menuitem"))
                  (with-nesting
                      (with-output-to-string (str)
                        (when views
@@ -116,8 +116,8 @@ for (i = 0; i < coll.length; i++) {
 </script>"))
 
 (defun application-banner ()
-  (html::div (strcat "<hr>"
-                     (format nil (html::heading 1 (long-name *application*)))
+  (html:div (strcat "<hr>"
+                     (format nil (html:heading 1 (long-name *application*)))
                      "<hr>")
              :id "app-banner"))
 

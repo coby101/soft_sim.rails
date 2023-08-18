@@ -21,7 +21,7 @@
         (*nesting-level* 0))
     (with-open-file (cont-file file :direction :output :if-exists :supersede)
       (format-file-notice cont-file "application_controller.rb")
-      (format cont-file "~&class ApplicationController < ActionController::Base")
+      (format cont-file "~&class ApplicationController < ActionController:Base")
       (with-nesting
           (when *authenticated-application?*
             (format cont-file "~%~a~a" (make-indent) (app-controller-authentication-code)))
@@ -119,11 +119,11 @@
   (declare (ignorable aspect))
   ;; seems we should be selective about this list based on allowed operations
   (let ((methods (list :show :edit :update :destroy)))
-    (ruby::unparse-array methods)))
+    (ruby:unparse-array methods)))
 
 (defmethod set_model-method ((aspect aspect) &optional (stream t))
   (let ((entity (entity aspect)))
-    (format stream (ruby::unparse-method
+    (format stream (ruby:unparse-method
                     (format nil "set_~a" (instance-name entity)) nil
                     (as-literal
                      (instance-variable-assignment aspect :show))))))
@@ -139,7 +139,7 @@
                 (flatten (append (extract-attributes (edit-panel aspect))
                                  (extract-attributes (add-panel aspect))))))))
     (format stream
-            (ruby::unparse-method
+            (ruby:unparse-method
              (format nil "~a_params" instance-name) nil
              (as-literal
               (format nil "params.require(:~a).permit(~{~a~^, ~})"
@@ -177,29 +177,29 @@
 (defmethod index-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a"
           (make-indent)
-          (ruby::unparse-method
+          (ruby:unparse-method
            "index" nil (as-literal (with-nesting (instance-variable-assignment aspect :list))))))
 
 (defmethod show-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a" (make-indent)
-          (apply #'ruby::unparse-method
+          (apply #'ruby:unparse-method
                  "show" nil (unless (use-set_method? aspect)
                            (list (as-literal (with-nesting (instance-variable-assignment aspect :show))))))))
 
 (defmethod new-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a" (make-indent) ;; instance-variable-assignment will account for defaults
-          (ruby::unparse-method "new" nil (as-literal (with-nesting (instance-variable-assignment aspect :new))))))
+          (ruby:unparse-method "new" nil (as-literal (with-nesting (instance-variable-assignment aspect :new))))))
 
 (defmethod edit-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a" (make-indent)
-          (apply #'ruby::unparse-method
+          (apply #'ruby:unparse-method
                  "edit" nil (unless (use-set_method? aspect)
                           (list (as-literal (with-nesting (instance-variable-assignment aspect :edit))))))))
 
 (defmethod create-method ((aspect aspect) &optional (stream t))
   (let ((entity (entity aspect)))
     (format stream "~a~a" (make-indent)
-            (ruby::unparse-method
+            (ruby:unparse-method
              "create" nil
              (as-literal (with-nesting (instance-variable-assignment aspect :create)))
              (as-literal (respond_to aspect :create))
@@ -207,7 +207,7 @@
 
 (defmethod delete-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a" (make-indent)
-          (ruby::unparse-method
+          (ruby:unparse-method
            "destroy" nil
            (as-literal (if (use-set_method? aspect) ""
                            (with-nesting (instance-variable-assignment aspect :delete))))
@@ -219,7 +219,7 @@
 
 (defmethod update-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a" (make-indent)
-          (ruby::unparse-method
+          (ruby:unparse-method
            "update" nil
            (as-literal
             (if (use-set_method? aspect) ""
@@ -233,7 +233,7 @@
     (format nil "respond_to do |format|~%  ~a~a" (make-indent)
             (indent-block nil
               (with-nesting
-                  (ruby::unparse-if-statement
+                  (ruby:unparse-if-statement
                    (as-literal (format nil "!update_conflict?(@~a) && @~:*~a.update(~:*~a_params)" instance-name))
                    (as-literal
                     (format nil "format.html { ~a, notice: action_success_message }~%~
@@ -249,7 +249,7 @@
     (format nil "respond_to do |format|~%  ~a~a" (make-indent)
             (indent-block nil
              (with-nesting
-                 (ruby::unparse-if-statement
+                 (ruby:unparse-if-statement
                   (as-literal (strcat "@" (instance-name entity) ".save"))
                   (as-literal
                    (format nil "format.html { ~a, notice: action_success_message }~%~
@@ -269,7 +269,7 @@
              (with-nesting
                  (if (typep (entity aspect) 'attribute-table)
                      (error "we shouldn't be here")
-                     (ruby::unparse-if-statement
+                     (ruby:unparse-if-statement
                       (as-literal (format nil "@~a.destroy" instance-name))
                       (as-literal
                        (format nil "format.html { ~a, notice: action_success_message }~%format.json { head :no_content }"
@@ -395,7 +395,7 @@ end
   (snake-case (name filter)))
 
 (defmethod unparse-filter-application ((filter formula))
-  (format nil "where(~s)" (sql::unparse-expression (expression filter))))
+  (format nil "where(~s)" (sql:unparse-expression (expression filter))))
 
 
 ;;;===========================================================================

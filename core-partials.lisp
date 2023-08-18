@@ -43,7 +43,7 @@
     (loop for row in (panel-items (detail-panel aspect))
 	          collect (format nil "[~{~a~^, ~}]"
 				  (loop for item in row collect (unparse-core-element item aspect))))
-    (ruby::unparse-array actions)
+    (ruby:unparse-array actions)
     (if (root? aspect) "" (format nil ",~%      ancestors:  @ancestors"))
     (space-close aspect)))))
 
@@ -87,7 +87,7 @@
 ~a" (space-open aspect)
     (render-context aspect)
     (schema-name (entity aspect))
-    (ruby::unparse-array actions)
+    (ruby:unparse-array actions)
     (if (root? aspect) "" (format nil ",~%      ancestors:  @ancestors"))
     (space-close aspect)))))
 
@@ -117,7 +117,7 @@
   (loop for row in context
 	collect (format nil "[~{~a~^, ~}]"
 			(loop for item in row collect (unparse-core-element item parent-aspect :downlink? :counts_only))))
-  (ruby::unparse-array actions)
+  (ruby:unparse-array actions)
   (instance-name ancestor)))))))
   nil)
 
@@ -142,7 +142,7 @@
 
 (defmethod core_form.html.erb ((aspect symbol) &optional stream)
   (core_form.html.erb (find-aspect (keywordify aspect) (keywordify  stream)) t))
-;; there is a lot of duplicate code in view.lisp::form.html.erb
+;; there is a lot of duplicate code in view.lisp:form.html.erb
 (defmethod core_form.html.erb (aspect &optional stream)
   (unless (typep (entity aspect) 'attribute-table)
     (let ((*simple-table-layouts?* nil)

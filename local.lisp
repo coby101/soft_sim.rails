@@ -1,7 +1,7 @@
 
 (in-package ror)
 
-(setf ruby::*include-rails* t)
+(setf ruby:*include-rails* t)
 (setf *simple-table-layouts?* t)
 
 (defun view-link (view &optional (base "172.105.172.46:7101"))
@@ -12,7 +12,7 @@
 (defun write-view-links (&optional (base "172.105.172.46:7101"))
   (with-open-file (file (merge-pathnames
                          (make-pathname :name "all-views" :type "html")
-                         (web-docs::documentation-css-filepath))
+                         (web-docs:documentation-css-filepath))
                         :direction :output :if-exists :supersede)
     (format file "<h1>All views below:</h1>")
     (dolist (view (views *application*))

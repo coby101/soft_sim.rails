@@ -39,7 +39,7 @@
            (not (default-value att)))))
 
 (defmethod model-name ((obj t))
-  (ruby::model-name obj))
+  (ruby:model-name obj))
 
 (defmethod instance-name ((rel relation))
   (format nil "~a~p" (snake-case (name rel)) (or (multiplicity-max rel) 2)))
@@ -60,7 +60,7 @@
   (snake-case (plural obj)))
 
 (defmethod schema-name ((obj t))
-  (ruby::schema-name obj))
+  (ruby:schema-name obj))
 
 (defun create-bash-scripts()
   (let ((simian-dir (pathname->shell-filename (implementation-subdirectory "ror") t))

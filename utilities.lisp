@@ -13,7 +13,7 @@
 (in-package :ror)
 
 (defun make-indent ()
-  (ruby::make-indent))
+  (ruby:make-indent))
 
 
 (defun format-file-notice (stream function)
@@ -33,13 +33,13 @@ this header to make clear the generated content is now obsolete.~a    #
   (string= (name obj) (plural obj)))
 
 (defun comment-out (stream str &rest args)
-  (apply #'ruby::comment-out stream str args))
+  (apply #'ruby:comment-out stream str args))
 
 (defun indent-block (stream str &rest args)
-  (apply #'ruby::indent-block stream str args))
+  (apply #'ruby:indent-block stream str args))
 
 (defun comment-with-warning (stream str &rest args)
-  (apply #'ruby::comment-with-warning stream str args))
+  (apply #'ruby:comment-with-warning stream str args))
 
 (defun contains-constants-only (exp)
   (every #'(lambda (elt)

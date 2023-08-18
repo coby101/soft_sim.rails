@@ -73,7 +73,7 @@ ip is http://172.105.180.23:3000
         (format load-file "puts 'loaded ~a'~%" (namestring (model-file-path entity)))))))
 
 (defun generate-code-for-documentation (&optional (app *application*))
-  (when *dev-mode* (setf simian::*code-examples* (make-hash-table :test #'equalp)))
+  (when *dev-mode* (setf simian:*code-examples* (make-hash-table :test #'equalp)))
   (dolist (entity (schema-entities app))
     (store-code-examples entity "Model Definition"
        (with-output-to-string (str)

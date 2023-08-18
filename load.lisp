@@ -56,7 +56,7 @@
        (format nil "there is no ~a file, which does not bother me. I would be happy to load one"
                (namestring (merge-pathnames "local.lisp" *load-truename*))))))
 
-(format t "~&To generate a Rails application at any time run (ror::generate-application)")
+(format t "~&To generate a Rails application at any time run (ror:generate-application)")
 
 
 

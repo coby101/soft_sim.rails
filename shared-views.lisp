@@ -90,7 +90,7 @@
 
 (defmethod unparse-best-in-place ((item attribute) (aspect aspect))
   (if (editable? item aspect)
-      (html::tag "span"
+      (html:tag "span"
          (unparse-erb t
               (format nil "best_in_place ~a, :~a, ~a"
                       (form-path aspect (strcat "@" (instance-name (entity aspect))))
@@ -275,7 +275,7 @@
     (with-open-file (html.erb file :direction :output :if-exists :supersede)
       (format (or stream html.erb) (unparse-erb nil (format-file-notice nil "_entity.html.erb")))
       (format (or stream html.erb)
-              (html::trow
+              (html:trow
                (strcat
                 (format nil "~{~%    <td class=\"pcmdcrud-td\">~a</td>~}~%"
                         (mapcar #'(lambda(item)

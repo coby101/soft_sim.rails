@@ -133,12 +133,12 @@
           (data-context.close)))
 (defun data-context.open (&optional id)
   (if *simple-table-layouts?*
-      (html::open-tag "table")
-      (apply #'html::open-tag "div" (append (list :class *record-context-class*) (when id (list :id id))))))
+      (html:open-tag "table")
+      (apply #'html:open-tag "div" (append (list :class *record-context-class*) (when id (list :id id))))))
 (defun data-context.close ()
   (if *simple-table-layouts?*
-      (html::close-tag "table")
-      (html::close-tag "div")))
+      (html:close-tag "table")
+      (html:close-tag "div")))
 
 (defmethod data-context-section ((rows list))
   (format nil "~a~%~{~a~%~}~a"
@@ -154,12 +154,12 @@
 
 (defun data-context-section.open ()
   (if *simple-table-layouts?*
-      (html::open-tag "table" :border 1)
-      (html::open-tag "div" :class *record-context-section-class*)))
+      (html:open-tag "table" :border 1)
+      (html:open-tag "div" :class *record-context-section-class*)))
 (defun data-context-section.close ()
   (if *simple-table-layouts?*
-      (html::close-tag "table")
-      (html::close-tag "div")))
+      (html:close-tag "table")
+      (html:close-tag "div")))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -176,12 +176,12 @@
             (update-form.close))))
 (defun update-form.open (&optional id)
   (if *simple-table-layouts?*
-      (html::open-tag "table")
-      (apply #'html::open-tag "div" (append (list :class *update-form-class*) (when id (list :id id))))))
+      (html:open-tag "table")
+      (apply #'html:open-tag "div" (append (list :class *update-form-class*) (when id (list :id id))))))
 (defun update-form.close ()
   (if *simple-table-layouts?*
-      (html::close-tag "table")
-      (html::close-tag "div")))
+      (html:close-tag "table")
+      (html:close-tag "div")))
 
 (defmethod update-form-line ((items string) &optional panel-width)
   (format nil "~a~%~a~%~a"
@@ -199,10 +199,10 @@
           (update-form-line.close)))
 (defun update-form-line.open (&optional length)
   (if *simple-table-layouts?*
-      (html::open-tag "tr")
-      (html::open-tag "div" :class (update-form-line-class length))))
+      (html:open-tag "tr")
+      (html:open-tag "div" :class (update-form-line-class length))))
 (defun update-form-line.close ()
-  (if *simple-table-layouts?* (html::close-tag "tr") (html::close-tag "div")))
+  (if *simple-table-layouts?* (html:close-tag "tr") (html:close-tag "div")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; update form ITEM
@@ -213,14 +213,14 @@
 
 (defun update-form-item.open (&key id colspan rowspan)
   (if *simple-table-layouts?*
-      (apply #'html::open-tag "td" (append (when colspan (list :colspan colspan))
+      (apply #'html:open-tag "td" (append (when colspan (list :colspan colspan))
                                            (when rowspan (list :rowspan rowspan))))
       ;; missing the logic to use colspan and rowspan
-      (apply #'html::open-tag "div" (append (list :class (update-form-element-class colspan))
+      (apply #'html:open-tag "div" (append (list :class (update-form-element-class colspan))
                                             (when id (list :id id))))))
 
 (defun update-form-item.close ()
-  (if *simple-table-layouts?* (html::close-tag "td") (html::close-tag "div")))
+  (if *simple-table-layouts?* (html:close-tag "td") (html:close-tag "div")))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -242,12 +242,12 @@
           (datasheet.close)))
 (defun datasheet.open (&optional id)
   (if *simple-table-layouts?*
-      (html::open-tag "p")
-      (html::open-tag "div" :class *datasheet-class*)))
+      (html:open-tag "p")
+      (html:open-tag "div" :class *datasheet-class*)))
 (defun datasheet.close ()
   (if *simple-table-layouts?*
-      (html::close-tag "p")
-      (html::close-tag "div")))
+      (html:close-tag "p")
+      (html:close-tag "div")))
 
 (defmethod datasheet-section ((rows list) class)
   (let ((screen-cols (calculate-screen-denominator rows)))
@@ -266,12 +266,12 @@
 
 (defun datasheet-section.open (class)
   (if *simple-table-layouts?*
-      (html::open-tag "table" :border 1)
-      (html::open-tag "div" :class class)))
+      (html:open-tag "table" :border 1)
+      (html:open-tag "div" :class class)))
 (defun datasheet-section.close ()
   (if *simple-table-layouts?*
-      (html::close-tag "table")
-      (html::close-tag "div")))
+      (html:close-tag "table")
+      (html:close-tag "div")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; datasheet LINE
@@ -293,11 +293,11 @@
 
 (defun datasheet-line.open (&optional length)
   (if *simple-table-layouts?*
-      (html::open-tag "tr")
-      (html::open-tag "div" :class (datasheet-line-class length))))
+      (html:open-tag "tr")
+      (html:open-tag "div" :class (datasheet-line-class length))))
 
 (defun datasheet-line.close ()
-  (if *simple-table-layouts?* (html::close-tag "tr") (html::close-tag "div")))
+  (if *simple-table-layouts?* (html:close-tag "tr") (html:close-tag "div")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; datasheet ITEM
@@ -308,10 +308,10 @@
 
 (defun datasheet-item.open (&key id colspan rowspan)
   (if *simple-table-layouts?*
-      (apply #'html::open-tag "td" (append (when colspan (list :colspan colspan))
+      (apply #'html:open-tag "td" (append (when colspan (list :colspan colspan))
                                            (when rowspan (list :rowspan rowspan))))
       ;; missing the logic to use colspan and rowspan
-      (apply #'html::open-tag "div" (append (list :class (datasheet-element-class colspan))
+      (apply #'html:open-tag "div" (append (list :class (datasheet-element-class colspan))
                                             (when id (list :id id))))))
 (defun datasheet-item.close ()
   (if *simple-table-layouts?* "</td>" "</div>"))
@@ -336,34 +336,34 @@
           (data-list.close)))
 (defun data-list.open (&optional id)
   (if *simple-table-layouts?*
-      (html::open-tag "table" :border 1 :cellpadding 5)
-      (apply #'html::open-tag "div"
+      (html:open-tag "table" :border 1 :cellpadding 5)
+      (apply #'html:open-tag "div"
              (append (list :class *data-listing-class*) (when id (list :id id))))))
 (defun data-list.close ()
   (if *simple-table-layouts?*
-      (html::close-tag "table")
-      (html::close-tag "div")))
+      (html:close-tag "table")
+      (html:close-tag "div")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; data listing HEADINGS ROW
 (defmethod data-list-headings ((headings list) &optional id)
-  (let ((fmt-str (with-nesting (format nil "~~a~~a~~{~%~a~~a~~}~%~~a~~a" (html::make-indent)))))
+  (let ((fmt-str (with-nesting (format nil "~~a~~a~~{~%~a~~a~~}~%~~a~~a" (html:make-indent)))))
     (format nil fmt-str
-            (html::make-indent)
+            (html:make-indent)
             (data-list-headings.open id)
              (mapcar #'data-list-heading headings)
-            (html::make-indent)
+            (html:make-indent)
             (data-list-headings.close))))
 
 (defun data-list-headings.open (&optional id)
   (if *simple-table-layouts?*
-      (format nil "~a~%~a" (html::open-tag "thead") (html::open-tag "tr"))
-      (apply #'html::open-tag "div" (append (list :class *heading-row-class*)
+      (format nil "~a~%~a" (html:open-tag "thead") (html:open-tag "tr"))
+      (apply #'html:open-tag "div" (append (list :class *heading-row-class*)
                                             (when id (list :id id))))))
 (defun data-list-headings.close ()
   (if *simple-table-layouts?*
-      (format nil "~a~%~a" (html::close-tag "tr") (html::close-tag "thead"))
-      (html::close-tag "div")))
+      (format nil "~a~%~a" (html:close-tag "tr") (html:close-tag "thead"))
+      (html:close-tag "div")))
 
 (defmethod data-list-headings ((headings string) &optional id)
   (strcat (data-list-headings.open id) headings (data-list-headings.close)))
@@ -376,19 +376,19 @@
           (with-nesting (data-list-rows body))
           (data-list-body.close)))
 (defmethod data-list-body ((body list) &optional id)
-  (format nil "~a~a~%~{~a~%~}~%~a~a" (html::make-indent)
+  (format nil "~a~a~%~{~a~%~}~%~a~a" (html:make-indent)
           (data-list-body.open id)
           (with-nesting (with-nesting (data-list-rows body)))
-          (html::make-indent) (data-list-body.close)))
+          (html:make-indent) (data-list-body.close)))
 (defun data-list-body.open (&optional id)
   (if *simple-table-layouts?*
-      (html::open-tag "tbody")
-      (apply #'html::open-tag "div"
+      (html:open-tag "tbody")
+      (apply #'html:open-tag "div"
              (append (list :class *list-body-class*) (when id (list :id id))))))
 (defun data-list-body.close ()
   (if *simple-table-layouts?*
-      (html::close-tag "tbody")
-      (html::close-tag "div")))
+      (html:close-tag "tbody")
+      (html:close-tag "div")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -404,13 +404,13 @@
 
 (defun data-list-row.open (&optional id)
   (if *simple-table-layouts?*
-      (html::open-tag "tr")
-      (apply #'html::open-tag "div"
+      (html:open-tag "tr")
+      (apply #'html:open-tag "div"
              (append (list :class *list-row-class*)
                      (when id (list :id id))))))
 
 (defun data-list-row.close ()
-  (if *simple-table-layouts?* (html::close-tag "tr") (html::close-tag "div")))
+  (if *simple-table-layouts?* (html:close-tag "tr") (html:close-tag "div")))
 
 (defmethod data-list-row ((row string) &optional id)
   (strcat (data-list-row.open id) row (data-list-row.close)))
@@ -427,27 +427,27 @@
   (strcat (data-list-row.open id) row (data-list-row.close)))
 (defun data-list-row.open (&optional id)
   (if *simple-table-layouts?*
-      (html::open-tag "tr")
-      (apply #'html::open-tag "div"
+      (html:open-tag "tr")
+      (apply #'html:open-tag "div"
              (append (list :class *list-row-class*)
                      (when id (list :id id))))))
 (defun data-list-row.close ()
-  (if *simple-table-layouts?* (html::close-tag "tr") (html::close-tag "div")))
+  (if *simple-table-layouts?* (html:close-tag "tr") (html:close-tag "div")))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; data listing HEADING ELEMENT
 (defun data-list-heading.open (&key id colspan rowspan)
   (if *simple-table-layouts?*
-      (apply #'html::open-tag "th" 
+      (apply #'html:open-tag "th" 
              (append (when colspan (list :colspan colspan))
                      (when rowspan (list :rowspan rowspan))))
-      (apply #'html::open-tag "div"
+      (apply #'html:open-tag "div"
              (append (list :class (heading-element-class colspan))
                      (when id (list :id id))))))
 
 (defun data-list-heading.close ()
-  (if *simple-table-layouts?* (html::close-tag "th") (html::close-tag "div")))
+  (if *simple-table-layouts?* (html:close-tag "th") (html:close-tag "div")))
 
 (defmethod data-list-heading ((heading string) &key id colspan rowspan)
   (strcat (data-list-heading.open :id id :rowspan rowspan :colspan colspan)
@@ -459,9 +459,9 @@
 ;;; data listing DATA ELEMENT
 (defun data-list-element.open (&key id colspan rowspan)
   (if *simple-table-layouts?*
-      (apply #'html::open-tag "td" (append (when colspan (list :colspan colspan))
+      (apply #'html:open-tag "td" (append (when colspan (list :colspan colspan))
                                            (when rowspan (list :rowspan rowspan))))
-      (apply #'html::open-tag "div" (append (list :class (list-element-class colspan))
+      (apply #'html:open-tag "div" (append (list :class (list-element-class colspan))
                                             (when id (list :id id))))))
 
 (defun data-list-element.close () (if *simple-table-layouts?* "</td>" "</div>"))
@@ -521,13 +521,13 @@
   (format nil "t('~a.long_name')" (snake-case (name view))))
 
 (defun crud-page-heading(&optional (text "<%= t('.title') %>"))
-  (html::heading 1 text :class *crud-page-title-class*))
+  (html:heading 1 text :class *crud-page-title-class*))
 
 (defmethod ui-label ((obj aspect) (action (eql :list)) &optional id)
   (let ((heading (crud-page-heading)))
     (if *simple-table-layouts?*
         heading
-        (apply #'html::div heading
+        (apply #'html:div heading
                (append (list :class *datagrid-title*)
                        (when id (list :id id)))))))
 
@@ -535,7 +535,7 @@
   (let ((heading (crud-page-heading)))
     (if *simple-table-layouts?*
         heading
-        (apply #'html::div heading
+        (apply #'html:div heading
                (append (list :class *datagrid-title*)
                        (when id (list :id id)))))))
 
@@ -543,15 +543,15 @@
   (let ((heading (crud-page-heading)))
     (if *simple-table-layouts?*
         heading
-        (apply #'html::div heading
+        (apply #'html:div heading
                (append (list :class *datasheet-title*)
                        (when id (list :id id)))))))
 
 (defmethod ui-label ((obj attribute-table) (action (eql :list)) &optional id)
   (let ((text (format nil "t('schema.~a.long_plural')" (schema-name obj))))
     (if *simple-table-layouts?*
-        (html::heading 3 text :class *nested-attribute-title-class*)
-        (apply #'html::div (html::heading 3 text)
+        (html:heading 3 text :class *nested-attribute-title-class*)
+        (apply #'html:div (html:heading 3 text)
                (append (list :class *datasheet-title*)
                        (when id (list :id id)))))))
 
