@@ -12,20 +12,6 @@
 
 (in-package :ror)
 
-
-(defvar *javascript-packs* nil)
-(defvar *css-components* nil)
-(defvar *custom-application.html.erb* nil)
-(defvar *custom-mailer.txt.erb* nil)
-(defvar *custom-mailer.html.erb* nil)
-
-;; may not need this as internationalization.lisp should handle it
-(defvar *authenticated-application?* nil)
-(defvar *notified-application?* nil)
-
-(defparameter *RESTful-actions*
-  '(:new :list :detail :edit :create :delete :patch :update))
-
 (defmethod controller-name ((aspect aspect))
   (format nil "~a~aController"
           (if (name (view aspect))

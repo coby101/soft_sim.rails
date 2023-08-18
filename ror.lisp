@@ -11,15 +11,18 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#|
-load soft_sim
-load-project
-bash - rails new pcmd
-ip is http://172.105.180.23:3000
-
-|#
-
 (in-package :ror)
+
+(defvar *javascript-packs* nil)
+(defvar *css-components* nil)
+(defvar *custom-application.html.erb* nil)
+(defvar *custom-mailer.txt.erb* nil)
+(defvar *custom-mailer.html.erb* nil)
+(defvar *authenticated-application?* nil)
+(defvar *notified-application?* nil)
+
+(defparameter *RESTful-actions*
+  '(:new :list :detail :edit :create :delete :patch :update))
 
 (defun language-locale () "en")
 
