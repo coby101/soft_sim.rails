@@ -27,7 +27,6 @@
 (defun language-locale () "en")
 
 (defun generate-application (&optional (app *application*))
-  (format t "*simple-table-layouts?* is ~a for everything except forms~%" *simple-table-layouts?*)
   (clean-up)
   (when *authenticated-application?*
     (insert-authentication-attributes))
