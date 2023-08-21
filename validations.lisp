@@ -14,7 +14,7 @@
 (defun simple-validation-helper? (exp)
   (cond
     ((comparison-operator? (car exp))
-     (notany #'ruby:returns-date? (cdr exp)))
+     (notany #'returns-date? (cdr exp)))
     ((member (operator-key (car exp)) '($when $unless))
      (and (simple-validation-helper? (second exp))
            (simple-validation-helper? (third exp))))

@@ -11,6 +11,8 @@
 
 (in-package :ror)
 
+(load-unparser "html")
+
 (defvar *nested-attribute-title-class* "nested-attribute-title")
 
 (defvar *svg-delete-icon* "")

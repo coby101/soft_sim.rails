@@ -61,7 +61,7 @@ end~%"))))
   (when nil ;(requires-active-model-code? entity)
     (format stream "~%~{~a~%~}"
             (mapcar #'write-validator-method
-                    (remove-if-not #'ror:calls-custom-method?
+                    (remove-if-not #'calls-custom-method?
                                    (apply #'append
                                           (mapcar #'constraints
                                                   (persistent-attributes entity)))))))
@@ -127,9 +127,6 @@ end~%"))))
     (when (requires-active-model-code? entity)
       (push "include ActiveModel::Validations" statements))
     statements))
-
-(defun calls-custom-method? (constraint)
-  (recursive-find (get-operator '$call) (expression constraint)))
 
 (defmethod model-validations ((ent entity))
   (append
