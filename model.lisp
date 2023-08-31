@@ -20,29 +20,6 @@
 (defun model-entities (&optional (app *application*))
   (schema-entities app))
 
-(defun application_record.rb ()
-  (let ((file (merge-pathnames
-               (make-pathname :name "application_record"
-                              :type "rb")
-               (model-directory)))
-        (*nesting-level* 0))
-    (with-open-file (mod-file file :direction :output :if-exists :supersede)
-      (format-file-notice mod-file "application_record.rb")
-      ;; db_import is used in seeds.rb (not really necessary)
-      (format mod-file "~&class ApplicationRecord < ActiveRecord::Base~%
-  self.abstract_class = true
-
-  def self.db_import!(data)
-    return true unless data.present?
-    data.each do |atts|
-      self.find_or_create_by!(atts) unless atts[:id].present? && self.where(id: atts[:id]).present?
-    end
-  end
-  def check_deleteable?
-    true
-  end
-end~%"))))
-
 (defun generate-model-files (&optional (app *application*))
   (application_record.rb)
   (dolist (entity (model-entities app))

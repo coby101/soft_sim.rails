@@ -44,19 +44,7 @@
                    (not (eq (tenant-entity) ent)))
           (terpri seed-file)
           (create-seed-data ent seed-file)
-          (terpri seed-file)))
-      (when (and nil *authenticated-application?*)
-        ;; this is tenant specific so can not go in general seed data
-        (let ((ten-key (schema-name (tenant-key (find-entity :user)))))
-          (format seed-file "
-User.create!(name: 'Gandalf the White', email: 'mithrandir@middleearth.com', login: 'mithrandir', ~
-             password: 'Glamdring', password_confirmation: 'Glamdring', ~a: 1) ~
-  unless User.find_by(login: 'mithrandir')
-UserRole.find_or_create_by!(user_id: User.find_by(login: 'mithrandir').id, role_id:  Role.find_by(name: 'Super').id)
-User.create!(name: 'Pippin Took', email: 'pip@middleearth.com', login: 'pippin', ~
-             password: '2ndBreakfast', password_confirmation: '2ndBreakfast', ~:*~a: 1) ~
-  unless User.find_by(login: 'pippin')
-UserRole.find_or_create_by!(user_id: User.find_by(login: 'pippin').id, role_id:  Role.find_by(name: 'stff').id)~%" ten-key))))))
+          (terpri seed-file))))))
 
 (defun seed-data-order (entities)
   (let* ((app-ent (application-entity))
@@ -67,7 +55,7 @@ UserRole.find_or_create_by!(user_id: User.find_by(login: 'pippin').id, role_id: 
          (regular (remove app-ent (remove-if #'(lambda (e) (typep e 'weak-entity)) non-cal))))
     (append (when app-ent (list app-ent))
             (when tenant (list tenant))
-            cal
+            (when *load-calendar-framework* cal)
             (sort regular #'string-lessp :key #'name)
             (sort weak #'string-lessp :key #'name))))
 

@@ -13,8 +13,10 @@
 
 (in-package simian)
 
-(defpackage "ROR"
-  (:use "SIMIAN" "CL"))
+(defpackage simian.rails-generator
+  (:use :simian :cl :simian.calendar)
+  (:nicknames :ror)
+  (:export #:generate-application))
 
 (in-package :ror)
 
@@ -52,6 +54,8 @@
   (format t "~%loaded ~a" (merge-pathnames "associations.lisp" *load-truename*))
   (load (merge-pathnames "callbacks.lisp" *load-truename*))
   (format t "~%loaded ~a" (merge-pathnames "callbacks.lisp" *load-truename*))
+  (load (merge-pathnames "application_record.lisp" *load-truename*))
+  (format t "~%loaded ~a" (merge-pathnames "application_record.lisp" *load-truename*))
   (load (merge-pathnames "model.lisp" *load-truename*))
   (format t "~%loaded ~a" (merge-pathnames "model.lisp" *load-truename*))
   (load (merge-pathnames "database.lisp" *load-truename*))
