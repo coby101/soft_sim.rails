@@ -14,12 +14,11 @@
 (in-package :ror)
 
 (defun routes.rb (&optional (app *application*))
-  (let ((*application-name* (name app)))
-    (with-open-file (routes (routes-file-path) :direction :output :if-exists :supersede)
-      (format-file-notice routes "routes.rb")
-      (format routes "~%Rails.application.routes.draw do~%")
-      (write-routes routes *application*)
-      (format routes "~%end~%"))))
+  (with-open-file (routes (routes-file-path) :direction :output :if-exists :supersede)
+    (format-file-notice routes "routes.rb")
+    (format routes "~%Rails.application.routes.draw do~%")
+    (write-routes routes app)
+    (format routes "~%end~%")))
 
 (defun write-routes (stream &optional (app *application*))
   (format stream "~%~{  ~a~%~}~%~%" (framework-routes))
