@@ -11,7 +11,144 @@
 
 (in-package :ror)
 
+(defun reserved-column-name? (name ent)
+  ;; still need to add 0 to many (association_name)_type for relations
+  ;; and 0 to many (table_name)_count for children
+  (member
+   name
+   (list
+    (strcat (snake-case (name ent)) "_id")
+    "id"
+    "type" ;; a table designation for a single inheritance
+    "lock_version" ;; Adds optimistic locking to a model
+    "updated_at" ;; modificatioin timestamp
+    "created_at" ;; creation timestamp
+    )))
 
+(defmethod model-name ((att attribute))
+  (model-name (my-entity att)))
+(defmethod model-name ((ent entity))
+  (camel-case (name ent)))
+(defmethod model-name ((rel relation))
+  (camel-case (name (entity rel))))
+(defmethod model-name ((str string))
+  (camel-case str))
+
+(defmethod schema-name ((ref list))
+  (if (field-reference-spec? ref)
+      (strcat (snake-case (name (car ref))) "_"
+              (if (= (length (cdr ref)) 1)
+                  (schema-name (cadr ref))
+                  (schema-name (cdr ref))))
+      (error "can not handle ~a" ref)))
+
+(defmethod schema-name ((rel relation))
+  (snake-case (plural rel)))
+
+(defmethod schema-name ((ent entity))
+  (snake-case (plural ent)))
+(defmethod schema-name ((ent specialized-entity))
+  (schema-name (super ent)))
+
+(defmethod schema-name ((att attribute))
+  (let ((name (snake-case (name att))))
+    (if (reserved-column-name? name (my-entity att))
+        (strcat (schema-name (my-entity att)) "_" name) 
+        name)))
+
+(defmethod schema-name ((att foreign-key))
+  (call-next-method))
+
+(defmethod schema-name ((att primary-key))
+  (call-next-method));"id")
+
+(defmethod unparse ((obj list))
+  (if (and (= 2 (length obj))
+           (field-reference-expression? obj)
+           (or (eq (entity (car obj)) (my-entity (cadr obj)))
+               (eq (car obj) (my-entity (cadr obj)))))
+      (if (eq (entity (car obj)) (my-entity (cadr obj)))
+          (format nil "~a_~a" (snake-case (name (car obj))) (schema-name (cadr obj))) 
+          (unparse (cadr obj)))
+      (ruby:unparse obj)))
+
+(defmethod unparse ((obj entity))
+  ;; snake-case is a bit arbitrary but a common convention
+  (schema-name obj))
+
+(defmethod unparse ((obj attribute))
+  (snake-case (name obj)))
+
+(defmethod unparse ((obj calculated-attribute))
+  (unparse (expression (formula obj))))
+
+(defmethod unparse ((obj relation)) (call-next-method)); (unparse (keywordify (schema-name obj))))
+
+(defmethod unparse-expression ((obj attribute) &optional args)
+  (when args
+    (error "we shouldn't have any args here...? (~a)" args))
+  (schema-name obj))
+
+(defmethod unparse-expression ((obj calculated-attribute) &optional args)
+  (when args
+    (error "we shouldn't have any args here...? (~a)" args))
+  (unparse-expression (formula obj)))
+
+(defmethod unparse-expression ((operator (eql '$rows)) &optional args) 
+  (let ((class (model-name (car args)))
+        (where (if (cadr args)
+                   (format nil ".where(\"~a\")" (sql::unparse-expression (cadr args)))
+                   "")))
+    (format nil "~a~a.count" class where)))
+
+(defmethod unparse-expression ((operator (eql '$unchanged)) &optional args)
+;; this check fails on ($literal "supplier_id")
+;  (unless (or (typep (car args) 'string) (typep (car args) 'attribute))
+;    (error "$UNCHANGED is only appropriate for an attribute expression"))
+  (format nil "~a_change_to_be_saved == nil" (unparse-expression (car args))))
+
+(defmethod unparse-expression ((operator (eql '$new-value)) &optional args)
+  (format nil "~a" (unparse-expression (car args))))
+
+(defmethod unparse-expression ((operator (eql '$old-value)) &optional args)
+ ; (unless (or (typep (car args) 'string) (typep (car args) 'attribute))
+ ;   (error "$OLD_VALUE is only appropriate for an attribute expression"))  
+  (format nil "~a_change_to_be_saved ? ~:*~a_change_to_be_saved.first : ~:*~a" (unparse-expression (car args))))
+
+(defmethod unparse-expression ((operator (eql '$stop-delete)) &optional args) 
+  (format nil "errors.add(:~a, ~s)" (unparse (primary-key (my-entity (car args))))
+            "deletion is not allowed"))
+
+;;Record.count(:all, :conditions => {:created_at => start_date..end_date, :finished_at => nil })
+(defmethod unparse-expression ((operator (eql '$max-rows)) &optional args)
+  (unparse-expression
+   '$<= (list (list '$rows (car args) (caddr args)) (cadr args))))
+
+(defmethod unparse-expression ((operator (eql '$min-rows)) &optional args)
+  (unparse-expression
+   '$>= (list (list '$rows (car args) (caddr args)) (cadr args))))
+
+(defmethod unparse-expression ((operator (eql '$rows-eql)) &optional args)
+  (unparse-expression
+   '$= (list (list '$rows (car args) (caddr args)) (cadr args))))
+
+(defmethod unparse-expression ((operator (eql '$as-money)) &optional args)
+  (format nil "number_to_currency(~a)" (unparse-expression (car args))))
+
+(defmethod unparse-expression ((operator (eql '$as-quantity)) &optional args)
+  (format nil "helper.number_with_precision(~a, :precision => 2, :delimiter => ',')"
+          (unparse-expression (car args))))
+
+(defmethod unparse-expression ((operator (eql '$not-null)) &optional args)
+  (let ((field-var (unparse-expression (first args))))
+    (format nil "~a.present?" field-var)))
+
+(defmethod unparse-expression ((operator (eql '$null)) &optional args)
+  (let ((field-var (unparse-expression (first args))))
+    (format nil "~a.blank?" field-var)))
+
+(defmethod unparse-attribute-value ((attribute attribute) (value t))
+  (unparse-data (data-type attribute) value))
 
 (defmethod unparse-form-element ((item attribute))
   (html:div
