@@ -26,7 +26,7 @@
 
 (defun language-locale () "en")
 
-(defun generate-application (&optional (app *application*))
+(defun generate (&optional (app *application*))
   (clean-up)
   (when *authenticated-application?*
     (insert-authentication-attributes))

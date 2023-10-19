@@ -14,9 +14,9 @@
 (in-package simian)
 
 (defpackage simian.rails-generator
-  (:use :simian :cl :simian.calendar)
-  (:nicknames :ror)
-  (:export #:generate-application))
+  (:use :simian :cl)
+  (:nicknames :ror :rails)
+  (:export #:generate))
 
 (in-package :ror)
 
