@@ -16,7 +16,7 @@
    (controller-directory)))
 
 (defmethod core-controller-class-definition ((aspect symbol) &optional stream)
-  (core-controller-class-definition (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (core-controller-class-definition (find-aspect aspect stream) t))
 (defmethod core-controller-class-definition ((aspect aspect) &optional (stream t))
   (when (eq stream t) (format stream "~%# app/controllers/~a_controller.rb~%" (snake-case (plural (entity aspect)))))
   (let ((actions (implemented-actions aspect)))

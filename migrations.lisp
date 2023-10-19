@@ -99,7 +99,7 @@ for associative tables "id: false"
   (call-next-method))
 
 (defmethod create_table ((entity symbol) &optional stream)
-  (create_table (find-entity (keywordify entity)) (or stream t)))
+  (create_table (find-entity entity) (or stream t)))
 
 (defmethod create_table ((entity specialized-entity) &optional stream)
   (declare (ignorable stream))
@@ -319,7 +319,7 @@ class ~a < ActiveRecord::Migration[6.1]
   def change~%~{    ~a~%~}  end~%end~%" name (mapcar #'add_column atts)))
 
 (defmethod add-attribute-migration ((att symbol) &optional (entity t))
-  (add-attribute-migration (find-field (keywordify att) (keywordify entity)) t))
+  (add-attribute-migration (find-field att entity) t))
 (defmethod add-attribute-migration ((att attribute) &optional (stream t))
   (format stream "~%
 class Add~aTo~a < ActiveRecord::Migration[6.1]
@@ -331,7 +331,7 @@ class Add~aTo~a < ActiveRecord::Migration[6.1]
   (with-nesting (with-nesting (remove_column att nil)))))
 
 (defmethod add-entity-migration ((entity symbol) &optional (stream t))
-  (let ((ent (find-entity (keywordify entity))))
+  (let ((ent (find-entity entity)))
     (if ent
         (add-entity-migration ent t)
         (warn "no entity with key ~a found" entity))))

@@ -10,7 +10,7 @@
     (generate-partials aspect)))
 
 (defmethod generate-partials ((aspect symbol) &optional stream)
-  (generate-partials (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (generate-partials (find-aspect aspect stream) t))
 (defmethod generate-partials (aspect &optional stream)
   (core_context.html.erb aspect stream)
   (when (listable? aspect)
@@ -25,7 +25,7 @@
     (core_form.html.erb aspect stream)))
 
 (defmethod core_show.html.erb ((aspect symbol) &optional stream)
-  (core_show.html.erb (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (core_show.html.erb (find-aspect aspect stream) t))
 (defmethod core_show.html.erb ((aspect aspect) &optional stream)
  (let ((file (layout-file-path aspect "show"))
        (actions (core-action-links aspect :detail)))
@@ -71,7 +71,7 @@
 <%= render partial: '~a/context' %>" (schema-name (entity aspect)))))
 
 (defmethod core_index.html.erb ((aspect symbol) &optional stream)
-  (core_index.html.erb (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (core_index.html.erb (find-aspect aspect stream) t))
 (defmethod core_index.html.erb ((aspect aspect) &optional stream)
  (let ((file (layout-file-path aspect "index"))
        (actions (core-action-links aspect :list)))
@@ -92,7 +92,7 @@
     (space-close aspect)))))
 
 (defmethod core_context.html.erb ((aspect symbol) &optional stream)
-  (core_context.html.erb (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (core_context.html.erb (find-aspect aspect stream) t))
 (defmethod core_context.html.erb ((aspect aspect) &optional stream)
   (unless (root? aspect)
     (let ((file (layout-file-path aspect "_context")))
@@ -122,7 +122,7 @@
   nil)
 
 (defmethod core_edit.html.erb ((aspect symbol) &optional stream)
-  (core_edit.html.erb (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (core_edit.html.erb (find-aspect aspect stream) t))
 (defmethod core_edit.html.erb (aspect &optional stream)
   (let ((file (layout-file-path aspect "edit")))
     (unless (typep (entity aspect) 'attribute-table)
@@ -131,7 +131,7 @@
 	(format (or stream html.erb) "<%= render 'form', ~a: @~:*~a %>~%" (instance-name (entity aspect)))))))
 
 (defmethod core_new.html.erb ((aspect symbol) &optional stream)
-  (core_new.html.erb (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (core_new.html.erb (find-aspect aspect stream) t))
 (defmethod core_new.html.erb (aspect &optional stream)
   (let ((file (layout-file-path aspect "new")))
     (unless (typep (entity aspect) 'attribute-table)
@@ -141,7 +141,7 @@
 
 
 (defmethod core_form.html.erb ((aspect symbol) &optional stream)
-  (core_form.html.erb (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (core_form.html.erb (find-aspect aspect stream) t))
 ;; there is a lot of duplicate code in view.lisp:form.html.erb
 (defmethod core_form.html.erb (aspect &optional stream)
   (unless (typep (entity aspect) 'attribute-table)

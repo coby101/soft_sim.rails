@@ -264,7 +264,7 @@ for (i = 0; i < coll.length; i++) {
 (defun framework-routes ()
   (append
    (if *authenticated-application?*
-       (list (format nil "devise_for :~a" (schema-name (find-entity (keywordify *user-model*))))
+       (list (format nil "devise_for :~a" (schema-name (find-entity *user-model*)))
              "root to: 'framework#home'")
        (list "get '/', to: 'framework#home', as: 'home'"))
    (list "get '/no_access', to: 'framework#denied'"

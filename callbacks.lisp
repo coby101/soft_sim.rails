@@ -57,7 +57,7 @@
   )
 
 (defmethod on-destroy-declarations ((entity symbol))
-  (on-destroy-declarations (find-entity (keywordify entity))))
+  (on-destroy-declarations (find-entity entity)))
 (defmethod on-destroy-declarations ((entity entity))
   (remove nil
           (append
@@ -91,7 +91,7 @@
           (instance-name parent)))
 
 (defmethod on-save-declarations ((entity symbol))
-  (on-save-declarations (find-entity (keywordify entity))))
+  (on-save-declarations (find-entity entity)))
 
 (defmethod on-validation-declarations ((entity entity))
   (remove nil
@@ -245,7 +245,7 @@
                         (instance-name model) expressions)))))))
 
 (defmethod trigger-summary-updates ((entity symbol))
-  (trigger-summary-updates (find-entity (keywordify entity))))
+  (trigger-summary-updates (find-entity entity)))
 (defmethod trigger-summary-updates ((entity entity))
   (let ((attributes (trigger-dependent-summary-fields entity)))
     (when attributes
@@ -448,7 +448,7 @@
 
 (defun unparse-callback-registration (event timing method &rest options)
   (let* ((args (mapcar #'(lambda(opt)
-                           (format nil "~a: ~a" (car opt) (ruby:unparse (if (eq (cadr opt) t) (cadr opt) (keywordify (cadr opt))))))
+                           (format nil "~a: :~a" (car opt) (ruby:unparse (if (eq (cadr opt) t) (cadr opt) (cadr opt)))))
                        options)))
     (format nil "~a_~a :~a~{, ~a~}" timing event method args)))
 #|
