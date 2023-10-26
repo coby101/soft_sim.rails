@@ -1,7 +1,6 @@
 
 (in-package ror)
 
-(setf ruby:*include-rails* t)
 (setf *simple-table-layouts?* t)
 
 (defun show-non-scoped-top-level-models()

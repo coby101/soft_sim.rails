@@ -256,17 +256,13 @@ for associative tables "id: false"
 (defun create-seed-method () "db_import!")
 
 (defun create-seed-data (ent stream &optional data-seed)
-  (let* ((data (or data-seed (make-data-seed ent (ignore-errors (seed-data ent)))))
-         (application-seed (if (needs-dbtenant? ent data)
-                               (format nil "~a: ~a, " (schema-name (tenant-key ent))
-                                       *tenant-id*)
-                               "")))
+  (let* ((data (or data-seed (make-data-seed ent (ignore-errors (seed-data ent))))))
     (when data
       (format stream "~a.~a([~%~{~a~^,~%~}~%])" (model-name ent) (create-seed-method) 
               (let* ((columns (columns data))
                      (column-count (length columns)))
                 (mapcar #'(lambda(row)
-                            (format nil "     {~a~{~a~^, ~}}" application-seed
+                            (format nil "     {~{~a~^, ~}}"
                                     (remove nil
                                        (loop for i from 0 to (1- column-count)
                                              collect (when (nth i row)

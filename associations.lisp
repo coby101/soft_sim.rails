@@ -44,14 +44,14 @@
 
 
 ;; null: true or null: false
-(defmethod format-table-association ((relationship recursive) (side (eql :left)))
+(defmethod format-table-association ((relationship recursive-relationship) (side (eql :left)))
   (when (eql 1 (multiplicity-max (lhs relationship)))
     (write-table-reference "references"
                            (snake-case (name (lhs relationship)))
                            (schema-name (entity (lhs relationship)))
                            :nullable? t)))
 
-(defmethod format-table-association ((relationship recursive) (side (eql :right)))
+(defmethod format-table-association ((relationship recursive-relationship) (side (eql :right)))
   (when (eql 1 (multiplicity-max (rhs relationship)))
       (write-table-reference "references"
                              (snake-case (name (rhs relationship)))
@@ -98,7 +98,7 @@
    nil "no format-model-association method written ~%for ~a (~a)"
    (type-of my-relationship) my-relationship))
 
-(defmethod format-model-association ((relationship recursive) (side t))
+(defmethod format-model-association ((relationship recursive-relationship) (side t))
   (let* ((my-relation (if (eql side :right) (lhs relationship) (rhs relationship)))
          (relation-name (name my-relation))
          (model-name (name (entity my-relation)))
@@ -261,7 +261,7 @@ all of this seems completely unused, delete it when emotionally ready..
 (defmethod format-migration-association ((relationship specialization) (side t))
   nil)
 
-(defmethod format-migration-association ((relationship recursive) (side t))
+(defmethod format-migration-association ((relationship recursive-relationship) (side t))
   (let* ((my-relation (if (eql side :right) (lhs relationship) (rhs relationship)))
          (relation-name (name my-relation))
          (model-name (name (entity my-relation)))
