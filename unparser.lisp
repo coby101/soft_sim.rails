@@ -329,31 +329,6 @@
                  (member source-entity (aggregate-children (entity (car effective-path)))))
             (setf effective-path nil)))
       (reverse (list* source-entity effective-path)))))
-#|
-(setf item simian:@claim.project)
-(setf entity (my-entity item))
-(setf source-entity (my-entity (data-source (domain item))))
-(setf common-ancestor (nearest-common-ancestor entity source-entity 
-                        :ignore-list (list* source-entity entity (parents entity))))
-(setf path-up (path-to-scope-object
-                (unless (member common-ancestor (parents entity)) common-ancestor)
- entity source-entity))
-(setf path-down (path-down-to-target-data 
-                  (unless (member common-ancestor (parents entity)) common-ancestor)
- source-entity)))
-
-(mapcar #'(lambda (item) 
-             (format t "~%~a.~a: ~s" (name (my-entity item)) (name item)
-                    (ror:target-data-expression item)))
-  (list (find-field :codecontroller :estimate)
- (find-field :workitem :estimate)
- (find-field :projectpart :workitem)
- (find-field :scheduleitem :workitem)
- (find-field :schedulepart :scheduleitem)
- (find-field :project :claim)
- (find-field :itemcodecontroller :claimline)))
-
-|#
 
 (defmethod target-data-expression ((item attribute) &optional filter)
   (declare (ignorable filter))
