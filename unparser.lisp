@@ -360,8 +360,8 @@
             (indent-block nil (data-list-element (ui-label entity :list)
                                     :colspan (+ (length actions) (length (user-attributes entity)))))
               (indent-block nil (data-list-row (list-column-headings entity (length actions))))
-              (indent-block nil
-                  (list-body (make-aspect entity '(:list) :list-panel (user-attributes entity))
+              (indent-block nil  ;; FIXME simian::make-aspect - not appropriate
+                  (list-body (simian::make-aspect entity '(:list) :list-panel (user-attributes entity))
                              actions)))))
 
 (defmethod unparse-best-in-place (item aspect)
