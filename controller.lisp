@@ -197,13 +197,12 @@
                           (list (as-literal (with-nesting (instance-variable-assignment aspect :edit))))))))
 
 (defmethod create-method ((aspect aspect) &optional (stream t))
-  (let ((entity (entity aspect)))
-    (format stream "~a~a" (make-indent)
-            (ruby:unparse-method
-             "create" nil
-             (as-literal (with-nesting (instance-variable-assignment aspect :create)))
-             (as-literal (respond_to aspect :create))
-             (as-literal "end")))))
+  (format stream "~a~a" (make-indent)
+          (ruby:unparse-method
+           "create" nil
+           (as-literal (with-nesting (instance-variable-assignment aspect :create)))
+           (as-literal (respond_to aspect :create))
+           (as-literal "end"))))
 
 (defmethod delete-method ((aspect aspect) &optional (stream t))
   (format stream "~a~a" (make-indent)
@@ -310,10 +309,10 @@ end
   (redirect_to aspect :create :show var))
 
 (defmethod instance-variable-assignment ((aspect aspect) (action (eql :edit)) &key (key-param "id") (recursive? t))
-  (instance-variable-assignment aspect :show :recursive? recursive?))
+  (instance-variable-assignment aspect :show :recursive? recursive? :key-param key-param))
 
 (defmethod instance-variable-assignment ((aspect aspect) (action (eql :delete)) &key (key-param "id") (recursive? t))
-  (instance-variable-assignment aspect :show :recursive? recursive?))
+  (instance-variable-assignment aspect :show :recursive? recursive? :key-param key-param))
 
 (defmethod mva-includes ((aspect aspect))
   (let ((mvas (multi-valued-attributes (entity aspect))))
@@ -342,6 +341,7 @@ end
 ;    @company = Company.find(params[:company_id])
 ;    @division = @company.divisions.build
 (defmethod instance-variable-assignment ((aspect aspect) (action (eql :new)) &key (key-param "id") (recursive? t))
+  (declare (ignorable key-param))
   (let* ((entity (entity aspect)))
     (format nil "~a~a" (if recursive? (set-parents aspect) "")
             (format nil "~a = ~a.~a" (strcat "@" (instance-name entity))
@@ -351,6 +351,7 @@ end
 ;    @company = Company.find(params[:company_id])
 ;    @division = @company.divisions.build(division_params)
 (defmethod instance-variable-assignment ((aspect aspect) (action (eql :create)) &key (key-param "id") (recursive? t))
+  (declare (ignorable key-param))
   (let* ((entity (entity aspect)))
     (format nil "~a~a" (if recursive? (set-parents aspect) "")
             (format nil "@~a = ~a.~a(~a_params)" (instance-name entity)
@@ -364,15 +365,13 @@ end
       "new"))
 
 (defmethod instance-variable-assignment ((aspect aspect) (action (eql :list)) &key (key-param "id") (recursive? t))
-  (let* ((entity (entity aspect))
-         (closest-rel (get-closest-relative entity (view aspect)))
-         (relationship (when closest-rel (find-relationship closest-rel entity))))
-    (format nil "~a~a" (if recursive? (set-parents aspect) "")
-            (format nil "@~a = ~a~{.~a~}"
-                    (snake-case (plural (entity aspect)))
-                    (unparse-controller-model-reference aspect)
-                    (or (format-controller-filters aspect)
-                        (if (root? aspect) (list "all")))))))
+  (declare (ignorable key-param))
+  (format nil "~a~a" (if recursive? (set-parents aspect) "")
+          (format nil "@~a = ~a~{.~a~}"
+                  (snake-case (plural (entity aspect)))
+                  (unparse-controller-model-reference aspect)
+                  (or (format-controller-filters aspect)
+                      (if (root? aspect) (list "all"))))))
 
 (defmethod set-parents ((aspect aspect))
   (if (root? aspect)

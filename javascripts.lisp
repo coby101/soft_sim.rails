@@ -137,7 +137,7 @@ window.addEventListener('turbolinks:load', () => new removeFields())
 "))
   *javascript-packs* :test #'string-equal :key #'car)
 
-(defun google-address-js (aspect) "")
+(defun google-address-js (aspect) (declare (ignorable aspect)) "")
 
 
 ;;;===========================================================================

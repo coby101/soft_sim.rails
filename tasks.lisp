@@ -11,6 +11,8 @@
 
 (in-package :ror)
 
+(defun data-sets (arg) arg "WIP - see soft_sim data-sets.lisp")
+
 (defun write-data-load-tasks()
   (when (data-sets *application*)
     (let ((file (task-file-path "test_data")))

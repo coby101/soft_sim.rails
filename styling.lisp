@@ -186,6 +186,7 @@
       (html:close-tag "div")))
 
 (defmethod update-form-line ((items string) &optional panel-width)
+  (declare (ignorable panel-width))
   (format nil "~a~%~a~%~a"
           (update-form-line.open)
           items
@@ -243,6 +244,7 @@
           (with-nesting (datasheet-section content *datasheet-content-class*))
           (datasheet.close)))
 (defun datasheet.open (&optional id)
+  (declare (ignorable id))
   (if *simple-table-layouts?*
       (html:open-tag "p")
       (html:open-tag "div" :class *datasheet-class*)))
@@ -288,6 +290,7 @@
           (datasheet-line.close)))
 
 (defmethod datasheet-line ((items string) &optional panel-width)
+  (declare (ignorable panel-width))
   (format nil "~a~%~a~%~a"
           (datasheet-line.open)
           (indent-block nil items)

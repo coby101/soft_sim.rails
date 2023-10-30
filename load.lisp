@@ -20,7 +20,7 @@
 
 (in-package :ror)
 
-(let ((sb-ext:*muffled-warnings* 'style-warning))
+(let ();(sb-ext:*muffled-warnings* 'style-warning))
   (load-unparser "ruby")
   (load-unparser "sql")
   (load-unparser "html")

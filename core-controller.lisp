@@ -114,7 +114,10 @@
          (args (if with-params? "params[:column], params[:direction], params[:page]" (format nil "~(:~a~)"  (if (typep col1 'entity) "id" (schema-name col1))))))
     (format nil "sorted_and_paginated(@~a, ~a)" (schema-name (entity aspect)) args)))
 
-(defun set_ancestors-method-name (aspect) "set_ancestors")
+(defun set_ancestors-method-name (aspect)
+  (declare (ignorable aspect))
+  "set_ancestors")
+
 (defun set_model-method-name (aspect) (format nil "set_~a" (instance-name (entity aspect))))
 (defun set_models-method-name (aspect) (format nil "set_~a" (schema-name (entity aspect))))
 

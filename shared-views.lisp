@@ -36,7 +36,7 @@
               (make-action-links aspect :detail :icons? t :footer? t)))))
 
 (defmethod show.html.erb ((aspect symbol) &optional stream)
-  (show.html.erb (find-aspect (keywordify aspect) (keywordify  stream)) t))
+  (show.html.erb (find-aspect aspect stream) t))
 (defmethod show.html.erb ((aspect aspect) &optional stream)
  (let ((file (layout-file-path aspect "show"))
        (actions (action-links aspect :detail)))
@@ -267,7 +267,7 @@
 
 
 (defmethod _entity.html.erb ((aspect symbol) &optional stream)
-  (_entity.html.erb (find-aspect (keywordify aspect) (keywordify stream)) t))
+  (_entity.html.erb (find-aspect aspect stream) t))
 (defmethod _entity.html.erb ((aspect aspect) &optional stream)
   (let* ((entity (entity aspect))
          (var (instance-name entity))

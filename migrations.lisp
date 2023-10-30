@@ -255,6 +255,10 @@ for associative tables "id: false"
 
 (defun create-seed-method () "db_import!")
 
+;;; WIP in soft_sim data-set.lisp COLUMNS DATA-ROWS MAKE-DATA-SEED
+(defun columns (arg) arg)
+(defun data-rows (arg) arg)
+(defun make-data-seed (arg1 arg2) (values arg1 arg2))
 (defun create-seed-data (ent stream &optional data-seed)
   (let* ((data (or data-seed (make-data-seed ent (ignore-errors (seed-data ent))))))
     (when data
@@ -267,7 +271,7 @@ for associative tables "id: false"
                                        (loop for i from 0 to (1- column-count)
                                              collect (when (nth i row)
                                                        (format nil "~a: ~a" (schema-name (nth i columns))
-                                                               (ruby::unparse-attribute-value
+                                                               (unparse-attribute-value
                                                                 (nth i columns)
                                                                 (nth i row))))))))
                         (data-rows data))))
@@ -275,6 +279,7 @@ for associative tables "id: false"
               (format nil "~%ActiveRecord::Base.connection.reset_pk_sequence!('~a')~%"
                       (schema-name ent))))))
 
+(defun data-seeds (arg) arg "not implemented in soft_sim yet")
 (defun unparse-data-set (data-set &optional (stream t))
   (dolist (data-seed (reverse (data-seeds data-set)))
     (create-seed-data (entity data-seed) stream data-seed)))
@@ -290,10 +295,11 @@ for associative tables "id: false"
       (when special-code
         (format (or stream data-file) "~a~%" special-code)))))
 
-(defun needs-dbtenant? (entity data)
-  (and data
-       (tenant-scoped-entity? entity)
-       (not (find (id (tenant-key entity)) (columns data) :key #'id))))
+;;; WIP involving unfinished soft_sim data-set.lisp code
+ ;; (defun needs-dbtenant? (entity data)
+ ;;  (and data
+ ;;       (tenant-scoped-entity? entity)
+ ;;       (not (find (id (tenant-key entity)) (columns data) :key #'id))))
 
 (defmethod add_column ((attribute attribute) &optional stream)
   (let ((options (assemble-column-options attribute)))
@@ -329,7 +335,7 @@ class Add~aTo~a < ActiveRecord::Migration[6.1]
 (defmethod add-entity-migration ((entity symbol) &optional (stream t))
   (let ((ent (find-entity entity)))
     (if ent
-        (add-entity-migration ent t)
+        (add-entity-migration ent stream)
         (warn "no entity with key ~a found" entity))))
 
 (defmethod add-entity-migration ((entity entity) &optional (stream t))
@@ -348,6 +354,12 @@ class Create~a < ActiveRecord::Migration[6.1]
     drop_table :~a
   end
 end~%" (plural entity) create change (or import "") (schema-name entity))))
+
+(defmethod required-extensions ((db database-platform))
+  (remove nil
+          (list
+           (when (string-equal (name db) "PostgreSQL")
+             "enable_extension \"plpgsql\""))))
 
 ;;;===========================================================================
 ;;; Local variables:

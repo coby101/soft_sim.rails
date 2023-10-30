@@ -48,6 +48,7 @@
     (space-close aspect)))))
 
 (defun space-open (aspect)
+  (declare (ignorable aspect))
   (if t
       ""
       "
@@ -58,6 +59,7 @@
 "))
 
 (defun space-close (aspect)
+  (declare (ignorable aspect))
   (if t
       ""
       "
@@ -146,9 +148,9 @@
 (defmethod core_form.html.erb (aspect &optional stream)
   (unless (typep (entity aspect) 'attribute-table)
     (let ((*simple-table-layouts?* nil)
-          (file (layout-file-path aspect "_form"))
-          (before-elements (get-additional-page-elements aspect :form :before))
-          (after-elements (get-additional-page-elements aspect :form :after)))
+          (file (layout-file-path aspect "_form")))
+;;;          (before-elements (get-additional-page-elements aspect :form :before))
+;;;          (after-elements (get-additional-page-elements aspect :form :after)))
       (with-open-file (html.erb file :direction :output :if-exists :supersede)
 	(when stream (format stream "~%# app/views/~a/~a.html.erb~%" (schema-name (entity aspect)) "_form"))
 	(format (or stream html.erb) "~a~a
@@ -169,9 +171,11 @@
   (substitute :view :detail (action-links aspect page)))
 
 (defmethod unparse-core-element ((item entity) (aspect aspect) &key (downlink? :always))
+  (declare (ignorable aspect downlink?))
   ":id")
 
 (defmethod unparse-core-element ((item primary-key) (aspect aspect) &key (downlink? :always))
+  (declare (ignorable aspect downlink?))
   ":id")
 
 (defmethod unparse-core-element ((item summary-attribute) (aspect aspect) &key (downlink? :always))
@@ -180,6 +184,7 @@
       (call-next-method)))
 
 (defmethod unparse-core-element ((item t) (aspect aspect) &key (downlink? :always))
+  (declare (ignorable downlink?))
   (format nil ":~a" (schema-name item)))
 
 (defun next-level (aspect)

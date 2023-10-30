@@ -39,7 +39,9 @@
 ;;  validation methods
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun write-validator-method (constraint) nil)
+(defun write-validator-method (constraint)
+  (declare (ignorable constraint))
+  nil)
 (defun unparse-validation-constraint (constraint)
   (let* ((exp (expression constraint))
          (context (context (formula constraint)))

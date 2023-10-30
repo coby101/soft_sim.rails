@@ -26,36 +26,6 @@
 
 (defun language-locale () "en")
 
-(defun generate (&optional (app *application*))
-  (clean-up)
-  (when *authenticated-application?*
-    (insert-authentication-attributes))
-  (conventionalize-app)
-  (create-bash-scripts)
-  (format t "~&writing ~a" (namestring (routes-file-path)))
-  (routes.rb app) 
-  (write-data-load-tasks) 
-  (generated.yml)
-  (format t "~&writing schema.rb at ~s" (namestring (schema-file-path)))
-  (schema.rb app)
-  (format t "~&writing controller files in ~s" (namestring (controller-directory)))
-  (generate-controllers app)
-  (format t "~&writing model files in ~s" (namestring (model-directory)))
-  (generate-model-files app)
-  (format t "~&writing view files in ~s" (namestring (implementation-subdirectory "ror" "app" "views")))
-  (generate-views app)
-  (format t "~&taking care of dependencies")
-  (install-dependencies)
-  (format t "~&generating code fragments for documentation")
-  (generate-code-for-documentation app)
-  (format t "~&writing seeds.rb at ~s" (namestring (seed-file-path)))
-  (seeds.rb app)
-  (when *dev-mode*
-    (format t "~&writing load file at ~s" (namestring (load-file-path)))
-    (generate-load-file app))
-  (format t "~%~%done~%~%You will find some install scripts in ~a" *installation-directory*))
-
-
 (defun clean-up()
   "this function will delete all entity specific files to ensure nothing is left ~
    behind due to renaming.  Files with application independent names will remain."
@@ -340,10 +310,13 @@
                                  :long-plural "Model Specialization Types")
                 :indexed?     t
                 :read-only?   t
-                :domain (default-domain (get-logical-type :label))
-                :logical-type (get-logical-type :label))))
-        (add-entity-attribute entity model-type)
-        (resolve-constraints model-type)))))
+                :domain (simian.entities::default-domain (simian.entities::get-logical-type :label))
+                :logical-type (simian.entities::get-logical-type :label))))
+        ;; I think this is wrong headed and it requires exposing soft_sim internals
+        ;; so rather than exporting these two symbols I will reach in and borrow them
+        ;; FIXME (see just above too) - maybe a add-implementation-specific-attribute ?
+        (simian.entities::add-entity-attribute entity model-type)
+        (simian::resolve-constraints model-type)))))
 
 (defmethod conventionalize-attribute-name ((att composite-key))
   nil)
@@ -512,6 +485,35 @@
   (merge-pathnames
    (make-pathname :name "structure" :type "sql")
    (db-directory)))
+
+(defun generate (&optional (app *application*))
+  (clean-up)
+  (when *authenticated-application?*
+    (insert-authentication-attributes))
+  (conventionalize-app)
+  (create-bash-scripts)
+  (format t "~&writing ~a" (namestring (routes-file-path)))
+  (routes.rb app) 
+  (write-data-load-tasks) 
+  (generated.yml)
+  (format t "~&writing schema.rb at ~s" (namestring (schema-file-path)))
+  (schema.rb app)
+  (format t "~&writing controller files in ~s" (namestring (controller-directory)))
+  (generate-controllers app)
+  (format t "~&writing model files in ~s" (namestring (model-directory)))
+  (generate-model-files app)
+  (format t "~&writing view files in ~s" (namestring (implementation-subdirectory "ror" "app" "views")))
+  (generate-views app)
+  (format t "~&taking care of dependencies")
+  (install-dependencies)
+  (format t "~&generating code fragments for documentation")
+  (generate-code-for-documentation app)
+  (format t "~&writing seeds.rb at ~s" (namestring (seed-file-path)))
+  (seeds.rb app)
+  (when *dev-mode*
+    (format t "~&writing load file at ~s" (namestring (load-file-path)))
+    (generate-load-file app))
+  (format t "~%~%done~%~%You will find some install scripts in ~a" *installation-directory*))
 
 ;;;===========================================================================
 ;;; Local variables:

@@ -148,7 +148,7 @@
     (format nil "~a.blank?" field-var)))
 
 (defmethod unparse-attribute-value ((attribute attribute) (value t))
-  (unparse-data (data-type attribute) value))
+  (ruby:unparse-data (data-type attribute) value))
 
 (defmethod unparse-form-element ((item attribute))
   (html:div
@@ -211,7 +211,7 @@
   (format nil "form.email_field :~a, class: ~s~a" (schema-name item) class
           (if (require-user-input? item) ", required: true" "")))
 (defmethod unparse-form-helper ((item attribute) (type (eql :color)) &key (class (form-field-class item)))
-  (format nil "form.color_field :~a" (schema-name item)))
+  (format nil "form.color_field :~a, class: ~s" (schema-name item) class))
 (defmethod unparse-form-helper ((item attribute) (type (eql :url)) &key (class (form-field-class item)))
   (format nil "form.url_field :~a, class: ~s~a" (schema-name item) class
           (if (require-user-input? item) ", required: true" "")))
@@ -258,6 +258,7 @@
 ;          (if (require-user-input? item) ", required: true" ""))))
 
 (defmethod unparse-form-helper ((item attribute) (type (eql :foreign-key)) &key (class (form-field-class item)))
+  (declare (ignorable class))
   (let* ((target (my-entity (source item)))
 	     (order (or (ordering (path item)) (default-sort-field target))))
     (unparse-collection-select-helper
@@ -363,12 +364,6 @@
               (indent-block nil  ;; FIXME simian::make-aspect - not appropriate
                   (list-body (simian::make-aspect entity '(:list) :list-panel (user-attributes entity))
                              actions)))))
-
-(defmethod unparse-best-in-place (item aspect)
-  (format nil
-          "
-</div>
-" (t.long-name item)))
 
 (defmethod unparse-template-element ((item formula) (aspect aspect)
                                         &key obj-var labeled? css-class-string)
@@ -682,6 +677,7 @@
 (defun unparse-where-clause-refs (expr &key obj-var context other-contexts)
     "go through an expression and determine if attributue objects need extra
      work to reference them in unparsing code given possibly multiple contexts"
+  (declare (ignorable obj-var))
   (cond
     ((null expr) nil)
     ((typep expr 'operator) expr)

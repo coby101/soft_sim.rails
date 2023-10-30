@@ -50,6 +50,7 @@
   (format stream "~%end~%"))
 
 (defmethod write-model-class ((entity generalized-entity) &optional stream)
+  (declare (ignorable stream))
   (call-next-method))
 ;  (dolist (sub (subclasses entity))
 ;    (write-model-class sub stream)))
