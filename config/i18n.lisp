@@ -1,16 +1,11 @@
 ;;;===========================================================================
-;;; file:   internationalization.lisp
-;;; auth:   Coby Beck
-;;; date:   2022-01-22
 ;;;
-;;;---------------------------------------------------------------------------
-;;;   code associated with localizations
-;;;   this unparses the application specification's language version yml
-;;;   file only, other languages will need to be done by hand
-;;;   by translating everything in generated.*locale*.yml
-;;;---------------------------------------------------------------------------  
+;;;   code associated with localizations.
+;;;   this only unparses the yml file in the language of the application
+;;;   specification, which is expected to match *locale*. Any other
+;;;   languages will need to be done by hand in <rails>/config/locales/
 ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;===========================================================================
 
 (in-package :ror)
 

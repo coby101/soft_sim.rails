@@ -1,16 +1,12 @@
 ;;;===========================================================================
-;;; file:   generators/ror/views.lisp
-;;; auth:   Coby Beck
-;;; date:   2020-12-04
-;;; update: 
-;;;---------------------------------------------------------------------------
+;;;
 ;;;   Code for generating general and view specific layouts, and
 ;;;   all aspects of the view component of Rails MVC framework 
-;;;---------------------------------------------------------------------------  
 ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;===========================================================================
 
 (in-package :ror)
+
 (defvar *use-shared-views* t)
 (defun generate-views (&optional (app *application*))
   (default-layouts)

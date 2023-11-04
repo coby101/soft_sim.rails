@@ -1,15 +1,13 @@
 ;;;===========================================================================
-;;; file:   ror.lisp
-;;; auth:   Coby Beck
-;;; date:   2020-12-04
 ;;;
-;;;---------------------------------------------------------------------------
-;;;   code associated with generating a Ruby on Rails application
-;;;---------------------------------------------------------------------------  
+;;;   Ruby on Rails application generator for a Software Simian project
 ;;;
-;;; 2020
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;===========================================================================
+
+(defpackage simian.rails-generator
+  (:use :simian :cl)
+  (:nicknames :ror :rails)
+  (:export #:generate))
 
 (in-package :ror)
 
@@ -26,7 +24,7 @@
 
 (defun language-locale () "en")
 
-(defun clean-up()
+(defun clean-up ()
   "this function will delete all entity specific files to ensure nothing is left ~
    behind due to renaming.  Files with application independent names will remain."
   ;; no need to check if these directories exist as implementation-subdirectory

@@ -1,3 +1,10 @@
+;;;===========================================================================
+;;;
+;;;   code largely specific to PCMD Software Solutions application. Eventually this
+;;;   will belong to that project's repo and there will be a soft_sim mechanism
+;;;   for importing project specific generator code. 
+;;;
+;;;===========================================================================
 
 (in-package :ror)
 

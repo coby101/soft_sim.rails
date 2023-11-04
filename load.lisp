@@ -1,24 +1,8 @@
 ;;;===========================================================================
-;;; file:   load.lisp
-;;; auth:   Coby Beck
-;;; date:   2021-06-25
 ;;;
-;;;---------------------------------------------------------------------------
-;;;   load file for code associated with generating a Ruby on Rails application
-;;;---------------------------------------------------------------------------  
+;;;   load file for Ruby on Rails application generator
 ;;;
-;;;  
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(in-package simian)
-
-(defpackage simian.rails-generator
-  (:use :simian :cl)
-  (:nicknames :ror :rails)
-  (:export #:generate))
-
-(in-package :ror)
+;;;===========================================================================
 
 (let ();(sb-ext:*muffled-warnings* 'style-warning))
   (load-unparser "ruby")
@@ -39,34 +23,31 @@
                      (error "can't find file ~a in ~a" file *load-truename*))))))
     (ld "ror.lisp")
     (ld "general.lisp")
-    (ld "styling.lisp")
     (ld "unparser.lisp")
     (ld "utilities.lisp")
-    (ld "authentication.lisp")
-    (ld "internationalization.lisp")
+    (ld "authentication/devise.lisp")
+    (ld "config/i18n.lisp")
     (ld "framework.lisp")
-    (ld "controller.lisp")
-    (ld "core-controller.lisp")
-    (ld "validations.lisp")
-    (ld "associations.lisp")
-    (ld "callbacks.lisp")
-    (ld "application_record.lisp")
-    (ld "model.lisp")
-    (ld "database.lisp")
-    (ld "migrations.lisp")
-    (ld "views.lisp")
-    (ld "shared-views.lisp")
-    (ld "core-partials.lisp")
-    (ld "dependencies.lisp")
-    (ld "javascripts.lisp")
-    (ld "css.lisp")
+    (ld "controller/controller.lisp")
+    (ld "controller/core-controller.lisp")
+    (ld "model/validations.lisp")
+    (ld "model/associations.lisp")
+    (ld "model/callbacks.lisp")
+    (ld "model/application_record.lisp")
+    (ld "model/model.lisp")
+    (ld "database/database.lisp")
+    (ld "view/styling.lisp")
+    (ld "view/views.lisp")
+    (ld "view/shared-views.lisp")
+    (ld "view/core-partials.lisp")
+    (ld "view/unparse-elements.lisp")
+    (ld "dependencies/dependencies.lisp")
     (ld "tasks.lisp")
-    (ld "routes.lisp")
+    (ld "testing/factory_bot.lisp")
+    (ld "config/routes.lisp")
     (ld "local.lisp" t)))
 
-(format t "~&To generate a Rails application at any time run (ror:generate)")
-
-
+(format t "~&To generate a Rails application at any time load your software.simian project and run (ror:generate)")
 
 ;;;===========================================================================
 ;;; Local variables:

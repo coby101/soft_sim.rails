@@ -1,13 +1,9 @@
 ;;;===========================================================================
-;;; file:   model.lisp
-;;; auth:   Coby Beck
-;;; date:   2020-12-04
 ;;;
-;;;---------------------------------------------------------------------------
-;;;   code associated with generating the model aspect of Rails MVC framework 
-;;;---------------------------------------------------------------------------  
+;;;   code for creating application_record.rb and the instance and class methods
+;;;   relied on by other generated components 
 ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;===========================================================================
 
 (in-package :ror)
 

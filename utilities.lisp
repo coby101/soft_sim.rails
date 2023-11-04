@@ -1,14 +1,8 @@
 ;;;===========================================================================
-;;; file:   src/generators/ror/utilities.lisp
-;;; auth:   Coby Beck
-;;; date:   2021-06
 ;;;
-;;;---------------------------------------------------------------------------
-;;;   code associated with generating a Ruby on Rails application
-;;;---------------------------------------------------------------------------  
+;;; various helpers and utilities used in diverse places
 ;;;
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;===========================================================================
 
 (in-package :ror)
 
@@ -60,6 +54,7 @@ this header to make clear the generated content is now obsolete.~a    #
                          ((atom elt) (not (typep elt 'attribute)))
                          (t (contains-reachable-values? elt context))))
                exp))))
+
 ;;;===========================================================================
 ;;; Local variables:
 ;;; tab-width: 4

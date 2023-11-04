@@ -1,13 +1,8 @@
 ;;;===========================================================================
-;;; file:   tasks.lisp
-;;; auth:   Coby Beck
-;;; date:   2022-10-16
 ;;;
-;;;---------------------------------------------------------------------------
 ;;;   code associated with generating Factory_Bot factory definitions
-;;;---------------------------------------------------------------------------  
 ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;===========================================================================
 
 (in-package :ror)
 
@@ -90,7 +85,7 @@
 (defun factories-file-path ()
   (merge-pathnames
    (make-pathname :name "factories" :type "rb")
-   (implementation-subdirectory "ror" "spec" "support"))
+   (implementation-subdirectory "ror" "spec" "support")))
 
 (defun testable-entities (&optional (app *application*))
  (application-entities app))

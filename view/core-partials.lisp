@@ -1,3 +1,11 @@
+;;;===========================================================================
+;;;
+;;;   Code for generating "core" partials. The code produced here depends on
+;;;   PCMD specific partials that have not yet been incorporated into this generator
+;;;   (see app/views/application/core/*.html.erb partials)
+;;;
+;;;===========================================================================
+
 (in-package ror)
 
 (defun layout-directory (aspect)

@@ -1,16 +1,9 @@
 ;;;===========================================================================
-;;; file:   generators/ror/authentication.lisp
-;;; auth:   Coby Beck
-;;; date:   2021-12-07
-;;; update: 
-;;;---------------------------------------------------------------------------
+;;;
 ;;;   code associated with generating authentication code
 ;;;      - NB: based on the devise gem
-;;;---------------------------------------------------------------------------  
 ;;;
-;;; 
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;===========================================================================
 
 (in-package :ror)
 (defparameter *user-model* "User")
@@ -18,11 +11,6 @@
 (defparameter *devise-modules*
   (list "database_authenticatable" "recoverable" "rememberable"
         "validatable" "lockable" "trackable"))
-
-;; not useable as password is not an attribute but set encrypted password
-(defun user-seed-data()
-  '((:dbtenant :name :email :login :password :password_confirmation)
-    (1 "Gandalf the White" "hq@pcmd.com.au" "mithrandir" "Glamdring" "Glamdring")))
 
 (defun logout-link ()
   "<%= link_to 'Logout', destroy_user_session_path, method: :delete if user_signed_in? %>")
