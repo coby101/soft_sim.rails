@@ -111,7 +111,8 @@
   (when (not (read-only? ent))
     (remove nil (mapcar #'format-model-validation (constraints ent)))))
 
-(defmethod attribute-model-validations ((att audit-attribute)) nil)
+;; simian:audit-attribute may be deprecated, can do without this anyway for now.
+;(defmethod attribute-model-validations ((att audit-attribute)) nil)
 (defmethod attribute-model-validations ((att primary-key)) nil)
 (defmethod attribute-model-validations ((att foreign-key))
   (when (not (read-only? att))

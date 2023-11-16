@@ -96,8 +96,7 @@
                    (make-user-attribute "Locked At" :type :datetime))))))
     (when user-model
       (dolist (att attributes)
-        ;; FIXME need a proper simian hook for this, add-entity-attribute is too internal I think?
-        (simian::add-entity-attribute user-model att))
+        (add-entity-attribute user-model att))
       (resolve-constraint-objects))))
 
 

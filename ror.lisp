@@ -313,7 +313,7 @@
         ;; I think this is wrong headed and it requires exposing soft_sim internals
         ;; so rather than exporting these two symbols I will reach in and borrow them
         ;; FIXME (see just above too) - maybe a add-implementation-specific-attribute ?
-        (simian.entities::add-entity-attribute entity model-type)
+        (add-entity-attribute entity model-type)
         (simian::resolve-constraints model-type)))))
 
 (defmethod conventionalize-attribute-name ((att composite-key))
