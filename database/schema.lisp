@@ -123,7 +123,7 @@ for associative tables "id: false"
 
 (defmethod t.column ((attribute cached-summary) &optional stream)
   (let ((options (assemble-column-options attribute)))
-    (format stream "t.~a :~a~a" (ruby:unparse-datatype (logical-type attribute))
+    (format stream "t.~a :~a~a" (unparse-datatype (logical-type attribute))
             (schema-name attribute)
             (if options
                 (format nil ", ~{~a~^, ~}" options)
@@ -134,7 +134,7 @@ for associative tables "id: false"
     (format stream "t.~a :~a~a"
             (if (implement-as-string? attribute)
                 "string"
-                (ruby:unparse-datatype (logical-type attribute)))
+                (unparse-datatype (logical-type attribute)))
             (schema-name attribute)
             (if options
                 (format nil ", ~{~a~^, ~}" options)

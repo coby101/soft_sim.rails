@@ -14,7 +14,7 @@
             (schema-name (my-entity attribute)) (schema-name attribute)
             (if (implement-as-string? attribute)
                 "string"
-                (ruby:unparse-datatype (logical-type attribute)))
+                (unparse-datatype (logical-type attribute)))
             (if options
                 (format nil ", ~{~a~^, ~}" options)
                 ""))))
