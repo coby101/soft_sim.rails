@@ -494,7 +494,7 @@
                                       (ruby:unparse (primary-key context)))
                     (or error-msg
                         (format nil "The check to ensure that ~a has failed"
-                                (english:unparse-expression (ruby:negate-expression test))))))
+                                (unparse-expression (negate-expression test) :english)))))
         (format code "~%~aend" (make-indent)))
       (when (vulnerable-to-null? test)
         (format code "~%~aend" (make-indent))

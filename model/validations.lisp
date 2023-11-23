@@ -59,12 +59,12 @@
       (format code "~%"))))
 
 (defmethod rewrite-expression ((operator t) expression)
-  (ruby:negate-expression expression))
+  (negate-expression expression))
 
 (defmethod rewrite-expression ((operator (eql '$when)) expression)
   (list (get-operator '$and)
         (second expression)
-        (ruby:negate-expression (third expression))))
+        (negate-expression (third expression))))
 
 (defmethod rewrite-expression ((operator (eql '$max-rows)) expression)
   (list (get-operator '$gt)

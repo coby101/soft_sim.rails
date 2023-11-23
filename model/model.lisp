@@ -145,9 +145,10 @@
 (defmethod format-model-scope ((state entity-state))
   (let ((lambda-body
          (as-literal (format nil "where(~s)"
-                             (sql:unparse-expression
+                             (unparse-expression
                               (sql:unparse-attribute-references (expression (predicate state))
-                                                                 (my-entity state)))))))
+                                                                 (my-entity state))
+                              :sql)))))
     (format nil "scope :~a, ~a" (snake-case (name state))
             (ruby:unparse-lambda nil lambda-body))))
 
