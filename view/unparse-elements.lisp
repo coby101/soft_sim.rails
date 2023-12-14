@@ -163,8 +163,7 @@
 	        prompt *default-form-collection-class*
             (if (require-user-input? item) ", required: true" ""))))
 
-(defmethod unparse-template-element ((item multi-valued-attribute) (aspect aspect)
-                                        &key obj-var labeled? css-class-string)
+(defmethod unparse-template-element ((item multi-valued-attribute) (aspect aspect) &key obj-var labeled? css-class-string)
   (declare (ignorable obj-var labeled? css-class-string aspect))
   (let ((entity (child-entity item))
         (actions nil))
@@ -176,20 +175,15 @@
                   (list-body (simian::make-aspect entity '(:list) :list-panel (user-attributes entity))
                              actions)))))
 
-(defmethod unparse-template-element ((item formula) (aspect aspect)
-                                        &key obj-var labeled? css-class-string)
+(defmethod unparse-template-element ((item formula) (aspect aspect) &key obj-var labeled? css-class-string)
   (declare (ignorable obj-var labeled? css-class-string aspect))
-  (ruby:unparse-expression
-   (unparse-attribute-references
-    (expression item) (context item) obj-var)))
+  (unparse-expression (unparse-attribute-references (expression item) (context item) obj-var) :ruby))
 
-(defmethod unparse-template-element ((item string) (aspect t)
-                                        &key obj-var labeled? css-class-string)
+(defmethod unparse-template-element ((item string) (aspect t) &key obj-var labeled? css-class-string)
   (declare (ignorable obj-var labeled? css-class-string aspect))
   item);(format nil "~a" (escape-characters item #\')))
 
-(defmethod unparse-template-element ((element t) (aspect aspect)
-                                     &key obj-var labeled? css-class-string)
+(defmethod unparse-template-element ((element t) (aspect aspect) &key obj-var labeled? css-class-string)
   (when (not (or (typep element 'attribute) (typep element 'list)))
     (error "no code to handle object ~a of type ~a" element (type-of element)))
   (let* ((expression (unparse-template-expression element obj-var))
@@ -247,12 +241,9 @@
               item)))
 
 (defmethod unparse-template-expression ((item formula) &optional obj-var)
-  (ruby:unparse-expression
-   (unparse-attribute-references
-    (expression item) (context item) obj-var)))
+  (unparse-expression (unparse-attribute-references (expression item) (context item) obj-var) :ruby))
 
-(defun unparse-template-link (aspect action &key var (short-label? t)
-                                     icon label css-class style external?)
+(defun unparse-template-link (aspect action &key var (short-label? t) icon label css-class style external?)
   (when (and icon external?)
     (error "can't unparse an icon with an external link call"))
   (let* ((entity (entity aspect))
@@ -262,13 +253,12 @@
                      (if external? "link_with_external_link" "link_to")
                      (if icon
                          ""
-                         (if label (strcat label ", ")
-                             (format nil "~a, "
-                                     (action-label entity action :brief? short-label?))))
+                         (if label 
+                             (strcat label ", ")
+                             (format nil "~a, " (action-label entity action :brief? short-label?))))
                      (path-method-call aspect action var)
                      (if css-class (format nil ", class: '~a'" css-class) "")
-                     (if external? ""
-                         (format nil ", title: ~a" (t.button-title action entity)))
+                     (if external? "" (format nil ", title: ~a" (t.button-title action entity)))
                      (if style (format nil ", style: '~a'" style) "")
                      (if external? ", '_self'" "")
                      (if icon " do" "")))))

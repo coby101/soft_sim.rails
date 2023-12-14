@@ -112,7 +112,7 @@
   (declare (ignorable aspect))
   ;; seems we should be selective about this list based on allowed operations
   (let ((methods (list :show :edit :update :destroy)))
-    (ruby:unparse-array methods)))
+    (unparse-array methods :ruby)))
 
 (defmethod set_model-method ((aspect aspect) &optional (stream t))
   (let ((entity (entity aspect)))
@@ -387,7 +387,7 @@ end
   (snake-case (name filter)))
 
 (defmethod unparse-filter-application ((filter formula))
-  (format nil "where(~s)" (sql:unparse-expression (expression filter))))
+  (format nil "where(~s)" (unparse-expression (expression filter) :sql)))
 
 
 ;;;===========================================================================

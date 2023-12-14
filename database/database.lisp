@@ -9,10 +9,6 @@
 ;; package definition will go here
 ;; (in-package :database)
 
-(load (merge-pathnames "schema.lisp" *load-truename*))
-(load (merge-pathnames "migrations.lisp" *load-truename*))
-(load (merge-pathnames "seeds.lisp" *load-truename*))
-
 (defun schema.rb (&optional (app *application*))
   (let ((file (schema-file-path))
         (entities (sort (copy-list (database-tables app))

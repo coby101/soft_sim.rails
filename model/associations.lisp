@@ -103,8 +103,7 @@
         (progn
           (setf association-type "has_many")
           (push (list "foreign_key"
-                      (ruby:unparse
-                       (strcat (instance-name (name (my-relation my-relation))) "_id")))
+                      (unparse (strcat (instance-name (name (my-relation my-relation))) "_id") :ruby))
                 association-options))
         (progn
           (when (eql :independent (dependency (rhs relationship)))
@@ -231,7 +230,7 @@
       (unparse-model-association "has_many" (model-plural child)
                            (list "through" (strcat ":" (model-plural assoc-ent))))
       (unparse-model-association "has_and_belongs_to_many" (model-plural child)
-                           (list "join_table" (ruby:unparse (model-plural assoc-ent))))))
+                           (list "join_table" (unparse (model-plural assoc-ent) :ruby)))))
 
 (defun unparse-model-association (type relation &rest options)
   (format nil "~a :~a~{, ~a~}" type relation
@@ -266,7 +265,7 @@ all of this seems completely unused, delete it when emotionally ready..
         (progn
           (setf association-type "has_many")
           (push (list "foreign_key"
-                      (ruby:unparse (strcat (instance-name (name (my-relation my-relation))) "_id")))
+                      (unparse (strcat (instance-name (name (my-relation my-relation))) "_id") :ruby))
                 association-options))
         (setf association-type "belongs_to"))
     (unless (string= relation-name model-name)
@@ -331,7 +330,7 @@ all of this seems completely unused, delete it when emotionally ready..
       (unparse-migration-association "has_many" (model-plural child)
                            (list "through" (strcat ":" (model-plural assoc-ent))))
       (unparse-migration-association "has_and_belongs_to_many" (model-plural child)
-                           (list "join_table" (ruby:unparse (model-plural assoc-ent))))))
+                           (list "join_table" (unparse (model-plural assoc-ent) :ruby)))))
 
 
 (defmethod format-migration-association ((rel specialization) (side (eql :right)))

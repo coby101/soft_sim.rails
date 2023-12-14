@@ -206,10 +206,9 @@
     (unless (typep default 'attribute)
       (error "unhandled default value ~a" (type-of default)))
     (if (eq (my-entity default) context)
-      (ruby:unparse-expression
-       (unparse-attribute-references default context))
-      (ruby:unparse-expression
-       (list '$unless
+      (unparse-expression (unparse-attribute-references default context) :ruby)
+      (unparse-expression
+       (list '$unless :ruby
              (as-literal (format nil "~{~a~^.~}.nil?"
                                  (mapcar #'instance-name (butlast (path-to-attribute context default)))))
              (unparse-attribute-references default context))))))
@@ -218,8 +217,7 @@
   (let* ((attributes (cached-calculations entity))
          (expressions (mapcar #'(lambda (att)
                                   (format nil "self.~a = ~a" (schema-name att)
-                                          (ruby:unparse-expression
-                                           (unparse-attribute-references (expression att) entity))))
+                                          (unparse-expression (unparse-attribute-references (expression att) entity) :ruby)))
                               attributes)))
     (when attributes
       (format nil "def set_cached_calculations ~{~%    ~a~}~%  end~%" expressions))))
@@ -304,9 +302,9 @@
     (ruby:unparse-method (require-update-predicate-name relation)
        nil
        (as-literal (format nil "!saved_changes.keys.intersection(~a).blank?~a"
-                           (ruby:unparse-array
+                           (unparse-array
                             (list* (strcat (instance-name relation) "_id")
-                                   (mapcar #'schema-name (mapcar #'source atts))))
+                                   (mapcar #'schema-name (mapcar #'source atts))) :ruby)
                             (if (required-relation? relation)
                                 ""
                                 (format nil " && !~a.nil?" (instance-name relation))))))))
@@ -346,8 +344,7 @@
          (model (model-name entity))
          (left-key (car (associates entity)))
          (left-key-name (strcat (instance-name left-key) "_id"))
-         (left-key-ref (ruby:unparse-expression
-                        (unparse-attribute-references (primary-key left-key) context)))
+         (left-key-ref (unparse-expression (unparse-attribute-references (primary-key left-key) context) :ruby))
          (right-key (cadr (associates entity)))
          (right-key-name (strcat (instance-name right-key) "_id"))
          (right-key-ref (unparse-path (primary-key right-key) context :bad-start nil)))
@@ -439,10 +436,9 @@
 (defmethod on-rollback-methods ((entity entity))
   )
 
-
 (defun unparse-callback-registration (event timing method &rest options)
   (let* ((args (mapcar #'(lambda(opt)
-                           (format nil "~a: :~a" (car opt) (ruby:unparse (if (eq (cadr opt) t) (cadr opt) (cadr opt)))))
+                           (format nil "~a: :~a" (car opt) (unparse (if (eq (cadr opt) t) (cadr opt) (cadr opt)) :ruby)))
                        options)))
     (format nil "~a_~a :~a~{, ~a~}" timing event method args)))
 #|

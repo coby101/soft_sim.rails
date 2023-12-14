@@ -5,7 +5,7 @@
 ;;;===========================================================================
 
 (defpackage simian.rails-generator
-  (:use :simian :cl)
+  (:use :cl :soft-sim :utilities :interrogation :entity :attribute :relationship :foundation :interface :formula)
   (:nicknames :ror :rails)
   (:export #:generate))
 
@@ -34,6 +34,11 @@
   (uiop:delete-directory-tree (db-directory) :validate t)
   (uiop:delete-directory-tree (implementation-subdirectory "ror" "views") :validate t))
 
+(defun load-file-path ()
+  (merge-pathnames
+   (make-pathname :name "load" :type "rb")
+   (implementation-subdirectory "ror")))
+
 (defun generate-load-file (&optional (app *application*))
   (let ((file-path (load-file-path)))
     (with-open-file (load-file file-path :direction :output :if-exists :supersede)
@@ -41,7 +46,9 @@
       (dolist (entity (model-entities app))
         (format load-file "load '~a'~%" (namestring (model-file-path entity)))
         (format load-file "puts 'loaded ~a'~%" (namestring (model-file-path entity)))))))
-
+#|
+ - needs major rethinking. It is a good feature, but where does it fit in?
+   - methods that specialize on keys (eg :rails) in a manner similar to unparse?
 (defun generate-code-for-documentation (&optional (app *application*))
   (when *dev-mode* (setf simian:*code-examples* (make-hash-table :test #'equalp)))
   (dolist (entity (schema-entities app))
@@ -66,7 +73,7 @@
       (store-code-examples aspect "Controller Definition"
           (with-output-to-string (str)
             (controller-class-definition aspect str))))))
-
+|#
 (defparameter *reserved-words*
   '("ADDITIONAL_LOAD_PATHS"
     "ARGF"
@@ -389,11 +396,6 @@
                                   :type "rb")
                    (model-directory)))
 
-(defun load-file-path ()
-  (merge-pathnames
-   (make-pathname :name "load" :type "rb")
-   (implementation-subdirectory "ror")))
-
 (defun model-directory ()
   (implementation-subdirectory "ror" "app" "models"))
 
@@ -504,8 +506,8 @@
   (generate-views app)
   (format t "~&taking care of dependencies")
   (install-dependencies)
-  (format t "~&generating code fragments for documentation")
-  (generate-code-for-documentation app)
+;  (format t "~&generating code fragments for documentation")
+;  (generate-code-for-documentation app)
   (format t "~&writing seeds.rb at ~s" (namestring (seed-file-path)))
   (seeds.rb app)
   (when *dev-mode*

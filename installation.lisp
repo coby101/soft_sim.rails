@@ -6,36 +6,6 @@
 
 (in-package :ror)
 
-(defmethod controller-name ((aspect aspect))
-  (format nil "~a~aController"
-          (if (name (view aspect))
-            (strcat (name (view aspect)) "::")
-            "")
-          (camel-case (plural (entity aspect)))))
-
-(defun implement-as-string? (att)
-  (and (eql (data-type att) :boolean)
-       (or (nullable? att)
-           (not (default-value att)))))
-
-(defmethod instance-name ((rel relation))
-  (format nil "~a~p" (snake-case (name rel)) (or (multiplicity-max rel) 2)))
-
-(defmethod instance-name ((att attribute))
-  (schema-name att))
-(defmethod instance-name ((att primary-key))
-  "id")
-(defmethod instance-name ((att composite-primary-key))
-  "id")
-(defmethod schema-name ((att composite-primary-key))
-  "id")
-(defmethod instance-name ((ent entity))
-  (snake-case (name ent)))
-(defmethod instance-name ((str string))
-  (snake-case str))
-(defmethod model-plural ((obj t))
-  (snake-case (plural obj)))
-
 (defun create-bash-scripts()
   (let ((simian-dir (pathname->shell-filename (implementation-subdirectory "ror") t))
         (install-dir (pathname->shell-filename (or *installation-directory* (implementation-subdirectory "ror")) t)))

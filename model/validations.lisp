@@ -112,7 +112,7 @@
           ((simple-validation-method? exp (context (formula con)))
            (unparse-validation-constraint con))
           (t (comment-with-warning
-              nil "can't do this one: ~a" (english:unparse-expression exp))))))
+              nil "can't do this one: ~a" (unparse-expression exp :english))))))
 
 (defun unparse-field-validation (field type &rest options)
   (let* ((args
@@ -222,7 +222,7 @@ These variables are available to message strings:
                            (cdr args))))
     (unparse-field-validation
      att "inclusion"
-     (list "in" (ruby:unparse-array (append legal-values (when (nullable? att) (list :null)))))
+     (list "in" (unparse-array (append legal-values (when (nullable? att) (list :null))) :ruby))
      (list "message"
            (format nil "~s"
                    (or message (format nil "~a value must be one of ~a. \"%{value}\" is not in there"
@@ -353,7 +353,7 @@ These variables are available to message strings:
      field "greater_than" (cadr args)
      (format nil "~s"
              (or message (format nil "the value of ~a must be greater than ~a. \"%{value}\" is too small"
-                                 (long-name field) (english:unparse-expression (cadr args)))))
+                                 (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
 (defmethod unparse-model-validation ((op (eql '$<)) args &key event message condition)
@@ -365,7 +365,7 @@ These variables are available to message strings:
      (format nil "~s"
              (or message (format nil  "the value of ~a must be less ~
                                              than ~a. \"%{value}\" is too large"
-                                 (long-name field) (english:unparse-expression (cadr args)))))
+                                 (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
 (defmethod unparse-model-validation ((op (eql '$<=)) args &key event message condition)
@@ -375,7 +375,7 @@ These variables are available to message strings:
      (format nil "~s"
                    (or message (format nil "the value of ~a must be less than or equal ~
                                             to ~a. \"%{value}\" is too large"
-                                       (long-name field) (english:unparse-expression (cadr args)))))
+                                       (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
 (defmethod unparse-model-validation ((op (eql '$>=)) args &key event message condition)
@@ -385,7 +385,7 @@ These variables are available to message strings:
      (format nil "~s"
                    (or message (format nil "the value of ~a must be greater than or equal ~
                                             to ~a. \"%{value}\" is too small"
-                                       (long-name field) (english:unparse-expression (cadr args)))))
+                                       (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
 (defmethod unparse-model-validation ((op (eql '$=)) args &key event message condition)
@@ -394,7 +394,7 @@ These variables are available to message strings:
      field "equal_to" (cadr args)
      (format nil "~s"
                    (or message (format nil "the value of ~a must be ~a."
-                                       (long-name field) (english:unparse-expression (cadr args)))))
+                                       (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
 (defmethod unparse-model-validation ((op (eql '$!=)) args &key event message condition)
@@ -403,7 +403,7 @@ These variables are available to message strings:
      field "other_than" (cadr args)
      (format nil "~s"
                    (or message (format nil "the value of ~a must not be ~a."
-                                       (long-name field) (english:unparse-expression (cadr args)))))
+                                       (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
 (defmethod unparse-model-validation ((op (eql '$between)) args &key event message condition)
@@ -444,7 +444,7 @@ These variables are available to message strings:
            (arg (second conditional))
            (option (if (member operator '($if $when)) "if" "unless"))
            (expr (if (symbolp arg)
-                     (strcat ":" (ruby:unparse-expression arg))
+                     (strcat ":" (unparse-expression arg :ruby))
                      (ruby:unparse-lambda nil arg))))
       (list option expr))))
 

@@ -8,10 +8,6 @@
 ;;; define and use a dependencies package
 (in-package :ror)
 
-(load (merge-pathnames "application_helper.lisp" *load-truename*))
-(load (merge-pathnames "javascripts.lisp" *load-truename*))
-(load (merge-pathnames "css.lisp" *load-truename*))
-
 (defun write-helpers ()
   ;; for now just application_helper.rb with one function
   ;; link_to_add_fields which is used in nested forms for repeated attributes

@@ -51,7 +51,7 @@
     (loop for row in (panel-items (detail-panel aspect))
 	          collect (format nil "[~{~a~^, ~}]"
 				  (loop for item in row collect (unparse-core-element item aspect))))
-    (ruby:unparse-array actions)
+    (unparse-array actions :ruby)
     (if (root? aspect) "" (format nil ",~%      ancestors:  @ancestors"))
     (space-close aspect)))))
 
@@ -97,7 +97,7 @@
 ~a" (space-open aspect)
     (render-context aspect)
     (schema-name (entity aspect))
-    (ruby:unparse-array actions)
+    (unparse-array actions) :ruby
     (if (root? aspect) "" (format nil ",~%      ancestors:  @ancestors"))
     (space-close aspect)))))
 
@@ -127,7 +127,7 @@
   (loop for row in context
 	collect (format nil "[~{~a~^, ~}]"
 			(loop for item in row collect (unparse-core-element item parent-aspect :downlink? :counts_only))))
-  (ruby:unparse-array actions)
+  (unparse-array actions :ruby)
   (instance-name ancestor)))))))
   nil)
 

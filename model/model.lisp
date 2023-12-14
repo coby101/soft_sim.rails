@@ -199,7 +199,7 @@
       ((or (stringp default)
            (numberp default))
        default)
-      (t (format nil "-> (obj) { \"~a\" }" (ruby:unparse-expression default))))))
+      (t (format nil "-> (obj) { \"~a\" }" (unparse-expression default :ruby))))))
 
 
 ;;;===========================================================================

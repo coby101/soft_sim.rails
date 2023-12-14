@@ -12,22 +12,38 @@
   (member
    name
    (list
-    (strcat (snake-case (name ent)) "_id")
-    "id"
-    "type" ;; a table designation for a single inheritance
-    "lock_version" ;; Adds optimistic locking to a model
-    "updated_at" ;; modificatioin timestamp
-    "created_at" ;; creation timestamp
+    (strcat (snake-case (name ent)) "_id") ;; rail's default foreign key name
+    "id"                                   ;; rail's default for primary key
+    "type"                                 ;; column name used for a polymorphic reference
+    "lock_version"                         ;; Adds optimistic locking to a model
+    "updated_at"                           ;; rail's default modification timestamp
+    "created_at"                           ;; rail's default creation timestamp
     )))
 
-(defmethod model-name ((att attribute))
-  (model-name (my-entity att)))
-(defmethod model-name ((ent entity))
-  (camel-case (name ent)))
-(defmethod model-name ((rel relation))
-  (camel-case (name (entity rel))))
-(defmethod model-name ((str string))
-  (camel-case str))
+(defmethod controller-name ((aspect aspect))
+  (format nil "~a~aController"
+          (if (name (view aspect))
+            (strcat (name (view aspect)) "::")
+            "")
+          (camel-case (plural (entity aspect)))))
+
+(defun implement-as-string? (att)
+  (and (eql (data-type att) :boolean)
+       (or (nullable? att)
+           (not (default-value att)))))
+
+(defmethod instance-name ((rel relation))              (format nil "~a~p" (snake-case (name rel)) (or (multiplicity-max rel) 2)))
+(defmethod instance-name ((att attribute))             (schema-name att))
+(defmethod instance-name ((att primary-key))           "id")
+(defmethod instance-name ((att composite-primary-key)) "id")
+(defmethod instance-name ((ent entity))                (snake-case (name ent)))
+(defmethod instance-name ((str string))                (snake-case str))
+(defmethod model-plural ((obj t)) (snake-case (plural obj)))
+
+(defmethod model-name ((att attribute)) (model-name (my-entity att)))
+(defmethod model-name ((ent entity))    (camel-case (name ent)))
+(defmethod model-name ((rel relation))  (camel-case (name (entity rel))))
+(defmethod model-name ((str string))    (camel-case str))
 
 (defmethod schema-name ((ref list))
   (if (field-reference-spec? ref)
@@ -36,15 +52,10 @@
                   (schema-name (cadr ref))
                   (schema-name (cdr ref))))
       (error "can not handle ~a" ref)))
-
-(defmethod schema-name ((rel relation))
-  (snake-case (plural rel)))
-
-(defmethod schema-name ((ent entity))
-  (snake-case (plural ent)))
-(defmethod schema-name ((ent specialized-entity))
-  (schema-name (super ent)))
-
+(defmethod schema-name ((att composite-primary-key)) "id")
+(defmethod schema-name ((rel relation))              (snake-case (plural rel)))
+(defmethod schema-name ((ent entity))                (snake-case (plural ent)))
+(defmethod schema-name ((ent specialized-entity))    (schema-name (super ent)))
 (defmethod schema-name ((att attribute))
   (let ((name (snake-case (name att))))
     (if (reserved-column-name? name (my-entity att))
@@ -57,89 +68,81 @@
 (defmethod schema-name ((att primary-key))
   (call-next-method));"id")
 
-(defmethod unparse ((obj list))
+(defmethod unparse ((obj list) (language (eql :ruby)))
   (if (and (= 2 (length obj))
            (field-reference-expression? obj)
            (or (eq (entity (car obj)) (my-entity (cadr obj)))
                (eq (car obj) (my-entity (cadr obj)))))
       (if (eq (entity (car obj)) (my-entity (cadr obj)))
           (format nil "~a_~a" (snake-case (name (car obj))) (schema-name (cadr obj))) 
-          (unparse (cadr obj)))
-      (ruby:unparse obj)))
+          (unparse (cadr obj) language))
+      (unparse obj language)))
 
-(defmethod unparse ((obj entity))
+(defmethod unparse ((obj entity) (language (eql :ruby)))
   ;; snake-case is a bit arbitrary but a common convention
   (schema-name obj))
 
-(defmethod unparse ((obj attribute))
+(defmethod unparse ((obj attribute) (language (eql :ruby)))
   (snake-case (name obj)))
 
-(defmethod unparse ((obj calculated-attribute))
-  (unparse (expression (formula obj))))
+(defmethod unparse ((obj relation) (language (eql :ruby))) (call-next-method)); (unparse (keywordify (schema-name obj)) language))
 
-(defmethod unparse ((obj relation)) (call-next-method)); (unparse (keywordify (schema-name obj))))
-
-(defmethod unparse-expression ((obj attribute) &optional args)
+(defmethod unparse-expression ((obj attribute) (language (eql :ruby)) &optional args)
   (when args
     (error "we shouldn't have any args here...? (~a)" args))
   (schema-name obj))
 
-(defmethod unparse-expression ((obj calculated-attribute) &optional args)
-  (when args
-    (error "we shouldn't have any args here...? (~a)" args))
-  (unparse-expression (formula obj)))
-
-(defmethod unparse-expression ((operator (eql '$rows)) &optional args) 
+(defmethod unparse-expression ((operator (eql :rows)) (language (eql :ruby)) &optional args) 
   (let ((class (model-name (car args)))
         (where (if (cadr args)
-                   (format nil ".where(\"~a\")" (sql::unparse-expression (cadr args)))
+                   (format nil ".where(\"~a\")" (unparse-expression (cadr args) :sql))
                    "")))
     (format nil "~a~a.count" class where)))
 
-(defmethod unparse-expression ((operator (eql '$unchanged)) &optional args)
+(defmethod unparse-expression ((operator (eql :unchanged)) (language (eql :ruby)) &optional args)
 ;; this check fails on ($literal "supplier_id")
 ;  (unless (or (typep (car args) 'string) (typep (car args) 'attribute))
 ;    (error "$UNCHANGED is only appropriate for an attribute expression"))
-  (format nil "~a_change_to_be_saved == nil" (unparse-expression (car args))))
+  (format nil "~a_change_to_be_saved == nil" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql '$new-value)) &optional args)
-  (format nil "~a" (unparse-expression (car args))))
+(defmethod unparse-expression ((operator (eql :new-value)) (language (eql :ruby)) &optional args)
+  (format nil "~a" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql '$old-value)) &optional args)
+(defmethod unparse-expression ((operator (eql :old-value)) (language (eql :ruby)) &optional args)
  ; (unless (or (typep (car args) 'string) (typep (car args) 'attribute))
  ;   (error "$OLD_VALUE is only appropriate for an attribute expression"))  
-  (format nil "~a_change_to_be_saved ? ~:*~a_change_to_be_saved.first : ~:*~a" (unparse-expression (car args))))
+  (format nil "~a_change_to_be_saved ? ~:*~a_change_to_be_saved.first : ~:*~a" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql '$stop-delete)) &optional args) 
-  (format nil "errors.add(:~a, ~s)" (unparse (primary-key (my-entity (car args))))
-            "deletion is not allowed"))
+(defmethod unparse-expression ((operator (eql :stop-delete)) (language (eql :ruby)) &optional args) 
+  (format nil "errors.add(:~a, ~s)" (unparse (primary-key (my-entity (car args))) language)
+          "deletion is not allowed"))
 
 ;;Record.count(:all, :conditions => {:created_at => start_date..end_date, :finished_at => nil })
-(defmethod unparse-expression ((operator (eql '$max-rows)) &optional args)
+(defmethod unparse-expression ((operator (eql :max-rows)) (language (eql :ruby)) &optional args)
   (unparse-expression
-   '$<= (list (list '$rows (car args) (caddr args)) (cadr args))))
+   :<= language (list (list :rows (car args) (caddr args)) (cadr args))))
 
-(defmethod unparse-expression ((operator (eql '$min-rows)) &optional args)
+(defmethod unparse-expression ((operator (eql :min-rows)) (language (eql :ruby)) &optional args)
   (unparse-expression
-   '$>= (list (list '$rows (car args) (caddr args)) (cadr args))))
+   :>= language (list (list :rows (car args) (caddr args)) (cadr args))))
 
-(defmethod unparse-expression ((operator (eql '$rows-eql)) &optional args)
+(defmethod unparse-expression ((operator (eql :rows-eql)) (language (eql :ruby)) &optional args)
   (unparse-expression
-   '$= (list (list '$rows (car args) (caddr args)) (cadr args))))
+   := language (list (list :rows (car args) (caddr args)) (cadr args))))
 
-(defmethod unparse-expression ((operator (eql '$as-money)) &optional args)
-  (format nil "number_to_currency(~a)" (unparse-expression (car args))))
+(defmethod unparse-expression ((operator (eql :as-money)) (language (eql :ruby)) &optional args)
+  (format nil "number_to_currency(~a)" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql '$as-quantity)) &optional args)
+(defmethod unparse-expression ((operator (eql :as-quantity)) (language (eql :ruby)) &optional args)
   (format nil "helper.number_with_precision(~a, :precision => 2, :delimiter => ',')"
-          (unparse-expression (car args))))
+          (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql '$not-null)) &optional args)
-  (let ((field-var (unparse-expression (first args))))
+(defmethod unparse-expression ((operator (eql :not-null)) (language (eql :ruby)) &optional args)
+  (let ((field-var (unparse-expression (first args) language)))
     (format nil "~a.present?" field-var)))
 
-(defmethod unparse-expression ((operator (eql '$null)) &optional args)
-  (let ((field-var (unparse-expression (first args))))
+(defmethod unparse-expression ((operator (eql :null)) (language (eql :ruby)) &optional args)
+  (let ((field-var (unparse-expression (first args) language)))
     (format nil "~a.blank?" field-var)))
 
 (defmethod unparse-attribute-value ((attribute attribute) (value t))
@@ -183,7 +186,7 @@
              (path-down (path-down-to-target-data common-ancestor source-entity)))
         (when (> (length path-down) 1)
           (warn "generating select box for ~s: ~%~a~{.~a~} will not work!"
-                (english:unparse item) path-up (mapcar #'schema-name path-down)))
+                (unparse item :english) path-up (mapcar #'schema-name path-down)))
         (format nil "~a~{.~a~}" path-up (mapcar #'schema-name path-down)))))
 
 ;  (format nil "~a~a"  (model-name source-entity)
@@ -220,12 +223,12 @@
   (format nil "<%~a ~a %>" (if output? "=" "") code))
 
 (defmethod unparse-erb (output? (obj t))
-  (unparse-erb output? (ruby:unparse obj)))
+  (unparse-erb output? (unparse obj :ruby)))
 
 (defmethod unparse-erb (output? (obj list))
   (if (or (typep (car obj) 'operator) (operator-symbol? (car obj)))
-      (unparse-erb output? (ruby:unparse-expression (car obj) (cdr obj)))
-      (ruby:unparse-expression (ruby:unparse obj) output?)))
+      (unparse-erb output? (unparse-expression (car obj) :ruby (cdr obj)))
+      (unparse-expression (unparse obj :ruby) :ruby output?)))
 
 ;; this is not debugged yet, but not used seriously yet either
 (defmethod unparse-formatting ((data t) (type (eql :checkbox)))
@@ -309,7 +312,7 @@
         (let ((record-probe (format nil "~a.~a.blank?"
                                     context-var (instance-name relation))))
           (ruby:unparse-if-statement (as-literal record-probe) (as-literal (t.no-parent)) field-expr))
-        (ruby:unparse-expression field-expr))))
+        (unparse-expression field-expr :ruby))))
 
 ;; unparse-attribute-references will be called by functions trying to write methods and
 ;; expressions for model class definitions (derived attributes and state predicates)
@@ -398,11 +401,11 @@
   (if (or (typep (car obj) 'operator) (operator-symbol? (car obj)))
       (progn
         (when args (error "we shouldn't have any args here...? (~a)" args))
-        (ruby:unparse-expression (car obj) (cdr obj)))
-      (unparse obj))) ;; not sure this UNPARSE will ever be appropriate...
+        (unparse-expression (car obj) :ruby (cdr obj)))
+      (unparse obj :ruby))) ;; not sure this UNPARSE will ever be appropriate...
 
 (defmethod unparse-find-condition ((operator (eql '$eql)) &optional args)
-  (format nil "~a: ~a" (ruby:unparse-expression (car args)) (ruby:unparse-expression (cadr args))))
+  (format nil "~a: ~a" (unparse-expression (car args) :ruby) (unparse-expression (cadr args) :ruby)))
 
                     
 ;(defvar conditions (cddr expr))
@@ -482,16 +485,16 @@
       (when (vulnerable-to-null? test)
         (incf *nesting-level*)
 	    (format code "~%~aunless ~{~a.blank?~^ || ~}" (make-indent)
-                (mapcar #'ruby:unparse (remove-duplicates nullable-atts))))
+                (mapcar #'(lambda (att) (unparse att :ruby)) (remove-duplicates nullable-atts))))
 	  (with-nesting
           (format code "~%~aif ~a" (make-indent)
-                  (ruby:unparse-expression
-                   (unparse-attribute-references test context)))
+                  (unparse-expression
+                   (unparse-attribute-references test context) :ruby))
         (with-nesting
             (format code "~%~aerrors.add(:~a, ~s)"
                     (make-indent) (if (typep context 'attribute)
-                                      (ruby:unparse context)
-                                      (ruby:unparse (primary-key context)))
+                                      (unparse context :ruby)
+                                      (unparse (primary-key context) :ruby))
                     (or error-msg
                         (format nil "The check to ensure that ~a has failed"
                                 (unparse-expression (negate-expression test) :english)))))

@@ -57,7 +57,7 @@
   (format nil "| i | \"~a#{i}\"" (short-name att)))
 
 (defmethod test-datum ((type (eql :date)) (att attribute))
-  (ruby:unparse-expression '$current-date))
+  (unparse-expression '$current-date :ruby))
 
 (defmethod test-datum ((type (eql :name)) (att attribute))
   "Faker::Name.first_name")

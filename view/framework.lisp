@@ -6,42 +6,6 @@
 
 (in-package :ror)
 
-(defun framework_controller.rb ()
-  (let ((file (merge-pathnames
-               (make-pathname :name "framework_controller"
-                              :type "rb")
-               (controller-directory)))
-        (*nesting-level* 0))
-    (with-open-file (cont-file file :direction :output :if-exists :supersede)
-      (format-file-notice cont-file "framework_controller.rb")
-      (framework-controller-definition cont-file))))
-
-(defmethod framework-controller-definition (&optional (stream t))
-  (format stream (controller-class-declaration "FrameworkController"))
-  (terpri stream) (terpri stream)
-  (with-nesting
-    (framework-home-method stream) (terpri stream)    
-    (framework-denied-method stream) (terpri stream)    
-    (framework-about-method stream) (terpri stream)
-    (framework-help-method stream) (terpri stream))
-  (format stream "end~%"))
-
-(defun framework-home-method (&optional (stream t))
-  (princ (make-indent) stream)
-  (format stream (ruby:unparse-method "home" nil)))
-
-(defun framework-about-method (&optional (stream t))
-  (princ (make-indent) stream)
-  (format stream (ruby:unparse-method "about" nil)))
-
-(defun framework-denied-method (&optional (stream t))
-  (princ (make-indent) stream)
-  (format stream (ruby:unparse-method "denied" nil)))
-
-(defun framework-help-method (&optional (stream t))
-  (princ (make-indent) stream)
-  (format stream (ruby:unparse-method "help" nil)))
-
 (defun framework-layouts ()
   (let ((file (merge-pathnames
                (make-pathname :name "home.html" :type "erb")
@@ -255,16 +219,6 @@ for (i = 0; i < coll.length; i++) {
 
 (defun erb-home-page-link()
   "<%= link_to 'Application Home Page', root_path %>")
-
-(defun framework-routes ()
-  (append
-   (if *authenticated-application?*
-       (list (format nil "devise_for :~a" (schema-name (find-entity *user-model*)))
-             "root to: 'framework#home'")
-       (list "get '/', to: 'framework#home', as: 'home'"))
-   (list "get '/no_access', to: 'framework#denied'"
-         "get '/about', to: 'framework#about', as: 'about'"
-         "mount ActionCable.server => '/cable'")))
 
 ;;;===========================================================================
 ;;; Local variables:
