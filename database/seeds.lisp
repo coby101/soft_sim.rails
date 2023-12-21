@@ -4,10 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
-
-;; package definition will go here
-;; (in-package :database)
+(in-package :database)
 
 (defun seed-data-order (entities)
   (let* ((app-ent (application-entity))
@@ -18,7 +15,7 @@
          (regular (remove app-ent (remove-if #'(lambda (e) (typep e 'weak-entity)) non-cal))))
     (append (when app-ent (list app-ent))
             (when tenant (list tenant))
-            (when *load-calendar-framework* cal)
+            cal
             (sort regular #'string-lessp :key #'name)
             (sort weak #'string-lessp :key #'name))))
 
@@ -26,6 +23,8 @@
 (defun columns (arg) arg)
 (defun data-rows (arg) arg)
 (defun make-data-seed (arg1 arg2) (values arg1 arg2))
+(defun create-seed-method () "db_import!")
+
 (defun create-seed-data (ent stream &optional data-seed)
   (let* ((data (or data-seed (make-data-seed ent (ignore-errors (seed-data ent))))))
     (when data
@@ -50,8 +49,6 @@
 (defun unparse-data-set (data-set &optional (stream t))
   (dolist (data-seed (reverse (data-seeds data-set)))
     (create-seed-data (entity data-seed) stream data-seed)))
-
-(defun create-seed-method () "db_import!")
 
 (defun create-test-data-file (data-set &optional stream)
   (let ((file (test-data-file-path (snake-case (name data-set))))

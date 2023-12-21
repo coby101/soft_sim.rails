@@ -6,54 +6,14 @@
 ;;;
 ;;;===========================================================================
 
-(in-package ror)
+(in-package :view)
 
-(defun layout-directory (aspect)
-  (apply #'implementation-subdirectory
-         (append '("ror" "app" "views")
-                 (list (snake-case (plural (entity aspect)))))))
-
-(defun generate-view (view)
+'(defun generate-view (view)
   (dolist (aspect (aspects (find-view view)))
     (generate-partials aspect)))
 
-(defmethod generate-partials ((aspect symbol) &optional stream)
-  (generate-partials (find-aspect aspect stream) t))
-(defmethod generate-partials (aspect &optional stream)
-  (core_context.html.erb aspect stream)
-  (when (listable? aspect)
-    (core_index.html.erb aspect stream))
-  (when (showable? aspect)
-    (core_show.html.erb aspect stream))
-  (when (updatable? aspect)
-    (core_edit.html.erb aspect stream))
-  (when (creatable? aspect)
-    (core_new.html.erb aspect stream))
-  (when (updatable? aspect)
-    (core_form.html.erb aspect stream)))
-
-(defmethod core_show.html.erb ((aspect symbol) &optional stream)
-  (core_show.html.erb (find-aspect aspect stream) t))
-(defmethod core_show.html.erb ((aspect aspect) &optional stream)
- (let ((file (layout-file-path aspect "show"))
-       (actions (core-action-links aspect :detail)))
-   (with-open-file (html.erb file :direction :output :if-exists :supersede)
-     (when stream (format stream "~%# app/views/~a/~a.html.erb~%" (schema-name (entity aspect)) "show"))
-     (format (or stream html.erb) "~a~a
-<%= render partial: 'application/core/show', locals: {
-      object:     @~a,
-      attributes: [~{~a~^,~%                   ~}],
-      actions:    ~a~a
-      } %>
-~a" (space-open aspect)
-    (render-context aspect)
-    (instance-name (entity aspect))
-    (loop for row in (panel-items (detail-panel aspect))
-	          collect (format nil "[~{~a~^, ~}]"
-				  (loop for item in row collect (unparse-core-element item aspect))))
-    (unparse-array actions :ruby)
-    (if (root? aspect) "" (format nil ",~%      ancestors:  @ancestors"))
-    (space-close aspect)))))
+(defun core-action-links (aspect page)
+  (substitute :view :detail (action-links aspect page)))
 
 (defun space-open (aspect)
   (declare (ignorable aspect))
@@ -80,6 +40,29 @@
       (format nil "
 <%= render partial: '~a/context' %>" (schema-name (entity aspect)))))
 
+(defmethod core_show.html.erb ((aspect symbol) &optional stream)
+  (core_show.html.erb (find-aspect aspect stream) t))
+(defmethod core_show.html.erb ((aspect aspect) &optional stream)
+ (let ((file (layout-file-path aspect "show"))
+       (actions (core-action-links aspect :detail)))
+   (with-open-file (html.erb file :direction :output :if-exists :supersede)
+     (when stream (format stream "~%# app/views/~a/~a.html.erb~%" (schema-name (entity aspect)) "show"))
+     (format (or stream html.erb) "~a~a
+<%= render partial: 'application/core/show', locals: {
+      object:     @~a,
+      attributes: [~{~a~^,~%                   ~}],
+      actions:    ~a~a
+      } %>
+~a" (space-open aspect)
+    (render-context aspect)
+    (instance-name (entity aspect))
+    (loop for row in (panel-items (detail-panel aspect))
+	          collect (format nil "[~{~a~^, ~}]"
+				  (loop for item in row collect (unparse-core-element item aspect))))
+    (unparse-array actions :ruby)
+    (if (root? aspect) "" (format nil ",~%      ancestors:  @ancestors"))
+    (space-close aspect)))))
+
 (defmethod core_index.html.erb ((aspect symbol) &optional stream)
   (core_index.html.erb (find-aspect aspect stream) t))
 (defmethod core_index.html.erb ((aspect aspect) &optional stream)
@@ -97,7 +80,7 @@
 ~a" (space-open aspect)
     (render-context aspect)
     (schema-name (entity aspect))
-    (unparse-array actions) :ruby
+    (unparse-array actions :ruby)
     (if (root? aspect) "" (format nil ",~%      ancestors:  @ancestors"))
     (space-close aspect)))))
 
@@ -175,30 +158,20 @@
     (if (root? aspect) "" (format nil ",~%      ancestors:  @ancestors"))
     (space-close aspect))))))
 
-(defun core-action-links (aspect page)
-  (substitute :view :detail (action-links aspect page)))
-
-(defmethod unparse-core-element ((item entity) (aspect aspect) &key (downlink? :always))
-  (declare (ignorable aspect downlink?))
-  ":id")
-
-(defmethod unparse-core-element ((item primary-key) (aspect aspect) &key (downlink? :always))
-  (declare (ignorable aspect downlink?))
-  ":id")
-
-(defmethod unparse-core-element ((item summary-attribute) (aspect aspect) &key (downlink? :always))
-  (if (or (eql :count (summary-type item)) (eql downlink? :always))
-      (format nil "{ ~a: { downlink: :~a } }" (schema-name item) (schema-name (my-entity (source item))))
-      (call-next-method)))
-
-(defmethod unparse-core-element ((item t) (aspect aspect) &key (downlink? :always))
-  (declare (ignorable downlink?))
-  (format nil ":~a" (schema-name item)))
-
-(defun next-level (aspect)
-  (get-closest-relative (entity aspect) (mapcar #'entity (aspects (view aspect)))))
-
-
+(defmethod generate-partials ((aspect symbol) &optional stream)
+  (generate-partials (find-aspect aspect stream) t))
+(defmethod generate-partials (aspect &optional stream)
+  (core_context.html.erb aspect stream)
+  (when (listable? aspect)
+    (core_index.html.erb aspect stream))
+  (when (showable? aspect)
+    (core_show.html.erb aspect stream))
+  (when (updatable? aspect)
+    (core_edit.html.erb aspect stream))
+  (when (creatable? aspect)
+    (core_new.html.erb aspect stream))
+  (when (updatable? aspect)
+    (core_form.html.erb aspect stream)))
 
 ;;;===========================================================================
 ;;; Local variables:

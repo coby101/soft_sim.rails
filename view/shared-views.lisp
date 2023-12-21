@@ -8,25 +8,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package ror)
-
-(defun generate-view (view)
-  (dolist (aspect (aspects (find-view view)))
-    (_context.html.erb aspect)
-    (when (listable? aspect)
-      (_index_actions.html.erb aspect)
-      (index.html.erb aspect)
-      (_entity.html.erb aspect))
-    (when (showable? aspect)
-      (_show_actions.html.erb aspect)
-      (show.html.erb aspect))
-    (when (updatable? aspect)
-      (edit.html.erb aspect))
-    (when (creatable? aspect)
-      (new.html.erb aspect))
-   ;(when (member :search ops) ??)
-    (when (updatable? aspect)
-      (_form.html.erb aspect))))
+(in-package :view)
 
 (defun _index_actions.html.erb (aspect &optional stream)
   (unless (typep (entity aspect) 'attribute-table)
@@ -43,6 +25,67 @@
       (format (or stream html.erb) (unparse-erb nil (format-file-notice nil "_show_actions.html.erb")))
       (format (or stream html.erb) "~%<div class=\"pcmdcrud-show-icon-holder\">~%~{~a~%~}</div>"
               (make-action-links aspect :detail :icons? t :footer? t)))))
+
+(defvar *bip-ok-button-class* "mt-1 mr-1 shadow bg-gray-200 cursor-pointer py-1 px-2 rounded hover:bg-gray-300")
+(defvar *bip-cancel-button-class* "mt-1 shadow bg-gray-200 cursor-pointer py-1 px-2 rounded hover:bg-gray-300")
+
+(defmethod best-in-place-collection-args (item aspect)
+  (if (typep (domain item) 'static-enumeration)
+      (let*((null? (nullable? item))
+            (prompt (if null? "" "(required)")))
+        (format nil "[~a~{[~s, ~:*~s]~^, ~}]" (format nil "[\"~a\", \"\"], " prompt)
+                (legal-values (domain item))))
+      (unparse-referential-collection item aspect)))
+
+(defmethod best-in-place-collection-args (item aspect)
+  (cond
+    ((and (eql :boolean (data-type item)) (not (implement-as-string? item)))
+     (let ((options (list (list "true" (ecase (id (logical-type item))
+                                         (:yes/no "yes")
+                                         (:on/off "on")
+                                         (:true/false "True")))
+                          (list "false" (ecase (id (logical-type item))
+                                          (:yes/no "no")
+                                          (:on/off "off")
+                                          (:true/false "False"))))))
+       (format nil "[~{~a~^, ~}]" (mapcar #'(lambda (opt) (format nil "[~a, ~s]" (car opt) (cadr opt)))
+                                                options))))
+    ((typep (domain item) 'static-enumeration)
+     (let*((null? (nullable? item))
+           (prompt (if null? "" "(required)")))
+       (format nil "[~a~{[~s, ~:*~s]~^, ~}]" (format nil "[\"~a\", \"\"], " prompt)
+               (legal-values (domain item)))))
+    (t (unparse-referential-collection item aspect))))
+
+(defmethod best-in-place-args ((item attribute) (aspect aspect))
+  (if (or (typep (domain item) 'enumeration) (typep item 'foreign-key))
+      (format nil "as: :select, collection: ~a" (best-in-place-collection-args item aspect))
+      (format nil "ok_button: '&#x2713;'.html_safe, cancel_button: ~
+                  '&#x2717;'.html_safe, ok_button_class: '~a', cancel_button_class: '~a'"
+              *bip-ok-button-class* *bip-cancel-button-class*)))
+
+(defmethod unparse-best-in-place ((item t) (aspect aspect))
+  (unparse-template-element item aspect))
+(defmethod unparse-best-in-place ((item summary-attribute) (aspect aspect))
+  (unparse-template-element item aspect))
+
+(defmethod unparse-best-in-place ((item attribute) (aspect aspect))
+  (if (editable? item aspect)
+      (html:tag "span"
+         (unparse-erb t
+              (format nil "best_in_place ~a, :~a, ~a"
+                      (form-path aspect (strcat "@" (instance-name (entity aspect))))
+                      (schema-name item) (best-in-place-args item aspect)))
+         :class "flex-grow")
+      (unparse-template-element item aspect)))
+
+(defmethod unparse-detail-element ((item t) (aspect aspect))
+  (with-output-to-string (str)
+    (format str "~%    <div class=\"pcmdcrud-show-content-item-holder\">")
+    (format str "~%      <dt class=\"pcmdcrud-show-content-item-key\"><%= t('.~a') %></dt>" (schema-name item))
+    (format str "~%      <dd class=\"pcmdcrud-show-content-item-value\">")
+    (format str "~%        ~a" (unparse-best-in-place item aspect))
+    (format str "~%      </dd>~%    </div>")))
 
 (defmethod show.html.erb ((aspect symbol) &optional stream)
   (show.html.erb (find-aspect aspect stream) t))
@@ -81,84 +124,6 @@
            (panel-items (list-panel (find-aspect (view aspect) child-entity))))
    (instance-name (entity aspect)) (schema-name child-entity))))
 
-(defmethod unparse-detail-element ((item t) (aspect aspect))
-  (with-output-to-string (str)
-    (format str "~%    <div class=\"pcmdcrud-show-content-item-holder\">")
-    (format str "~%      <dt class=\"pcmdcrud-show-content-item-key\"><%= t('.~a') %></dt>" (schema-name item))
-    (format str "~%      <dd class=\"pcmdcrud-show-content-item-value\">")
-    (format str "~%        ~a" (unparse-best-in-place item aspect))
-    (format str "~%      </dd>~%    </div>")))
-
-(defvar *bip-ok-button-class* "mt-1 mr-1 shadow bg-gray-200 cursor-pointer py-1 px-2 rounded hover:bg-gray-300")
-(defvar *bip-cancel-button-class* "mt-1 shadow bg-gray-200 cursor-pointer py-1 px-2 rounded hover:bg-gray-300")
-
-(defmethod unparse-best-in-place ((item t) (aspect aspect))
-  (unparse-template-element item aspect))
-(defmethod unparse-best-in-place ((item summary-attribute) (aspect aspect))
-  (unparse-template-element item aspect))
-
-(defmethod unparse-best-in-place ((item attribute) (aspect aspect))
-  (if (editable? item aspect)
-      (html:tag "span"
-         (unparse-erb t
-              (format nil "best_in_place ~a, :~a, ~a"
-                      (form-path aspect (strcat "@" (instance-name (entity aspect))))
-                      (schema-name item) (best-in-place-args item aspect)))
-         :class "flex-grow")
-      (unparse-template-element item aspect)))
-
-(defmethod best-in-place-args ((item attribute) (aspect aspect))
-  (if (or (typep (domain item) 'enumeration) (typep item 'foreign-key))
-      (format nil "as: :select, collection: ~a" (best-in-place-collection-args item aspect))
-      (format nil "ok_button: '&#x2713;'.html_safe, cancel_button: ~
-                  '&#x2717;'.html_safe, ok_button_class: '~a', cancel_button_class: '~a'"
-              *bip-ok-button-class* *bip-cancel-button-class*)))
-
-(defmethod best-in-place-collection-args (item aspect)
-  (if (typep (domain item) 'static-enumeration)
-      (let*((null? (nullable? item))
-            (prompt (if null? "" "(required)")))
-        (format nil "[~a~{[~s, ~:*~s]~^, ~}]" (format nil "[\"~a\", \"\"], " prompt)
-                (legal-values (domain item))))
-      (unparse-referential-collection item aspect)))
-
-(defmethod best-in-place-collection-args (item aspect)
-  (cond
-    ((and (eql :boolean (data-type item)) (not (implement-as-string? item)))
-     (let ((options (list (list "true" (ecase (id (logical-type item))
-                                         (:yes/no "yes")
-                                         (:on/off "on")
-                                         (:true/false "True")))
-                          (list "false" (ecase (id (logical-type item))
-                                          (:yes/no "no")
-                                          (:on/off "off")
-                                          (:true/false "False"))))))
-       (format nil "[~{~a~^, ~}]" (mapcar #'(lambda (opt) (format nil "[~a, ~s]" (car opt) (cadr opt)))
-                                                options))))
-    ((typep (domain item) 'static-enumeration)
-     (let*((null? (nullable? item))
-           (prompt (if null? "" "(required)")))
-       (format nil "[~a~{[~s, ~:*~s]~^, ~}]" (format nil "[\"~a\", \"\"], " prompt)
-               (legal-values (domain item)))))
-    (t (unparse-referential-collection item aspect))))
-
-;; @tenant.business_types.order(:name).map{|v| [v.name, v.name]}
-;; also handle foreign keys
-
-(defun unparse-referential-collection (item aspect)
-  (declare (ignorable aspect))
-  (let* ((filter nil)
-         (data-source (data-source (domain item)))
-         (source-entity (my-entity data-source))
-         (user-data (schema-name
-                     (if (typep item 'foreign-key)
-                        (default-user-key source-entity)
-                        (or (find-field :name source-entity) data-source))))
-         (prompt (if (nullable? item) "[[nil, ' ']] + " "")))
-    (format nil "~a~a.order(:~a).map{ |v| [v.~a, v.~a]}" prompt
-            (target-data-expression item filter) user-data (schema-name data-source) user-data)))
-
-
 (defun index.html.erb (aspect &optional stream)
  (let ((file (layout-file-path aspect "index"))
        (actions (action-links aspect :detail)))
@@ -177,9 +142,6 @@
     collection: @~a
   } %>" (mapcar #'t.name (panel-items (list-panel aspect))) (snake-case (plural (entity aspect))))
      (when actions (format (or stream html.erb) "~%  <%= render partial: 'index_actions' %>~%")))))
-
-(defun next-level (aspect)
-  (get-closest-relative (entity aspect) (mapcar #'entity (aspects (view aspect)))))
 
 (defun _context.html.erb (aspect &optional stream)
   (unless (or (nested-fields? aspect) (null (context-panel aspect)))
@@ -307,6 +269,34 @@
                             (make-action-links aspect :list :var var :icons? t))))
                :class "bg-white")))))
 
+(defun generate-view (view)
+  (dolist (aspect (aspects (find-view view)))
+    (_context.html.erb aspect)
+    (when (listable? aspect)
+      (_index_actions.html.erb aspect)
+      (index.html.erb aspect)
+      (_entity.html.erb aspect))
+    (when (showable? aspect)
+      (_show_actions.html.erb aspect)
+      (show.html.erb aspect))
+    (when (updatable? aspect)
+      (edit.html.erb aspect))
+    (when (creatable? aspect)
+      (new.html.erb aspect))
+   ;(when (member :search ops) ??)
+    (when (updatable? aspect)
+      (_form.html.erb aspect))))
+
+(defun generate-views (&optional (app *application*))
+  (default-layouts)
+  (framework-layouts)
+  ;; (when *dev-mode*
+  ;;   (dolist (view (mapcar #'create-default-view (schema-entities app)))
+  ;;     (write-view-files view)))
+  (dolist (view (views app))
+    (if *use-shared-views*
+        (generate-view view)
+        (write-view-files view))))
 
 ;;;===========================================================================
 ;;; Local variables:

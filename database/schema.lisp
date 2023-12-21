@@ -4,29 +4,119 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
-
-;; package definition will go here
-;; (in-package :database)
+(in-package :database)
 
 (defun database-tables(&optional (app *application*))
   (remove-if #'(lambda(ent)
-                 (or (typep ent 'audit-entity)
+                 (or nil ;(typep ent 'audit-entity)
                      (typep ent 'specialized-entity)))
              (schema app)))
 
-(defmethod create_table-arguments ((ent entity))
-  (format nil ":~a~{, ~a~}" (schema-name ent)
-          (assemble-table-options ent)))
-
+(defmethod assemble-table-options ((ent associative-entity)) (call-next-method))
 (defmethod assemble-table-options ((ent entity))
   (remove nil
     (list
      (when *dev-mode*
        "force: true"))))
 
-(defmethod assemble-table-options ((ent associative-entity))
-  (call-next-method))
+(defmethod create_table-arguments ((ent entity))
+  (format nil ":~a~{, ~a~}" (schema-name ent)
+          (assemble-table-options ent)))
+
+(defmethod database-attributes ((entity entity))
+  (append
+   (list (primary-key entity))
+   (foreign-keys entity)
+   (user-attributes entity)
+   (cached-inherits entity)
+   (cached-calculations entity)
+   (summary-attributes entity)))
+
+(defmethod database-attributes ((entity generalized-entity))
+  (remove nil
+   (append
+    (list (find-field :modeltype entity))
+    (call-next-method)
+    (remove-if #'(lambda(att)
+                   (or (typep att 'primary-key)
+                       (and (typep att 'cached-inheritance)
+                            (eq (my-entity (source att)) entity))))
+               (apply #'append (mapcar #'database-attributes (subclasses entity)))))))
+
+;; default is specify no options
+(defmethod limit-column-option     ((type t)) nil)
+(defmethod scale-column-option     ((type t)) nil)
+(defmethod precision-column-option ((type t)) nil)
+
+;; provide some t.column options according to the column's logical type
+(defmethod limit-column-option     ((type (eql :code)))  (format nil "limit: 10"))
+(defmethod scale-column-option     ((type (eql :money))) (format nil "scale: 3"))
+(defmethod precision-column-option ((type (eql :money))) (format nil "precision: 15"))
+
+(defun assemble-column-options (att)
+  (let ((type-id (id (logical-type att))))
+    (remove nil
+            (list
+             (when (or (unique? att) (indexed? att))
+               (format nil "index: ~a" (if (and (unique? att)
+                                                (not (nullable? att))
+                                                (not (tenant-scoped-entity? (my-entity att))))
+                                           ;; there is no unique constraint on a null field
+                                           "{ unique: true }" "true")))
+             (when (sql:unparsable-default? att)
+               (let ((default (default-value att)))
+                 (format nil "default: ~a"
+                         (cond
+                           ((and (eql (data-type att) :boolean) (not (implement-as-string? att)))
+                            (if (member (default-value att)
+                                        (list "yes" "on" "true") :test #'string-equal)
+                                "true" "false"))
+                           ((or (stringp default)
+                                (numberp default))
+                            (unparse-expression default :sql))
+                           (t (format nil "-> { \"~a\" }" (unparse-expression default :sql)))))))
+             (unless (nullable? att)
+               (format nil "null: false"))
+             (limit-column-option type-id)
+             (precision-column-option type-id)
+             (scale-column-option type-id)))))
+;          (format nil ":comment ~s" (description att)))))
+
+;; https://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-add_column
+(defmethod t.column ((attribute composite-key)     &optional stream) (declare (ignorable stream)) nil)
+(defmethod t.column ((attribute foreign-key)       &optional stream) (declare (ignorable stream)) nil)
+(defmethod t.column ((attribute primary-key)       &optional stream) (declare (ignorable stream)) nil)
+(defmethod t.column ((attribute summary-attribute) &optional stream) (declare (ignorable stream)) nil)
+(defmethod t.column ((attribute cached-summary)    &optional stream)
+  (let ((options (assemble-column-options attribute)))
+    (format stream "t.~a :~a~a" (unparse-datatype (logical-type attribute))
+            (schema-name attribute)
+            (if options
+                (format nil ", ~{~a~^, ~}" options)
+                ""))))
+
+(defmethod t.column ((attribute persistent-attribute) &optional stream)
+  (let ((options (assemble-column-options attribute)))
+    (format stream "t.~a :~a~a"
+            (if (implement-as-string? attribute)
+                "string"
+                (unparse-datatype (logical-type attribute)))
+            (schema-name attribute)
+            (if options
+                (format nil ", ~{~a~^, ~}" options)
+                ""))))
+
+(defmethod roles-for-create-table ((ent entity))
+  (remove-if #'(lambda(r)
+                 (let ((relationship (if (typep r 'shared-relation) (car (relationships r)) (my-relationship r))))
+                   (typep relationship 'specialization)))
+             (my-roles ent)))
+
+(defmethod roles-for-create-table ((ent generalized-entity))
+  (append
+   (call-next-method)
+   (apply #'append
+          (mapcar #'roles-for-create-table (subclasses ent)))))
 
 ;; https://api.rubyonrails.org/classes/ActiveRecord/Schema.html
 #|
@@ -35,16 +125,6 @@ for associative tables "id: false"
 |#
 (defmethod create_table ((entity symbol) &optional stream)
   (create_table (find-entity entity) (or stream t)))
-
-(defmethod create_table ((entity specialized-entity) &optional stream)
-  (declare (ignorable stream))
-  (error "With Rails STI mechanism there should not be a database ~
-          table for a subclass entity (~a)" entity))
-
-(defmethod change_table ((entity specialized-entity) &optional stream)
-  (declare (ignorable stream))
-  (error "With Rails STI mechanism there should not be a database ~
-          table for a subclass entity (~a)" entity))
 
 ;; https://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-create_table
 (defmethod change_table ((table entity) &optional stream)
@@ -72,121 +152,13 @@ for associative tables "id: false"
           (comment-out stream fmt-str (remove nil (mapcar #'unparse-table-association assocs))))))
     (format stream "~%~aend~%" (make-indent))))
 
-(defmethod database-attributes ((entity entity))
-  (append
-   (list (primary-key entity))
-   (foreign-keys entity) ;; (maybe this is part of table associations?
-   (user-attributes entity)
-   (cached-inherits entity)
-   (cached-calculations entity)
-   (summary-attributes entity)))
-
-(defmethod database-attributes ((entity generalized-entity))
-  (remove nil
-   (append
-    (list (find-field :modeltype entity))
-    (call-next-method)
-    (remove-if #'(lambda(att)
-                   (or (typep att 'primary-key)
-                       (and (typep att 'cached-inheritance)
-                            (eq (my-entity (source att)) entity))))
-               (apply #'append (mapcar #'database-attributes (subclasses entity)))))))
-
-(defmethod roles-for-create-table ((ent entity))
-  (remove-if #'(lambda(r)
-                 (let ((relationship (if (typep r 'shared-relation) (car (relationships r)) (my-relationship r))))
-                   (typep relationship 'specialization)))
-             (my-roles ent)))
-
-(defmethod roles-for-create-table ((ent generalized-entity))
-  (append
-   (call-next-method)
-   (apply #'append
-          (mapcar #'roles-for-create-table (subclasses ent)))))
-
-;; https://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-add_column
-(defmethod t.column ((attribute composite-key) &optional stream)
+(defmethod create_table ((entity specialized-entity) &optional stream)
   (declare (ignorable stream))
-  nil)
+  (error "With Rails STI mechanism there should not be a database table for a subclass entity (~a)" entity))
 
-(defmethod t.column ((attribute foreign-key) &optional stream)
+(defmethod change_table ((entity specialized-entity) &optional stream)
   (declare (ignorable stream))
-  nil)
-
-(defmethod t.column ((attribute primary-key) &optional stream)
-  (declare (ignorable stream))
-  nil)
-
-(defmethod t.column ((attribute summary-attribute) &optional stream)
-  (declare (ignorable stream))
-  nil)
-
-(defmethod t.column ((attribute cached-summary) &optional stream)
-  (let ((options (assemble-column-options attribute)))
-    (format stream "t.~a :~a~a" (unparse-datatype (logical-type attribute))
-            (schema-name attribute)
-            (if options
-                (format nil ", ~{~a~^, ~}" options)
-                ""))))
-
-(defmethod t.column ((attribute persistent-attribute) &optional stream)
-  (let ((options (assemble-column-options attribute)))
-    (format stream "t.~a :~a~a"
-            (if (implement-as-string? attribute)
-                "string"
-                (unparse-datatype (logical-type attribute)))
-            (schema-name attribute)
-            (if options
-                (format nil ", ~{~a~^, ~}" options)
-                ""))))
-
-(defmethod limit-column-option ((type t)) nil)
-(defmethod limit-column-option ((type (eql :code)))
-  (format nil "limit: 10"))
-(defmethod scale-column-option ((type t)) nil)
-(defmethod scale-column-option ((type (eql :money)))
-  (format nil "scale: 3"))
-(defmethod precision-column-option ((type t)) nil)
-(defmethod precision-column-option ((type (eql :money)))
-  (format nil "precision: 15"))
-
-(defun sql-parsable-default? (att)
-  (let ((default (default-value att)))
-    (when default
-      (or (stringp default)
-          (numberp default)
-          (when (typep default 'formula)
-            (let ((op (operator-key (car (expression default)))))
-                   (member op '($current-timestamp $current-date $next-sequence-value))))))))
-
-(defun assemble-column-options (att)
-  (let ((type-id (id (logical-type att))))
-    (remove nil
-            (list
-             (when (or (unique? att) (indexed? att))
-               (format nil "index: ~a" (if (and (unique? att)
-                                                (not (nullable? att))
-                                                (not (tenant-scoped-entity? (my-entity att))))
-                                           ;; there is no unique constraint on a null field
-                                           "{ unique: true }" "true")))
-             (when (sql-parsable-default? att)
-               (let ((default (default-value att)))
-                 (format nil "default: ~a"
-                         (cond
-                           ((and (eql (data-type att) :boolean) (not (implement-as-string? att)))
-                            (if (member (default-value att)
-                                        (list "yes" "on" "true") :test #'string-equal)
-                                "true" "false"))
-                           ((or (stringp default)
-                                (numberp default))
-                            (unparse-expression default :sql))
-                           (t (format nil "-> { \"~a\" }" (unparse-expression default :sql)))))))
-             (unless (nullable? att)
-               (format nil "null: false"))
-             (limit-column-option type-id)
-             (precision-column-option type-id)
-             (scale-column-option type-id)))))
-;          (format nil ":comment ~s" (description att)))))
+  (error "With Rails STI mechanism there should not be a database table for a subclass entity (~a)" entity))
 
 (defmethod required-extensions ((db database-platform))
   (remove nil

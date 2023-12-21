@@ -4,10 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
-
-;; package definition will go here
-;; (in-package :database)
+(in-package :database)
 
 (defun schema.rb (&optional (app *application*))
   (let ((file (schema-file-path))

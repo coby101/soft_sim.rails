@@ -5,32 +5,26 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
+(in-package :model)
 
-(defun application_record.rb (&optional stream)
-  (let ((file (merge-pathnames
-               (make-pathname :name "application_record"
-                              :type "rb")
-               (model-directory)))
-        (*nesting-level* 0)
-	(out nil))
-    (with-open-file (mod-file file :direction :output :if-exists :supersede)
-      (if stream
-	  (setf out stream)
-	  (progn
-	    (setf out mod-file)
-	    (format-file-notice mod-file "application_record.rb")))
-      (format out "~&class ApplicationRecord < ActiveRecord::Base~%")
-      (let ((*nesting-level* 1))
-	(terpri out)
-	(format out "~aself.abstract_class = true~%" (make-indent))
-	(db_import! out)
-	(check_deletable? out)
-	(polymorphic_reference out)  
-	(meta-data-class-methods out)
-	(terpri out)
-	(format out "~aclass BadMetaData < StandardError; end~%" (make-indent)))
-      (format out "~aend~%" (make-indent)))))
+(defun check_deletable?(&optional (stream t))
+  (indent-block stream "
+# used in many model files as a pre-check to deny users the chance to delete records with dependent relations
+def check_deleteable?
+  true
+end
+"))
+
+(defun db_import!(&optional (stream t))
+  (indent-block stream "
+# used in seeds.rb so can be reloaded during development without creating duplicate records
+def self.db_import!(data)
+  return true unless data.present?
+  data.each do |atts|
+    self.find_or_create_by!(atts) unless atts[:id].present? && self.where(id: atts[:id]).present?
+  end
+end
+"))
 
 (defun polymorphic_reference(&optional (stream t))
   (indent-block stream "
@@ -142,22 +136,33 @@ class << self
 end
 "))
 
-(defun check_deletable?(&optional (stream t))
-  (indent-block stream "
-# used in many model files as a pre-check to deny users the chance to delete records with dependent relations
-def check_deleteable?
-  true
-end
-"))
+(defun application_record.rb (&optional stream)
+  (let ((file (merge-pathnames
+               (make-pathname :name "application_record"
+                              :type "rb")
+               (model-directory)))
+        (*nesting-level* 0)
+	(out nil))
+    (with-open-file (mod-file file :direction :output :if-exists :supersede)
+      (if stream
+	  (setf out stream)
+	  (progn
+	    (setf out mod-file)
+	    (format-file-notice mod-file "application_record.rb")))
+      (format out "~&class ApplicationRecord < ActiveRecord::Base~%")
+      (let ((*nesting-level* 1))
+	(terpri out)
+	(format out "~aself.abstract_class = true~%" (make-indent))
+	(db_import! out)
+	(check_deletable? out)
+	(polymorphic_reference out)  
+	(meta-data-class-methods out)
+	(terpri out)
+	(format out "~aclass BadMetaData < StandardError; end~%" (make-indent)))
+      (format out "~aend~%" (make-indent)))))
 
-(defun db_import!(&optional (stream t))
-  (indent-block stream "
-# used in seeds.rb so can be reloaded during development without creating duplicate records
-def self.db_import!(data)
-  return true unless data.present?
-  data.each do |atts|
-    self.find_or_create_by!(atts) unless atts[:id].present? && self.where(id: atts[:id]).present?
-  end
-end
-"))
-
+;;;===========================================================================
+;;; Local variables:
+;;; tab-width: 4
+;;; indent-tabs-mode: nil
+;;; End:

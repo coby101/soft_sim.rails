@@ -4,7 +4,14 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
+(in-package :view)
+
+(defvar *custom-application.html.erb* nil)
+(defvar *custom-mailer.txt.erb* nil)
+(defvar *custom-mailer.html.erb* nil)
+
+(defun write-home-layout (&optional (stream t))
+  (format stream (unparse-erb t "image_tag \"logo_customcolor_background.png\", width: \"600px\"")))
 
 (defun framework-layouts ()
   (let ((file (merge-pathnames
@@ -80,21 +87,21 @@ for (i = 0; i < coll.length; i++) {
                      "<hr>")
              :id "app-banner"))
 
-(defun write-home-layout (&optional (stream t))
-  (format stream (unparse-erb t "image_tag \"logo_customcolor_background.png\", width: \"600px\"")))
-
 (defun default-layout-header()
   (format nil "
 <!DOCTYPE html>~%<html>~%  <head>~%    <title>~a</title>
     <meta name=\"robots\" content=\"noindex,nofollow\" />
     <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">
-    <meta name=\"app-timestamp\" content=\"~a\">
+    <meta name=\"app-timestamp\" content=\"<deprecated>\">
     <%= csrf_meta_tags %>~%    <%= csp_meta_tag %>~%
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
     <script src=\"https://maps.googleapis.com/maps/api/js?key=<%=ENV['GOOGLE_MAP_API']%>&libraries=places&callback=initMap\" defer data-turbolinks-eval=\"reload\"></script>
-  </head>~%" (long-name *application*)
-  (local-time:format-timestring nil (local-time:now) :format *documentation-timestamp-format*)))
+  </head>~%" (long-name *application*)))
+;  (local-time:format-timestring nil (local-time:now) :format *documentation-timestamp-format*)))
+
+(defun erb-home-page-link()
+  "<%= link_to 'Application Home Page', root_path %>")
 
 (defun default-layout-footer()
   (let ((logout (if *authenticated-application?* (format nil "~%<br>~a~%<br>~a" (current-user-display) (logout-link)) "")))
@@ -162,7 +169,7 @@ for (i = 0; i < coll.length; i++) {
     <%= render 'shared/footer' %>
   </div>
   </body>
-</html>" (local-time:format-timestring nil (local-time:now) :format *documentation-timestamp-format*)))
+</html>")) ; (local-time:format-timestring nil (local-time:now) :format *documentation-timestamp-format*)))
 
 (defun default-layouts ()
   (let ((file (merge-pathnames
@@ -216,9 +223,6 @@ for (i = 0; i < coll.length; i++) {
   </body>
 </html>
 "))))))
-
-(defun erb-home-page-link()
-  "<%= link_to 'Application Home Page', root_path %>")
 
 ;;;===========================================================================
 ;;; Local variables:

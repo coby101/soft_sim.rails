@@ -14,46 +14,77 @@
   :depends-on (#:soft-sim
                #:lisp-unit2)
   :components ((:file "load-unparsers")
-               (:file "ror")
-               (:file "installation")
-               (:file "unparser")
-               (:file "utilities")
-               (:file "authentication/devise")
-               (:file "config/i18n")
-               (:module controller
+               (:module unparsing
                 :components
-                ((:file "framework")
-                 (:file "controller")
-                 (:file "core-controller")))
+                ((:file "package")
+                 (:file "general")
+                 (:file "attribute-references")
+                 (:file "migrations")
+                 (:file "model-general")
+                 (:file "model-validations")
+                 (:file "translations")
+                 (:file "styling")
+                 (:file "view-general")
+                 (:file "view-elements")))
+               (:file "installation")
+               (:module authentication
+                :components
+                ((:file "package")
+                 (:file "devise")))
+               (:module dependencies
+                :components
+                ((:file "package")
+                 (:file "application_helper")
+                 (:file "javascripts")
+                 (:file "css") 
+                 (:file "dependencies")))
                (:module model
                 :components
-                ((:file "validations")
+                ((:file "package")
+                 (:file "validations")
                  (:file "associations")
                  (:file "callbacks")
                  (:file "application_record")
                  (:file "model")))
-               (:module database
+               (:module config
                 :components
-                ((:file "schema")
-                 (:file "migrations")
-                 (:file "seeds")
-                 (:file "database")))
+                ((:file "package")
+                 (:file "i18n")
+                 (:file "initializers")
+                 (:file "routes")))
                (:module view
                 :components
-                ((:file "styling")
+                ((:file "package")
+                 (:file "framework")
                  (:file "views")
                  (:file "shared-views")
-                 (:file "core-partials")
-                 (:file "unparse-elements")))
-               (:module dependencies
+                 (:file "core-partials")))
+               (:module controller
                 :components
-                ((:file "application_helper")
-                 (:file "javascripts")
-                 (:file "css") 
-                 (:file "dependencies")))
-               (:file "tasks")
-               (:file "testing/factory_bot")
-               (:file "config/routes")))
+                ((:file "package")
+                 (:file "variables")
+                 (:file "class")
+                 (:file "framework")
+                 (:file "controller")
+                 (:file "core-controller")))
+               (:module database
+                :components
+                ((:file "package")
+                 (:file "schema")
+                 (:file "seeds")
+                 (:file "migrations")
+                 (:file "database")))
+               (:module app-tasks
+                :components
+                ((:file "package")
+                 (:file "tasks")))
+               (:module app-tests
+                :components
+                ((:file "package")
+                 (:file "factory_bot")))
+               (:file "package")
+               (:file "ror")
+                 ))
 
 (format t "~&To generate a Rails application at any time load your software.simian project and run (ror:generate)")
 

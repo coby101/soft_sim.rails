@@ -5,8 +5,11 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
+(in-package :authentication)
+
 (defparameter *user-model* "User")
+(defvar *authenticated-application?* nil)
+(defvar *notified-application?* nil)
 
 (defparameter *devise-modules*
   (list "database_authenticatable" "recoverable" "rememberable"

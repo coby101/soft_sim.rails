@@ -4,7 +4,9 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
+(in-package :dependencies)
+
+(defvar *css-components* nil)
 
 (pushnew
  '("nested-fields"

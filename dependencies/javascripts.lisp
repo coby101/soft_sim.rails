@@ -4,8 +4,9 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
+(in-package :dependencies)
 
+(defvar *javascript-packs* nil)
 
 (pushnew
   '("nested-fields"

@@ -4,7 +4,7 @@
 ;;;
 ;;;====================================================
 
-(in-package :ror)
+(in-package :app-tasks)
 
 (defun data-sets (arg) arg "WIP - see soft_sim data-sets.lisp")
 
@@ -42,6 +42,10 @@
     end
   end~%")
         (format task "end~%")))))
+
+(defun create-test-data-file (data-set)
+  (declare (ignorable data-set))
+  "WIP - see soft_sim data-sets.lisp")
 
 (defun create-test-data ()
   (mapcar #'create-test-data-file (data-sets *application*)))

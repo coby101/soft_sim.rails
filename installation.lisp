@@ -1,11 +1,144 @@
 ;;;===========================================================================
 ;;;
-;;;   general purpose and utility code associated with generating Rails MVC framework 
+;;;   directory structure and code associated with generating installation scripts 
 ;;;
 ;;;===========================================================================
+(defpackage :simian.rails-generator.implementation
+  (:use
+   :cl :rails-unparser :unparser :configuration :utilities :entity :foundation :interface)
+  (:nicknames :implementation)
+  (:export
+   #:controller-directory
+   #:controller-file-path
+   #:create-bash-scripts
+   #:css-directory
+   #:css-file-path
+   #:factories-directory
+   #:factories-file-path
+   #:db-directory
+   #:db-migration-file-path
+   #:db-structure-file-path
+   #:helper-directory
+   #:helper-file-path
+   #:javascript-directory
+   #:javascript-file-path
+   #:layout-directory
+   #:layout-file-path
+   #:model-directory
+   #:model-file-path
+   #:routes-file-path
+   #:schema-file-path
+   #:seed-file-path
+   #:task-file-path
+   #:test-data-file-path
+   ))
 
-(in-package :ror)
+(in-package :implementation)
 
+(defun model-directory ()
+  (implementation-subdirectory "ror" "app" "models"))
+
+(defun model-file-path (entity)
+  (merge-pathnames (make-pathname :name (if (typep entity 'entity) (snake-case (name entity)) entity)
+                                  :type "rb")
+                   (model-directory)))
+
+(defun controller-directory (&optional aspect)
+  (apply #'implementation-subdirectory
+         (list* "ror" "app" "controllers" (when aspect (unparse-namespace aspect :list)))))
+(defun controller-file-path (aspect)
+  (merge-pathnames
+   (make-pathname
+    :name (snake-case (strcat (plural (entity aspect)) "_controller"))
+    :type "rb")
+   (controller-directory aspect)))
+
+
+(defun db-migration-directory ()
+  (implementation-subdirectory "ror" "db" "migrate"))
+
+(defun db-directory ()
+  (implementation-subdirectory "ror" "db"))
+
+(defun db-migration-file-path (entity)
+  (merge-pathnames
+   (make-pathname :name (strcat (timestamp) "_create_" (snake-case (plural entity))) :type "rb")
+   (db-migration-directory)))
+
+(defun javascript-directory (&rest sub-dirs)
+  (apply #'implementation-subdirectory "ror" "app" "javascript" "packs" sub-dirs))
+
+(defun javascript-file-path (file-name &rest subdirs)
+  (merge-pathnames
+   (make-pathname :name file-name :type "js")
+   (apply #'javascript-directory subdirs)))
+
+(defun css-directory (&rest sub-dirs)
+  (apply #'implementation-subdirectory "ror" "app" "assets" "stylesheets" "components" sub-dirs))
+
+(defun css-file-path (file-name &rest subdirs)
+  (merge-pathnames
+   (make-pathname :name file-name :type "css")
+   (apply #'css-directory subdirs)))
+
+(defun helper-directory ()
+  (implementation-subdirectory "ror" "app" "helpers"))
+
+(defun helper-file-path (file-name)
+  (merge-pathnames
+   (make-pathname :name file-name :type "rb")
+   (helper-directory)))
+
+(defun layout-directory (aspect)
+  (apply #'implementation-subdirectory
+         (append '("ror" "app" "views")
+                 (unparse-namespace aspect :list)
+                 (list (snake-case (plural (entity aspect)))))))
+
+(defun layout-file-path (aspect panel)
+  (merge-pathnames
+   (make-pathname :name (strcat panel ".html") :type "erb")
+   (layout-directory aspect)))
+
+(defun routes-file-path()
+  (merge-pathnames
+   (make-pathname :name "routes" :type "rb")
+   (implementation-subdirectory "ror" "config")))
+
+(defun task-file-path(name)
+  (merge-pathnames
+   (make-pathname :name name :type "rake")
+   (implementation-subdirectory "ror" "lib" "tasks")))
+
+(defun test-data-file-path(name)
+  (merge-pathnames
+   (make-pathname :name name :type "rb")
+   (implementation-subdirectory "ror" "db" "data")))
+
+(defun schema-file-path()
+  (merge-pathnames
+   (make-pathname :name "schema" :type "rb")
+   (db-directory)))
+
+(defun seed-file-path(&optional (name "seeds"))
+  (merge-pathnames
+   (make-pathname :name name :type "rb")
+   (db-directory)))
+
+(defun db-structure-file-path()
+  (merge-pathnames
+   (make-pathname :name "structure" :type "sql")
+   (db-directory)))
+
+(defun factories-directory (&rest sub-dirs)
+  (apply #'implementation-subdirectory "ror" "spec" "support" sub-dirs))
+
+(defun factories-file-path (file-name &rest subdirs)
+  (merge-pathnames
+   (make-pathname :name file-name :type "rb")
+   (apply #'factories-directory subdirs)))
+
+;; need to get *javascript-packs* and *css-components* out of this file
 (defun create-bash-scripts()
   (let ((simian-dir (pathname->shell-filename (implementation-subdirectory "ror") t))
         (install-dir (pathname->shell-filename (or *installation-directory* (implementation-subdirectory "ror")) t)))

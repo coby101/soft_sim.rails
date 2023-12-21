@@ -4,25 +4,10 @@
 ;;;
 ;;;===========================================================================
 
-(defpackage simian.rails-generator
-  (:use :cl :soft-sim :utilities :interrogation :entity :attribute :relationship :foundation :interface :formula)
-  (:nicknames :ror :rails)
-  (:export #:generate))
-
 (in-package :ror)
-
-(defvar *javascript-packs* nil)
-(defvar *css-components* nil)
-(defvar *custom-application.html.erb* nil)
-(defvar *custom-mailer.txt.erb* nil)
-(defvar *custom-mailer.html.erb* nil)
-(defvar *authenticated-application?* nil)
-(defvar *notified-application?* nil)
 
 (defparameter *RESTful-actions*
   '(:new :list :detail :edit :create :delete :patch :update))
-
-(defun language-locale () "en")
 
 (defun clean-up ()
   "this function will delete all entity specific files to ensure nothing is left ~
@@ -296,6 +281,23 @@
                   (foreign-keys ent))
           (list (strcat (snake-case (name ent)) "_count"))))
 
+(defmethod conventionalize-attribute-name ((att composite-key))
+  nil)
+(defmethod conventionalize-attribute-name ((att inherited-attribute))
+  nil)
+(defmethod conventionalize-attribute-name ((att primary-key))
+  (setf (name att) "id"))
+(defmethod conventionalize-attribute-name ((att foreign-key))
+  (unless (string-equal "_id" (subseq (name att) (- (length (name att)) 3)))
+    (setf (name att) (strcat (name att) "_id"))))
+
+(defmethod conventionalize-attribute-name ((att attribute))
+  (when (and (member (snake-case (name att))
+                     (blacklisted-attribute-names (my-entity att))
+                     :test #'string-equal)
+             (not (eql :modeltype (id att))))
+    (setf (name att) (strcat (name (my-entity att)) (name att)))))
+
 (defmethod conventionalize-entity ((entity entity))
   (mapcar #'conventionalize-attribute-name (attributes entity)))
 
@@ -315,176 +317,17 @@
                                  :long-plural "Model Specialization Types")
                 :indexed?     t
                 :read-only?   t
-                :domain (simian.entities::default-domain (simian.entities::get-logical-type :label))
-                :logical-type (simian.entities::get-logical-type :label))))
+                :domain (attribute:default-domain (attribute:get-logical-type :label))
+                :logical-type (attribute:get-logical-type :label))))
         ;; I think this is wrong headed and it requires exposing soft_sim internals
         ;; so rather than exporting these two symbols I will reach in and borrow them
         ;; FIXME (see just above too) - maybe a add-implementation-specific-attribute ?
         (add-entity-attribute entity model-type)
-        (simian::resolve-constraints model-type)))))
-
-(defmethod conventionalize-attribute-name ((att composite-key))
-  nil)
-(defmethod conventionalize-attribute-name ((att inherited-attribute))
-  nil)
-(defmethod conventionalize-attribute-name ((att primary-key))
-  (setf (name att) "id"))
-(defmethod conventionalize-attribute-name ((att foreign-key))
-  (unless (string-equal "_id" (subseq (name att) (- (length (name att)) 3)))
-    (setf (name att) (strcat (name att) "_id"))))
-
-(defmethod conventionalize-attribute-name ((att attribute))
-  (when (and (member (snake-case (name att))
-                     (blacklisted-attribute-names (my-entity att))
-                     :test #'string-equal)
-             (not (eql :modeltype (id att))))
-    (setf (name att) (strcat (name (my-entity att)) (name att)))))
+        (construction::resolve-constraints model-type)))))
 
 (defun conventionalize-app (&optional (app *application*))
   (configure-inflections app)
   (mapcar #'conventionalize-entity (schema app)))
-
-(defmethod irregular-plurals ((obj named-object))
-  (remove nil
-          (list
-           (when (not (string-equal (cl-inflector::pluralize 2 (name obj))
-                                    (plural obj)))
-             (list (name obj) (plural obj)))
-           (when (not (string-equal (cl-inflector::pluralize 2 (short-name obj))
-                                    (short-plural obj)))
-             (list (short-name obj) (short-plural obj)))
-           (when (not (string-equal (cl-inflector::pluralize 2 (long-name obj))
-                                    (long-plural obj)))
-             (list (long-name obj) (long-plural obj))))))
-
-(defun application-acronyms (&optional (app *application*))
-  (remove-duplicates
-   (remove nil
-          (apply #'append
-                (mapcar #'find-acronyms
-                        (append (mapcar #'name (schema app))
-                                (mapcar #'name (find-all-relationships app))))))
-   :test #'string-equal))
-
-(defun configure-inflections (&optional (app *application*))
-  (let ((plurals
-         (append (apply #'append (mapcar #'irregular-plurals (schema app)))
-                 (apply #'append (mapcar #'irregular-plurals (find-all-relationships app)))))
-        (acronyms (application-acronyms app)))
-    (let ((path (merge-pathnames (make-pathname :name "inflections" :type "rb")
-                                   (implementation-subdirectory "ror" "config" "initializers"))))
-        (with-open-file (inflect path :direction :output :if-exists :supersede)
-          (format-file-notice inflect "configure-inflections")
-          (format inflect "~%ActiveSupport::Inflector.inflections(:~a) do |inflect|"
-                  (language-locale))
-          (with-nesting
-             (dolist (irr (remove-duplicates plurals :test #'equalp))
-               (if (string= (car irr) (cadr irr))
-                   (progn
-                     ;; (seek-interactive-guidance
-                     ;;  ("This plural and singular (~a) are identical. This is a big Rails headache." (car irr))
-                     ;;  :actions (("Plow blindly ahead" nil)))
-                     (format inflect "~%~ainflect.uncountable '~a'" (make-indent) (car irr)))
-                   (format inflect "~%~ainflect.irregular '~a', '~a'" (make-indent)
-                           (car irr) (cadr irr))))
-            (dolist (acr acronyms)
-              (format inflect "~%~ainflect.acronym '~a'" (make-indent) acr)))
-          (format inflect "~%end~%~%")))))
-
-(defun model-file-path (entity)
-  (merge-pathnames (make-pathname :name (if (typep entity 'entity) (snake-case (name entity)) entity)
-                                  :type "rb")
-                   (model-directory)))
-
-(defun model-directory ()
-  (implementation-subdirectory "ror" "app" "models"))
-
-(defun controller-file-path (aspect)
-  (merge-pathnames
-   (make-pathname
-    :name (snake-case (strcat (plural (entity aspect)) "_controller"))
-    :type "rb")
-   (controller-directory aspect)))
-
-(defun controller-directory (&optional aspect)
-  (apply #'implementation-subdirectory
-         (list* "ror" "app" "controllers" (when aspect (unparse-namespace aspect :list)))))
-
-(defun db-migration-file-path (entity)
-  (merge-pathnames
-   (make-pathname :name (strcat (timestamp) "_create_" (snake-case (plural entity))) :type "rb")
-   (db-migration-directory)))
-
-(defun db-migration-directory ()
-  (implementation-subdirectory "ror" "db" "migrate"))
-
-(defun db-directory ()
-  (implementation-subdirectory "ror" "db"))
-
-(defun javascript-directory (&rest sub-dirs)
-  (apply #'implementation-subdirectory "ror" "app" "javascript" "packs" sub-dirs))
-
-(defun javascript-file-path (file-name &rest subdirs)
-  (merge-pathnames
-   (make-pathname :name file-name :type "js")
-   (apply #'javascript-directory subdirs)))
-
-(defun css-directory (&rest sub-dirs)
-  (apply #'implementation-subdirectory "ror" "app" "assets" "stylesheets" "components" sub-dirs))
-
-(defun css-file-path (file-name &rest subdirs)
-  (merge-pathnames
-   (make-pathname :name file-name :type "css")
-   (apply #'css-directory subdirs)))
-
-(defun helper-directory ()
-  (implementation-subdirectory "ror" "app" "helpers"))
-
-(defun helper-file-path (file-name)
-  (merge-pathnames
-   (make-pathname :name file-name :type "rb")
-   (helper-directory)))
-
-(defun layout-directory (aspect)
-  (apply #'implementation-subdirectory
-         (append '("ror" "app" "views")
-                 (unparse-namespace aspect :list)
-                 (list (snake-case (plural (entity aspect)))))))
-
-(defun layout-file-path (aspect panel)
-  (merge-pathnames
-   (make-pathname :name (strcat panel ".html") :type "erb")
-   (layout-directory aspect)))
-
-(defun routes-file-path()
-  (merge-pathnames
-   (make-pathname :name "routes" :type "rb")
-   (implementation-subdirectory "ror" "config")))
-
-(defun task-file-path(name)
-  (merge-pathnames
-   (make-pathname :name name :type "rake")
-   (implementation-subdirectory "ror" "lib" "tasks")))
-
-(defun test-data-file-path(name)
-  (merge-pathnames
-   (make-pathname :name name :type "rb")
-   (implementation-subdirectory "ror" "db" "data")))
-
-(defun schema-file-path()
-  (merge-pathnames
-   (make-pathname :name "schema" :type "rb")
-   (db-directory)))
-
-(defun seed-file-path(&optional (name "seeds"))
-  (merge-pathnames
-   (make-pathname :name name :type "rb")
-   (db-directory)))
-
-(defun db-structure-file-path()
-  (merge-pathnames
-   (make-pathname :name "structure" :type "sql")
-   (db-directory)))
 
 (defun generate (&optional (app *application*))
   (clean-up)

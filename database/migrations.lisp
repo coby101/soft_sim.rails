@@ -4,9 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
-
-;; (in-package :database)
+(in-package :database)
 
 (defmethod add_column ((attribute attribute) &optional stream)
   (let ((options (assemble-column-options attribute)))

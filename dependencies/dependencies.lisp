@@ -5,8 +5,7 @@
 ;;;
 ;;;===========================================================================
 
-;;; define and use a dependencies package
-(in-package :ror)
+(in-package :dependencies)
 
 (defun write-helpers ()
   ;; for now just application_helper.rb with one function

@@ -4,82 +4,7 @@
 ;;; 
 ;;;===========================================================================
 
-(in-package :ror)
-
-(defmethod unparse-table-association ((rel relation))
-  (format-table-association (my-relationship rel) (my-side rel)))
-(defmethod unparse-table-association ((rel shared-relation))
-  (format-table-association (car (relationships rel)) (my-side rel)))
-
-(defmethod declare-model-association ((rel relation))
-  (format-model-association (my-relationship rel) (my-side rel)))
-(defmethod declare-model-association ((rel shared-relation))
-  (format-model-association (car (relationships rel)) (my-side rel)))
-
-(defmethod my-side ((me relation))
-  (if (eq me (lhs (my-relationship me))) :left :right))
-(defmethod my-side ((me shared-relation))
-  (if (eq me (lhs (car (relationships me)))) :left :right))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Association code to go in the schema definition
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod format-table-association ((my-relationship t) (side t))
-  (comment-with-warning
-   nil "no format-table-association method written for ~a (~a)"
-   (type-of my-relationship) my-relationship))
-
-(defmethod format-table-association ((relationship many-to-many) (side t)) nil)
-(defmethod format-table-association ((relationship specialization) (side t)) nil)
-(defmethod format-table-association ((relationship t) (side (eql :left))) nil)
-
-
-;; null: true or null: false
-(defmethod format-table-association ((relationship recursive-relationship) (side (eql :left)))
-  (when (eql 1 (multiplicity-max (lhs relationship)))
-    (write-table-reference "references"
-                           (snake-case (name (lhs relationship)))
-                           (schema-name (entity (lhs relationship)))
-                           :nullable? t)))
-
-(defmethod format-table-association ((relationship recursive-relationship) (side (eql :right)))
-  (when (eql 1 (multiplicity-max (rhs relationship)))
-      (write-table-reference "references"
-                             (snake-case (name (rhs relationship)))
-                             (schema-name (entity (rhs relationship)))
-                             :nullable? t)))
-
-(defmethod format-table-association ((relationship one-to-many) (side (eql :right)))
-  (let* ((lhs-ent (entity (lhs relationship)))
-         (alias (if (or (typep relationship 'aggregation)
-                        (member lhs-ent (associates (entity (rhs relationship)))))
-                    "belongs_to" "references"))
-         (fk-name (name (lhs relationship)))
-         (fk (find-field fk-name (entity (rhs relationship))))
-         (default (when (sql-parsable-default? fk) (default-value fk)))
-         (specialized-rhs? (typep (entity (rhs relationship)) 'specialized-entity)))
-    (write-table-reference alias
-         (snake-case fk-name)
-         (schema-name lhs-ent)
-         :default (and (not specialized-rhs?) default)
-         :nullable? (or (equal (multiplicity-min (lhs relationship)) 0)
-                        specialized-rhs?))))
-
-(defmethod format-table-association ((relationship xor-relationship) (side (eql :right)))
-  (format nil "t.references :~a, polymorphic: true, null: ~a"
-          (snake-case (name (lhs relationship)))
-          (if (equal (multiplicity-min (lhs relationship)) 0) "true" "false")))
-
-(defun write-table-reference (alias name entity &key (indexed? t) nullable? default)
-  (format nil "t.~a :~a, null: ~a~a~a, foreign_key: ~a"
-          alias name (if nullable? "true" "false") (if indexed? ", index: true" "")
-          (if default (format nil ", default: ~a" default) "")
-          (if (string-equal name entity)
-              "true"
-              (format nil "{ to_table: :~a }" entity))))
+(in-package :model)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -218,13 +143,6 @@
              (or non-standard-rhs (model-plural (entity (rhs rel))))
              options))))
 
-(defmethod format-model-association ((rel many-to-many) (side (eql :right)))
-  (let ((assoc-ent (associative-entity rel)))
-    (many-to-many-declaration (entity (lhs rel)) assoc-ent)))
-(defmethod format-model-association ((rel many-to-many) (side (eql :left)))
-  (let ((assoc-ent (associative-entity rel)))
-    (many-to-many-declaration (entity (rhs rel)) assoc-ent)))
-
 (defun many-to-many-declaration (child assoc-ent)
   (if (or (user-attributes assoc-ent) (not (has-default-name? assoc-ent)))
       (unparse-model-association "has_many" (model-plural child)
@@ -232,11 +150,17 @@
       (unparse-model-association "has_and_belongs_to_many" (model-plural child)
                            (list "join_table" (unparse (model-plural assoc-ent) :ruby)))))
 
-(defun unparse-model-association (type relation &rest options)
-  (format nil "~a :~a~{, ~a~}" type relation
-          (mapcar #'(lambda(opt)
-                      (format nil "~a: ~a" (car opt) (cadr opt)))
-                  (remove nil options))))
+(defmethod format-model-association ((rel many-to-many) (side (eql :right)))
+  (let ((assoc-ent (associated-entity rel)))
+    (many-to-many-declaration (entity (lhs rel)) assoc-ent)))
+(defmethod format-model-association ((rel many-to-many) (side (eql :left)))
+  (let ((assoc-ent (associated-entity rel)))
+    (many-to-many-declaration (entity (rhs rel)) assoc-ent)))
+
+(defmethod declare-model-association ((rel relation))
+  (format-model-association (my-relationship rel) (my-side rel)))
+(defmethod declare-model-association ((rel shared-relation))
+  (format-model-association (car (relationships rel)) (my-side rel)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -319,10 +243,10 @@ all of this seems completely unused, delete it when emotionally ready..
 
 
 (defmethod format-migration-association ((rel many-to-many) (side (eql :right)))
-  (let ((assoc-ent (associative-entity rel)))
+  (let ((assoc-ent (associated-entity rel)))
     (many-to-many-declaration (entity (lhs rel)) assoc-ent)))
 (defmethod format-migration-association ((rel many-to-many) (side (eql :left)))
-  (let ((assoc-ent (associative-entity rel)))
+  (let ((assoc-ent (associated-entity rel)))
     (many-to-many-declaration (entity (rhs rel)) assoc-ent)))
 
 (defun many-to-many-declaration (child assoc-ent)
