@@ -5,6 +5,9 @@
    #:rails-unparser #:implementation)
   (:nicknames #:database)
   (:export
+   #:add-attribute-migration
+   #:add-attributes-migration
+   #:add-entity-migration
    #:schema.rb
    #:seeds.rb
    ))

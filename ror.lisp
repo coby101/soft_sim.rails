@@ -13,7 +13,7 @@
   "this function will delete all entity specific files to ensure nothing is left ~
    behind due to renaming.  Files with application independent names will remain."
   ;; no need to check if these directories exist as implementation-subdirectory
-  ;; will create them to be harmlessly deleted while still empty
+  ;; will create them if not there to be harmlessly deleted while still empty
   (uiop:delete-directory-tree (implementation-subdirectory "ror" "app") :validate t)
   (uiop:delete-directory-tree (implementation-subdirectory "ror" "config") :validate t)
   (uiop:delete-directory-tree (db-directory) :validate t)
@@ -281,12 +281,9 @@
                   (foreign-keys ent))
           (list (strcat (snake-case (name ent)) "_count"))))
 
-(defmethod conventionalize-attribute-name ((att composite-key))
-  nil)
-(defmethod conventionalize-attribute-name ((att inherited-attribute))
-  nil)
-(defmethod conventionalize-attribute-name ((att primary-key))
-  (setf (name att) "id"))
+(defmethod conventionalize-attribute-name ((att composite-key)) nil)
+(defmethod conventionalize-attribute-name ((att inherited-attribute)) nil)
+(defmethod conventionalize-attribute-name ((att primary-key)) (setf (name att) "id"))
 (defmethod conventionalize-attribute-name ((att foreign-key))
   (unless (string-equal "_id" (subseq (name att) (- (length (name att)) 3)))
     (setf (name att) (strcat (name att) "_id"))))
@@ -326,7 +323,7 @@
         (construction::resolve-constraints model-type)))))
 
 (defun conventionalize-app (&optional (app *application*))
-  (configure-inflections app)
+  (inflections.rb app)
   (mapcar #'conventionalize-entity (schema app)))
 
 (defun generate (&optional (app *application*))

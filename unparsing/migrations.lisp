@@ -6,12 +6,6 @@
  
 (in-package #:rails-unparser)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Association code to go in the schema definition
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defmethod format-table-association ((my-relationship t) (side t))
   (comment-with-warning
    nil "no format-table-association method written for ~a (~a)"

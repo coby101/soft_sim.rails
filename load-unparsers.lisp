@@ -1,6 +1,6 @@
 ;;;===========================================================================
 ;;;
-;;;   load file for Ruby on Rails application generator
+;;;   load unparsers required by Ruby on Rails application generator
 ;;;
 ;;;===========================================================================
 

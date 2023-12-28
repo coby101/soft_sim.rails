@@ -1,7 +1,7 @@
 ;;;===========================================================================
 ;;;
 ;;;   Code for generating views that use "shared" partials. The code produced
-;;;    here depends onPCMD specific partials that have not yet been incorporated
+;;;    here depends on PCMD specific partials that have not yet been incorporated
 ;;;    into this generator (see app/views/shared/*.html.erb partials)
 ;;;
 ;;;               DEPRECATED!

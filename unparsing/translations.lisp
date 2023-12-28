@@ -1,6 +1,7 @@
 ;;;===========================================================================
 ;;;
-;;;   Code for uparsing layout and form elements
+;;;   Code for uparsing yaml translation file data structures and 
+;;;   erb translation references
 ;;;
 ;;;===========================================================================
  

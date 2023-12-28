@@ -1,6 +1,7 @@
 ;;;===========================================================================
 ;;;
-;;;   code for generating the model aspect of Rails MVC framework 
+;;;   code for generating the model aspect of Rails MVC framework.
+;;;   (see generate-model-files at the bottom of this file)
 ;;;
 ;;;===========================================================================
 

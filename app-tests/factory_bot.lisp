@@ -1,6 +1,8 @@
 ;;;===========================================================================
 ;;;
-;;;   code associated with generating Factory_Bot factory definitions
+;;;   code associated with generating Factory_Bot factory definitions.
+;;;   This is in a very initial state with many low hanging fruit still
+;;;   ripe for the picking.
 ;;;
 ;;;===========================================================================
 

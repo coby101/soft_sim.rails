@@ -30,7 +30,7 @@
                                 (mapcar #'name (relationships app))))))
    :test #'string-equal))
 
-(defun configure-inflections (&optional (app *application*))
+(defun inflections.rb (&optional (app *application*))
   (let ((plurals
          (append (apply #'append (mapcar #'irregular-plurals (schema app)))
                  (apply #'append (mapcar #'irregular-plurals (relationships app)))))
@@ -38,7 +38,7 @@
     (let ((path (merge-pathnames (make-pathname :name "inflections" :type "rb")
                                    (implementation-subdirectory "ror" "config" "initializers"))))
         (with-open-file (inflect path :direction :output :if-exists :supersede)
-          (format-file-notice inflect "configure-inflections")
+          (format-file-notice inflect "inflections.rb")
           (format inflect "~%ActiveSupport::Inflector.inflections(:~a) do |inflect|"
                   (language-locale))
           (with-nesting

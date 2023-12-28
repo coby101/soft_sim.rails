@@ -6,11 +6,6 @@
 
 (in-package #:model)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;      Association code to go in model files
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defmethod format-model-association ((rel specialization) (side t)) nil)
 (defmethod format-model-association ((my-relationship t) (side t))
   (comment-with-warning

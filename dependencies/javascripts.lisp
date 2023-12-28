@@ -1,6 +1,7 @@
 ;;;===========================================================================
 ;;;
-;;;    javascript packs needed by other generated code
+;;;    javascript packs needed by other generated code. This is all
+;;;    of dubious value and specific to the PCMD application project.
 ;;;
 ;;;===========================================================================
 

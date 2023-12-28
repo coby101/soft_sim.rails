@@ -1,11 +1,11 @@
-;;;============================================================
+;;;============================================================================================
 ;;;
-;;; unparse-attribute-references will be called by functions trying to write methods and
-;;; expressions for model class definitions and erb code (derived attributes, inheritied
-;;; fields and state predicates). It finds attribute objects that may require some kind of
-;;; special reference code and does the necessary work to provide this as appropriate.
+;;;   unparse-attribute-references will be called by functions trying to write methods and
+;;;   expressions for model class definitions and erb code (derived attributes, inheritied
+;;;   fields and state predicates). It finds attribute objects that may require some kind of
+;;;   special reference code and does the necessary work to provide this as appropriate.
 ;;;
-;;;============================================================
+;;;============================================================================================
  
 (in-package #:rails-unparser)
 

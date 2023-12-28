@@ -1,6 +1,9 @@
 ;;;===========================================================================
 ;;;
-;;;   Code for generating routes.rb
+;;;   Code for generating routes.rb. The approach taken below produces very
+;;;   detailed route specifications and is not very conventional at all. It
+;;;   will likely be significantly refactored to take advantage of all the 
+;;;   rails magic afforded by sticky with convention.
 ;;;
 ;;;===========================================================================
 

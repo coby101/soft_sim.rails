@@ -3,6 +3,8 @@
 ;;;   Code for adding application assets needed
 ;;;   by generated controllers, views, models etc
 ;;;
+;;;     This is all most likely DEPRECATED
+;;;
 ;;;===========================================================================
 
 (in-package #:dependencies)

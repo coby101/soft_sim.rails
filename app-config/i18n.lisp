@@ -1,6 +1,7 @@
 ;;;===========================================================================
 ;;;
 ;;;   code associated with localizations.
+;;;
 ;;;   this only unparses the yml file in the language of the application
 ;;;   specification, which is expected to match *locale*. Any other
 ;;;   languages will need to be done by hand in <rails>/config/locales/

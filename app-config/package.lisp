@@ -19,7 +19,7 @@
    #:*locale*
    #:*show-button-text*
    #:*delete-conf*
-   #:configure-inflections
+   #:inflections.rb
    #:implemented-actions
    #:generated.yml
    #:routes.rb

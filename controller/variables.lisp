@@ -1,6 +1,7 @@
 ;;;===========================================================================
 ;;;
-;;;   Code for generating miscellaneous parts of controllers code
+;;;   Code for generating code in controller files to
+;;;   query params and make variable assignments
 ;;;
 ;;;===========================================================================
 
