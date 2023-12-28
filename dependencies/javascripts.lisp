@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :dependencies)
+(in-package #:dependencies)
 
 (defvar *javascript-packs* nil)
 

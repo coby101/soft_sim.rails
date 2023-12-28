@@ -5,7 +5,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :authentication)
+(in-package #:authentication)
 
 (defparameter *user-model* "User")
 (defvar *authenticated-application?* nil)

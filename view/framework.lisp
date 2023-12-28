@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :view)
+(in-package #:view)
 
 (defvar *custom-application.html.erb* nil)
 (defvar *custom-mailer.txt.erb* nil)

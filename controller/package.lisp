@@ -1,13 +1,13 @@
 
-(defpackage :simian.rails-generator.controller
+(defpackage #:simian.rails-generator.controller
   (:use
-   :cl 
+   #:cl 
    ;; soft-sim packages
-   :unparser :interface :utilities :attribute :entity :relationship :formula :foundation :interrogation
+   #:unparser #:interface #:utilities #:attribute #:entity #:relationship #:formula #:foundation #:interrogation
    ;; other rails packages
-   :authentication :implementation :rails-unparser :rails-config
+   #:authentication #:implementation #:rails-unparser #:rails-config
    )
-  (:nicknames :controller)
+  (:nicknames #:controller)
   (:export
    #:controller-class-definition
    #:write-controller-files

@@ -1,5 +1,5 @@
 
-(defpackage :simian.rails-generator.app-tests
+(defpackage #:simian.rails-generator.app-tests
   (:use
    :cl
    ;; soft-sim packages

@@ -5,7 +5,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :dependencies)
+(in-package #:dependencies)
 
 (defun write-helpers ()
   ;; for now just application_helper.rb with one function

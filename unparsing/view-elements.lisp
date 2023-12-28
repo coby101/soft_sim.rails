@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
  
-(in-package :rails-unparser)
+(in-package #:rails-unparser)
 
 (defun text_ (text-type name &rest properties)
   (format nil "form.text_~a :~a~{, ~a: \"~a\"~}"

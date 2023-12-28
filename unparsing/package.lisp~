@@ -1,5 +1,5 @@
 
-(defpackage :simian.rails-generator.unparser
+(defpackage #:simian.rails-generator.unparser
   (:use
    :cl
    :unparser :interrogation :entity :attribute :relationship :foundation :interface :formula :utilities

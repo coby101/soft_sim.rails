@@ -7,7 +7,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :app-config)
+(in-package #:app-config)
 
 (defvar *locale* "en")
 (defvar *show-button-text* "View")

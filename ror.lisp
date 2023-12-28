@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :ror)
+(in-package #:ror)
 
 (defparameter *RESTful-actions*
   '(:new :list :detail :edit :create :delete :patch :update))
@@ -330,33 +330,34 @@
   (mapcar #'conventionalize-entity (schema app)))
 
 (defun generate (&optional (app *application*))
-  (clean-up)
-  (when *authenticated-application?*
-    (insert-authentication-attributes))
-  (conventionalize-app)
-  (create-bash-scripts)
-  (format t "~&writing ~a" (namestring (routes-file-path)))
-  (routes.rb app) 
-  (write-data-load-tasks) 
-  (generated.yml)
-  (format t "~&writing schema.rb at ~s" (namestring (schema-file-path)))
-  (schema.rb app)
-  (format t "~&writing controller files in ~s" (namestring (controller-directory)))
-  (generate-controllers app)
-  (format t "~&writing model files in ~s" (namestring (model-directory)))
-  (generate-model-files app)
-  (format t "~&writing view files in ~s" (namestring (implementation-subdirectory "ror" "app" "views")))
-  (generate-views app)
-  (format t "~&taking care of dependencies")
-  (install-dependencies)
-;  (format t "~&generating code fragments for documentation")
-;  (generate-code-for-documentation app)
-  (format t "~&writing seeds.rb at ~s" (namestring (seed-file-path)))
-  (seeds.rb app)
-  (when *dev-mode*
-    (format t "~&writing load file at ~s" (namestring (load-file-path)))
-    (generate-load-file app))
-  (format t "~%~%done~%~%You will find some install scripts in ~a" *installation-directory*))
+  (let ((*application* app))
+    (clean-up)
+    (when *authenticated-application?*
+      (insert-authentication-attributes))
+    (conventionalize-app)
+    (create-bash-scripts)
+    (format t "~&writing ~a" (namestring (routes-file-path)))
+    (routes.rb app)
+    (write-data-load-tasks) 
+    (generated.yml)
+    (format t "~&writing schema.rb at ~s" (namestring (schema-file-path)))
+    (schema.rb app)
+    (format t "~&writing controller files in ~s" (namestring (controller-directory)))
+    (generate-controllers app)
+    (format t "~&writing model files in ~s" (namestring (model-directory)))
+    (generate-model-files app)
+    (format t "~&writing view files in ~s" (namestring (implementation-subdirectory "ror" "app" "views")))
+    (generate-views app)
+    (format t "~&taking care of dependencies")
+    (install-dependencies)
+                                        ;  (format t "~&generating code fragments for documentation")
+                                        ;  (generate-code-for-documentation app)
+    (format t "~&writing seeds.rb at ~s" (namestring (seed-file-path)))
+    (seeds.rb app)
+    (when *dev-mode*
+      (format t "~&writing load file at ~s" (namestring (load-file-path)))
+      (generate-load-file app))
+    (format t "~%~%done~%~%You will find some install scripts in ~a" *installation-directory*)))
 
 ;;;===========================================================================
 ;;; Local variables:

@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :software-simian)
+(in-package #:software-simian)
 
 (load-unparser "ruby")
 (load-unparser "sql")

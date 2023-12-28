@@ -1,13 +1,12 @@
-
-(defpackage :simian.rails-generator.app-tasks
+(defpackage #:simian.rails-generator.app-tasks
   (:use
-   :cl
+   #:cl
    ;; soft-sim packages
-   :foundation :unparser :configuration :interface :relationship :entity :attribute :interrogation :utilities
+   #:foundation #:unparser #:configuration #:interface #:relationship #:entity #:attribute #:interrogation #:utilities
    ;; other rails packages
-   :authentication :implementation :rails-unparser
+   #:authentication #:implementation #:rails-unparser
    )
-  (:nicknames :app-tasks :rails-tasks)
+  (:nicknames #:app-tasks #:rails-tasks)
   (:export
    #:write-data-load-tasks
  ;  #:WIP

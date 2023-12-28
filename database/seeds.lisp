@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :database)
+(in-package #:database)
 
 (defun seed-data-order (entities)
   (let* ((app-ent (application-entity))

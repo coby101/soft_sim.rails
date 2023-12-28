@@ -8,7 +8,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :view)
+(in-package #:view)
 
 (defun _index_actions.html.erb (aspect &optional stream)
   (unless (typep (entity aspect) 'attribute-table)

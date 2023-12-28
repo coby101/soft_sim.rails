@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :dependencies)
+(in-package #:dependencies)
 
 (defvar *css-components* nil)
 

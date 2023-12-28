@@ -1,12 +1,12 @@
 
-(defpackage :simian.rails-generator.dependencies
+(defpackage #:simian.rails-generator.dependencies
   (:use
-   :cl
-   :implementation
-   :unparser
-   :rails-unparser
+   #:cl
+   #:implementation
+   #:unparser
+   #:rails-unparser
    )
-  (:nicknames :dependencies)
+  (:nicknames #:dependencies)
   (:export
    #:*css-components*
    #:google-address-js

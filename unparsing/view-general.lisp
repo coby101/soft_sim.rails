@@ -4,7 +4,7 @@
 ;;;
 ;;;====================================================
  
-(in-package :rails-unparser)
+(in-package #:rails-unparser)
 
 (defmethod unparse-erb (output? (code string))
   (format nil "<%~a ~a %>" (if output? "=" "") code))

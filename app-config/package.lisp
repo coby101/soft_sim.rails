@@ -1,20 +1,20 @@
 
-(defpackage :simian.rails-generator.config
+(defpackage #:simian.rails-generator.config
   (:use
-   :cl :cl-inflector
-   :foundation
-   :configuration
-   :unparser
-   :interface
-   :entity
-   :attribute
-   :implementation
-   :interrogation
-   :utilities
-   :authentication
-   :rails-unparser
+   #:cl #:cl-inflector
+   #:foundation
+   #:configuration
+   #:unparser
+   #:interface
+   #:entity
+   #:attribute
+   #:implementation
+   #:interrogation
+   #:utilities
+   #:authentication
+   #:rails-unparser
    )
-  (:nicknames :rails-config :app-config)
+  (:nicknames #:rails-config #:app-config)
   (:export
    #:*locale*
    #:*show-button-text*

@@ -5,7 +5,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :view)
+(in-package #:view)
 
 (defvar *use-shared-views* t)
 (defmethod includes-full-address? ((aspect aspect))

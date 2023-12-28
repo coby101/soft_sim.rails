@@ -8,7 +8,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :rails-unparser)
+(in-package #:rails-unparser)
 
 (defvar *nested-attribute-title-class* "nested-attribute-title")
 

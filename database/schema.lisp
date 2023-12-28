@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :database)
+(in-package #:database)
 
 (defun database-tables(&optional (app *application*))
   (remove-if #'(lambda(ent)

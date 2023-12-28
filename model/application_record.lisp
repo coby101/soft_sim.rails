@@ -5,7 +5,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :model)
+(in-package #:model)
 
 (defun check_deletable?(&optional (stream t))
   (indent-block stream "

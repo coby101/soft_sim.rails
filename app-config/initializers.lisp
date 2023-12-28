@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :app-config)
+(in-package #:app-config)
 
 (defun language-locale () "en")
 

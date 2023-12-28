@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :model)
+(in-package #:model)
 
 (defun model-entities (&optional (app *application*))
   (schema-entities app))

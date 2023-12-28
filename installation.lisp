@@ -3,10 +3,10 @@
 ;;;   directory structure and code associated with generating installation scripts 
 ;;;
 ;;;===========================================================================
-(defpackage :simian.rails-generator.implementation
+(defpackage #:simian.rails-generator.implementation
   (:use
-   :cl :rails-unparser :unparser :configuration :utilities :entity :foundation :interface)
-  (:nicknames :implementation)
+   #:cl #:rails-unparser #:unparser #:configuration #:utilities #:entity #:foundation #:interface)
+  (:nicknames #:implementation)
   (:export
    #:controller-directory
    #:controller-file-path
@@ -33,7 +33,7 @@
    #:test-data-file-path
    ))
 
-(in-package :implementation)
+(in-package #:implementation)
 
 (defun model-directory ()
   (implementation-subdirectory "ror" "app" "models"))

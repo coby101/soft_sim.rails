@@ -1,9 +1,9 @@
 
-(defpackage :simian.rails-generator.database
+(defpackage #:simian.rails-generator.database
   (:use
-   :cl :interface :utilities :attribute :entity :relationship :formula :foundation :unparser :interrogation
-   :rails-unparser :implementation)
-  (:nicknames :database)
+   #:cl #:interface #:utilities #:attribute #:entity #:relationship #:formula #:foundation #:unparser #:interrogation
+   #:rails-unparser #:implementation)
+  (:nicknames #:database)
   (:export
    #:schema.rb
    #:seeds.rb

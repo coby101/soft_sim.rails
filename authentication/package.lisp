@@ -1,9 +1,9 @@
-(defpackage :simian.rails-generator.authentication
+(defpackage #:simian.rails-generator.authentication
   (:use
-   :cl :utilities :foundation :interrogation :construction :entity
-   :rails-unparser
+   #:cl #:utilities #:foundation #:interrogation #:construction #:entity
+   #:rails-unparser
    )
-  (:nicknames :authentication)
+  (:nicknames #:authentication)
   (:export
    #:*authenticated-application?*
    #:*notified-application?*

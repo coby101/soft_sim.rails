@@ -5,11 +5,11 @@
 ;;;===============================================================================
 
 (defpackage simian.rails-generator
-  (:use :cl :cl-inflector
-        :soft-sim :utilities :entity :attribute :foundation :interrogation :construction :unparser
-        :implementation :model :view :controller :database :dependencies :authentication
-        :rails-unparser :rails-config :app-tests :app-tasks)
-  (:nicknames :ror :rails)
+  (:use #:cl #:cl-inflector
+        #:soft-sim #:utilities #:entity #:attribute #:foundation #:interrogation #:construction #:unparser
+        #:implementation #:model #:view #:controller #:database #:dependencies #:authentication
+        #:rails-unparser #:rails-config #:app-tests #:app-tasks)
+  (:nicknames #:ror #:rails)
   (:export #:generate))
 
 ;;;===========================================================================

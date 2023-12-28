@@ -46,7 +46,7 @@
                  (:file "callbacks")
                  (:file "application_record")
                  (:file "model")))
-               (:module config
+               (:module app-config
                 :components
                 ((:file "package")
                  (:file "i18n")

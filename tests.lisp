@@ -9,7 +9,7 @@
 ;;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(in-package :simian)
+(in-package #:simian)
 (load-generator "ror")
 
 (define-test :views "template-items are resolved and unparsed correctly 1"

@@ -6,7 +6,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :dependencies)
+(in-package #:dependencies)
 
 (defun link_with_external_link ()
   "

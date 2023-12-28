@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :controller)
+(in-package #:controller)
 
 (defmethod controller-class-declaration ((aspect aspect))
   (format nil "class ~a < ApplicationController~%" (controller-name aspect)))

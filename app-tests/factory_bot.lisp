@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :app-tests)
+(in-package #:app-tests)
 
 (defmethod test-datum ((type logical-type) (att attribute)) (test-datum (id type) att))
 (defmethod test-datum ((type symbol) (att attribute))

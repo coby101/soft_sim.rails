@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :model)
+(in-package #:model)
 
 (defun trigger-dependent-summary-fields (entity)
   (remove-if-not #'(lambda (att) (typep att 'cached-summary))

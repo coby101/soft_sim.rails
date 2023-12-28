@@ -1,10 +1,10 @@
 
-(defpackage :simian.rails-generator.unparser
+(defpackage #:simian.rails-generator.unparser
   (:use
-   :cl
-   :unparser :interrogation :entity :attribute :relationship :foundation :interface :formula :utilities
+   #:cl
+   #:unparser #:interrogation #:entity #:attribute #:relationship #:foundation #:interface #:formula #:utilities
    )
-  (:nicknames :rails-unparser)
+  (:nicknames #:rails-unparser)
   (:export
    #:*nested-attribute-title-class*
    #:*svg-delete-icon*

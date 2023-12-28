@@ -4,11 +4,15 @@
 ;;;
 ;;;====================================================
  
-(in-package :rails-unparser)
+(in-package #:rails-unparser)
 
 (defun unparse-validation-method (method-name context test error-msg)
   (let* ((model-attributes (remove nil (flatten (extract-attributes-from-expression test context))))
-         (nullable-atts (remove-if-not #'nullable? model-attributes)))
+         (nullable-atts (remove-if-not #'nullable? model-attributes))
+         ;; due to the usage of incf and decf below (probably a wrong-headed idea)
+         ;; we can use this let (*nesting-level* *nesting-level*) to protect against
+         ;; those destructive operations in the case of errors
+         (*nesting-level* *nesting-level*))
     (with-output-to-string (code)
       (format code "def ~a" method-name)
 ;; this <unless> nesting should only happen when a vulnerable operation will occur (or put the onus on callers?
@@ -37,14 +41,14 @@
 (defmethod rewrite-expression ((operator t) expression)
   (negate-expression expression))
 
-(defmethod rewrite-expression ((operator (eql '$when)) expression)
-  (list (get-operator '$and)
+(defmethod rewrite-expression ((operator (eql :when)) expression)
+  (list (get-operator :and)
         (second expression)
         (negate-expression (third expression))))
 
-(defmethod rewrite-expression ((operator (eql '$max-rows)) expression)
-  (list (get-operator '$gt)
-        (list (get-operator '$rows) (second expression) (fourth expression))
+(defmethod rewrite-expression ((operator (eql :max-rows)) expression)
+  (list (get-operator :gt)
+        (list (get-operator :rows) (second expression) (fourth expression))
         (third expression)))
 
 (defun make-event-option(event)
@@ -124,18 +128,18 @@ These variables are available to message strings:
                      (ruby:unparse-lambda nil arg))))
       (list option expr))))
 
-(defmethod unparse-model-validation ((op (eql '$when)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :when)) args &key event message condition)
   (when condition
     (error "it does not make sense to have a condition here (~a, ~a)"
            op condition))
   (unparse-conditional-validation op args :event event :message message))
-(defmethod unparse-model-validation ((op (eql '$unless)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :unless)) args &key event message condition)
   (when condition
     (error "it does not make sense to have a condition here (~a, ~a)"
            op condition))
   (unparse-conditional-validation op args :event event :message message))
 
-(defmethod unparse-model-validation ((op (eql '$call)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :call)) args &key event message condition)
   (when message
     (warn "we can not do anything with a message in a custom validates_with validation ($call ~a)"
           args))
@@ -167,7 +171,7 @@ These variables are available to message strings:
           (ruby:unparse-lambda (list obj-ref)
                                 (unparse-attribute-references exp entity obj-ref))))))
 
-(defmethod unparse-model-validation ((op (eql '$not-null)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :not-null)) args &key event message condition)
   (let ((att (car args)))
     (if (eql (data-type att) :boolean)
         ""
@@ -179,7 +183,7 @@ These variables are available to message strings:
             (make-conditional-option condition)
             (make-event-option event)))))))
 
-(defmethod unparse-model-validation ((op (eql '$regex)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :regex)) args &key event message condition)
   (apply #'unparse-field-validation
          (car args) "format"
          (remove nil
@@ -188,7 +192,7 @@ These variables are available to message strings:
                        (make-conditional-option condition)
                        (make-event-option event)))))
 
-(defmethod unparse-model-validation ((op (eql '$in)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :in)) args &key event message condition)
   (let* ((att (car args))
          (legal-values (if (eql (data-type att) :boolean)
                            (if (implement-as-string? att)
@@ -206,7 +210,7 @@ These variables are available to message strings:
      (make-conditional-option condition)
      (make-event-option event))))
 
-(defmethod unparse-model-validation ((op (eql '$length)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :length)) args &key event message condition)
   (unparse-field-validation
    (car args) "length"
    (list "is" (cadr args))
@@ -221,7 +225,7 @@ These variables are available to message strings:
    (make-conditional-option condition)
    (make-event-option event)))
 
-(defmethod unparse-model-validation ((op (eql '$length-lt)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :length-lt)) args &key event message condition)
   (unparse-field-validation
    (car args) "length"
    (list "maximum" (1- (cadr args)))
@@ -232,7 +236,7 @@ These variables are available to message strings:
    (make-conditional-option condition)
    (make-event-option event)))
 
-(defmethod unparse-model-validation ((op (eql '$length-between)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :length-between)) args &key event message condition)
   (unparse-field-validation
    (car args) "length"
    (list "in" (ruby:unparse-range (cadr args) (caddr args)))
@@ -247,7 +251,7 @@ These variables are available to message strings:
    (make-conditional-option condition)
    (make-event-option event)))
 
-(defmethod unparse-model-validation ((op (eql '$length-gt)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :length-gt)) args &key event message condition)
   (unparse-field-validation
    (car args) "length"
    (list "minimum" (1+ (cadr args)))
@@ -258,9 +262,9 @@ These variables are available to message strings:
    (make-conditional-option condition)
    (make-event-option event)))
 
-(defmethod unparse-model-validation ((op (eql '$unique)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :unique)) args &key event message condition)
   (if (tenant-scoped-entity? (my-entity (car args)))
-      (unparse-model-validation '$unique-within
+      (unparse-model-validation :unique-within
            (append args (list (tenant-key (my-entity (car args)))))
            :event event :condition condition
            :message (or message (format nil "all %{model} records must have a unique ~a value. \"%{value}\" is taken"
@@ -275,7 +279,7 @@ These variables are available to message strings:
        (make-conditional-option condition)
        (make-event-option event))))
 
-(defmethod unparse-model-validation ((op (eql '$unique-within)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :unique-within)) args &key event message condition)
   (let ((field (car args))
         (context (cadr args)))
     (unparse-field-validation
@@ -302,9 +306,9 @@ These variables are available to message strings:
          (make-conditional-option condition)
          (make-event-option event))))
 
-(defmethod unparse-model-validation ((op (eql '$>)) args &key event message condition)
-  (unparse-model-validation '$gt args :event event :condition condition :message message))
-(defmethod unparse-model-validation ((op (eql '$gt)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :>)) args &key event message condition)
+  (unparse-model-validation :gt args :event event :condition condition :message message))
+(defmethod unparse-model-validation ((op (eql :gt)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "greater_than" (cadr args)
@@ -313,9 +317,9 @@ These variables are available to message strings:
                                  (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
-(defmethod unparse-model-validation ((op (eql '$<)) args &key event message condition)
-  (unparse-model-validation '$lt args :event event :condition condition :message message))
-(defmethod unparse-model-validation ((op (eql '$lt)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :<)) args &key event message condition)
+  (unparse-model-validation :lt args :event event :condition condition :message message))
+(defmethod unparse-model-validation ((op (eql :lt)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "less_than" (cadr args)
@@ -325,7 +329,7 @@ These variables are available to message strings:
                                  (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
-(defmethod unparse-model-validation ((op (eql '$<=)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :<=)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "less_than_or_equal_to" (cadr args)
@@ -335,7 +339,7 @@ These variables are available to message strings:
                                        (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
-(defmethod unparse-model-validation ((op (eql '$>=)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :>=)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "greater_than_or_equal_to" (cadr args)
@@ -345,7 +349,7 @@ These variables are available to message strings:
                                        (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
-(defmethod unparse-model-validation ((op (eql '$=)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :=)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "equal_to" (cadr args)
@@ -354,7 +358,7 @@ These variables are available to message strings:
                                        (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
-(defmethod unparse-model-validation ((op (eql '$!=)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :!=)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "other_than" (cadr args)
@@ -363,7 +367,7 @@ These variables are available to message strings:
                                        (long-name field) (unparse-expression (cadr args) :english))))
      :event event :condition condition)))
 
-(defmethod unparse-model-validation ((op (eql '$between)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :between)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "in" (ruby:unparse-range (cadr args) (caddr args))
@@ -372,7 +376,7 @@ These variables are available to message strings:
                                        (long-name field) (cadr args) (caddr args))))
      :event event :condition condition)))
 
-(defmethod unparse-model-validation ((op (eql '$odd)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :odd)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "odd" "true"
@@ -381,7 +385,7 @@ These variables are available to message strings:
                                        (long-name field))))
      :event event :condition condition)))
 
-(defmethod unparse-model-validation ((op (eql '$even)) args &key event message condition)
+(defmethod unparse-model-validation ((op (eql :even)) args &key event message condition)
   (let ((field (car args)))
     (unparse-comparison-validation
      field "even" "true"

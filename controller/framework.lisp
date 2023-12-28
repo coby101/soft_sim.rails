@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :controller)
+(in-package #:controller)
 
 (defun framework-home-method (&optional (stream t))
   (princ (make-indent) stream)

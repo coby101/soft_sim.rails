@@ -4,7 +4,7 @@
 ;;;
 ;;;===========================================================================
 
-(in-package :controller)
+(in-package #:controller)
 
 (defmethod build-method ((aspect aspect))
   (if (or (not (root? aspect))

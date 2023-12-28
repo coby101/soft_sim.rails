@@ -7,7 +7,7 @@
 ;;;
 ;;;============================================================
  
-(in-package :rails-unparser)
+(in-package #:rails-unparser)
 
 (defmethod unparse-attribute-references :before ((exp t) (context t) &optional obj-var)
   (declare (ignorable obj-var)))
