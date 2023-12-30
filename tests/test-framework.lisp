@@ -7,7 +7,13 @@
   (load (asdf:system-relative-pathname 'rails-generator "tests/model/package.lisp"))
   (load (asdf:system-relative-pathname 'rails-generator "tests/model/expected-results.lisp"))
   (load (asdf:system-relative-pathname 'rails-generator "tests/model/model.lisp"))
-  )
+
+  (load (asdf:system-relative-pathname 'rails-generator "tests/controller/package.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/controller/controller.lisp"))
+
+  (load (asdf:system-relative-pathname 'rails-generator "tests/view/package.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/view/view.lisp"))
+)
 
 (defun test-application ()
   (define-project tests
