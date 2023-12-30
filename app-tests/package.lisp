@@ -7,7 +7,7 @@
    ;; other rails packages
    :authentication :implementation :rails-unparser
    )
-  (:nicknames :app-tests :rails-tests)
+  (:nicknames :app-tests)
   (:export
    #:unparse-factory
    #:write-factory-file

@@ -95,7 +95,7 @@ this header to make clear the generated content is now obsolete.~a    #
       (if (eq (entity (car obj)) (my-entity (cadr obj)))
           (format nil "~a_~a" (snake-case (name (car obj))) (schema-name (cadr obj))) 
           (unparse (cadr obj) language))
-      (unparse obj language)))
+      (unparse-array obj language)))
 
 (defmethod controller-name ((aspect aspect))
   (format nil "~a~aController"

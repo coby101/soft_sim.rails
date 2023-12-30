@@ -7,8 +7,8 @@
 (in-package #:model)
 
 (defparameter *handled-validation-helpers*
-  '($when $unless $call $not-null $regex $in $length $length-lt $length-between
-    $length-gt $unique-within $unique $> $gt $< $lt $<= $>= $= $!= $between $odd $even))
+  '(:when :unless :call :not-null :regex :in :length :length-lt :length-between
+    :length-gt :unique-within :unique :> :gt :< :lt :<= :>= := :!= :between :odd :even))
 
 (defun contains-constants-only (exp)
   (every #'(lambda (elt)
@@ -34,22 +34,22 @@
   (cond
     ((comparison-operator? (car exp))
      (notany #'returns-date? (cdr exp)))
-    ((member (operator-key (car exp)) '($when $unless))
+    ((member (operator-key (car exp)) '(:when :unless))
      (and (simple-validation-helper? (second exp))
            (simple-validation-helper? (third exp))))
-    ((eql (operator-key (car exp)) '$unique-within)
+    ((eql (operator-key (car exp)) :unique-within)
      (and (typep (caddr exp) 'attribute)
           (eq (my-entity (cadr exp)) (my-entity (caddr exp)))))
     (t (and (member (operator-key (car exp)) *handled-validation-helpers*)
             (typep (cadr exp) 'attribute)
             (contains-constants-only (cddr exp))
-            (not (recursive-find (get-operator '$current-date) exp))))))
+            (not (recursive-find (get-operator :current-date) exp))))))
 
 (defun simple-validation-method? (exp context)
-  (cond ((member (operator-key (car exp)) '($when $unless))
+  (cond ((member (operator-key (car exp)) '(:when :unless))
          (and (simple-validation-method? (second exp) context)
               (simple-validation-method? (third exp) context)))
-        ((member (operator-key (car exp)) '($rows-eql $min-rows $max-rows))
+        ((member (operator-key (car exp)) '(:rows-eql :min-rows :max-rows))
          (simple-validation-method? (fourth exp) context))
         (t (contains-reachable-values? (cdr exp) context))))
 

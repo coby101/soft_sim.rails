@@ -84,6 +84,10 @@
                  (:file "factory_bot")))
                (:file "package")
                (:file "ror")
+               (:module tests
+                :components
+                ((:file "package")
+                 (:file "test-framework")))
                  ))
 
 (format t "~&To generate a Rails application at any time load your software.simian project and run (ror:generate)")

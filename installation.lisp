@@ -195,8 +195,8 @@ rm -rf $INS_DIR/app/views/*
 ~{rm -rf $INS_DIR/app/javascript/packs/~a/*~%~}
 ~{rm -rf $INS_DIR/app/assets/stylesheets/components/~a.css~%~}
 " install-dir
-  (mapcar #'car *javascript-packs*)
-  (mapcar #'car *css-components*)))
+  (mapcar #'car nil) ; *javascript-packs*)
+  (mapcar #'car nil ))) ;*css-components*)))
     (with-open-file (script (merge-pathnames (make-pathname :name "install" :type "sh")
                                              (or *installation-directory* (implementation-subdirectory "ror")))
                             :direction :output :if-exists :supersede)

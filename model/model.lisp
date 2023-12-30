@@ -79,8 +79,8 @@
 (defun entity-meta-data (entity)
   (let* ((attributes (append (foreign-keys entity) (user-attributes entity) (summary-attributes entity) (derived-attributes entity))))
 	`((:attributes  ,(loop for att in (sort (remove-duplicates attributes) #'string-lessp :key #'name)
-                            collect `(,(ruby:unparse-hash-key (schema-name att))
-	                                  ((:logical_type ,(ruby:unparse-hash-key (snake-case (name (logical-type att)))))
+                            collect `(,(schema-name att)
+	                                  ((:logical_type ,(intern (snake-case (name (logical-type att))) :keyword))
                                        (:domain ,(domain-data (domain att)))
 	                                   (:default ,(ignore-errors (unparse-default-meta-data att)))
 	                                   (:nullable?  ,(or (nullable? att) 'false))))))
@@ -91,8 +91,8 @@
       (:children ,(mapcar #'(lambda (c) (make-symbol (model-name c))) (children entity)))
       (:parents ,(mapcar #'(lambda (c) (make-symbol (model-name c))) (parents entity))))))
 
-(defun meta_data(entity &optional stream)
-  (format stream "~%~adef self.meta_data" (make-indent))
+(defun meta_data (entity &optional stream)
+  (format stream "~%~adef self.meta_data~%" (make-indent))
     (with-nesting
         (format stream (ruby:unparse-hash (entity-meta-data (find-entity entity)))))
   (format stream "~%~aend~%" (make-indent)))

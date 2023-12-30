@@ -9,6 +9,7 @@
   (:nicknames #:dependencies)
   (:export
    #:*css-components*
+   #:*javascript-packs*
    #:google-address-js
    #:install-dependencies
    ))

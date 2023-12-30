@@ -6,14 +6,14 @@
 
 (in-package #:controller)
 
-(defun framework-method (method body)
+(defun framework-method (method body &optional (stream t))
   (princ (make-indent) stream)
   (format stream (ruby:unparse-method method body)))
 
-(defun framework-home-method   (&optional (stream t)) (framework-method "home" nil))
-(defun framework-about-method  (&optional (stream t)) (framework-method "about" nil))
-(defun framework-denied-method (&optional (stream t)) (framework-method "denied" nil))
-(defun framework-help-method   (&optional (stream t)) (framework-method "help" nil))
+(defun framework-home-method   (&optional (stream t)) (framework-method "home" nil stream))
+(defun framework-about-method  (&optional (stream t)) (framework-method "about" nil stream))
+(defun framework-denied-method (&optional (stream t)) (framework-method "denied" nil stream))
+(defun framework-help-method   (&optional (stream t)) (framework-method "help" nil stream))
 
 (defmethod framework-controller-definition (&optional (stream t))
   (format stream (controller-class-declaration "FrameworkController"))
