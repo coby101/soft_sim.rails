@@ -27,7 +27,7 @@
 
 (defun seed-data-import-statement (ent stream &optional data-seed)
   (let ((data (or data-seed (make-data-seed ent (ignore-errors (seed-data ent)))))
-        (fmt-str (format nil "~~a.~~a([~~%~~{~a~~a~~^,~~%~~}~~%])" (with-nesting (make-indent)))))
+        (fmt-str (format nil "~~a.~~a([~~%~~{~a~~a~~^,~~%~~}~~%~a])" (with-nesting (make-indent)) (make-indent))))
     (when data
       (format stream fmt-str (model-name ent) (create-seed-method)
               (let* ((columns (columns data ent))

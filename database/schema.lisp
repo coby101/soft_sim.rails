@@ -123,7 +123,7 @@
 for associative tables "id: false"
 "force: true" will drop the table if it exists. good for development
 |#
-(defmethod create_table ((entity symbol) &optional stream)
+(defmethod create_table ((entity symbol) stream &key include-associations)
   (create_table (find-entity entity) (or stream t)))
 
 ;; https://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-create_table
@@ -138,7 +138,7 @@ for associative tables "id: false"
             (format stream fmt-str t.references)))
       (format stream "~%~aend" (make-indent)))))
 
-(defmethod create_table ((table entity) &optional stream)
+(defmethod create_table ((table entity) stream &key include-associations)
   (let ((attributes (sort (copy-list (database-attributes table))
                           #'string-lessp :key #'name)))
     (format stream "~acreate_table(~a) do |t|~%" (make-indent) (create_table-arguments table))
@@ -148,11 +148,15 @@ for associative tables "id: false"
         (format stream fmt-str (remove nil (mapcar #'t.column attributes)))
         (format stream "~%~at.timestamps~%" (make-indent))
         (when assocs
-          (comment-out stream " associations are realized in the change_table method")
-          (comment-out stream fmt-str (remove nil (mapcar #'unparse-table-association assocs))))))
+          (if include-associations
+            (progn
+              (format stream fmt-str (remove nil (mapcar #'unparse-table-association assocs))))
+            (progn
+              (comment-out stream " associations (as below) are realized in the change_table method")
+              (comment-out stream fmt-str (remove nil (mapcar #'unparse-table-association assocs))))))))
     (format stream "~%~aend~%" (make-indent))))
 
-(defmethod create_table ((entity specialized-entity) &optional stream)
+(defmethod create_table ((entity specialized-entity) stream &key include-associations)
   (declare (ignorable stream))
   (error "With Rails STI mechanism there should not be a database table for a subclass entity (~a)" entity))
 

@@ -46,21 +46,19 @@ class Add~aTo~a < ActiveRecord::Migration[~a]
 
 (defmethod add-entity-migration ((entity entity) &optional (stream t))
   (let ((create (with-output-to-string (out)
-                  (with-nesting (with-nesting (create_table entity out)))))
-        (change (with-output-to-string (out)
-                  (with-nesting (with-nesting (change_table entity out)))))
+                  (with-nesting (with-nesting (create_table entity out :include-associations t)))))
         (import (when (seed-data entity)
                   (with-output-to-string (out)
                     (with-nesting (with-nesting (seed-data-import-statement entity out)))))))
     (format stream "
 class Create~a < ActiveRecord::Migration[~a]
-  def up~%~a~%~a~%    ~a
+  def up~%~a~%~a
   end
   def down
     drop_table :~a
   end
 end~%" (plural entity) (let ((platform (gui-platform *implementation*))) (format nil "~a.~a" (major-version platform) (minor-version platform)))
-       create change (or import "") (schema-name entity))))
+       create (if import (format nil "    ~a" import) "") (schema-name entity))))
 
 ;;;===========================================================================
 ;;; Local variables:
