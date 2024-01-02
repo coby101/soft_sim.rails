@@ -13,12 +13,19 @@
 
   (load (asdf:system-relative-pathname 'rails-generator "tests/view/package.lisp"))
   (load (asdf:system-relative-pathname 'rails-generator "tests/view/view.lisp"))
+
+  (load (asdf:system-relative-pathname 'rails-generator "tests/database/package.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/database/expected-results.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/database/migrations.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/database/schema.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/database/seeds.lisp"))
 )
 
 (defun test-application ()
   (define-project tests
     :org         "Rails Generator"
     :name        "Test Application"
+    :gui        ("Rails" :version "7.1.1")
     :description "")
 
   (define-lookup-table ("PhoneType") :keep-history? nil

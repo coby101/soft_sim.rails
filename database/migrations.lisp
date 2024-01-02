@@ -28,12 +28,13 @@ class ~a < ActiveRecord::Migration[6.1]
 (defmethod add-attribute-migration ((att symbol) &optional (entity t))
   (add-attribute-migration (find-field att entity) t))
 (defmethod add-attribute-migration ((att attribute) &optional (stream t))
-  (format stream "~%
-class Add~aTo~a < ActiveRecord::Migration[6.1]
+  (format stream "
+class Add~aTo~a < ActiveRecord::Migration[~a]
   def up~%    ~a
   end~%
   def down~%    ~a
   end~%end~%" (name att) (plural (my-entity att))
+  (let ((platform (gui-platform *implementation*))) (format nil "~a.~a" (major-version platform) (minor-version platform)))
   (with-nesting (with-nesting (add_column att nil)))
   (with-nesting (with-nesting (remove_column att nil)))))
 
@@ -50,15 +51,16 @@ class Add~aTo~a < ActiveRecord::Migration[6.1]
                   (with-nesting (with-nesting (change_table entity out)))))
         (import (when (seed-data entity)
                   (with-output-to-string (out)
-                    (with-nesting (with-nesting (create-seed-data entity out)))))))
-    (format stream "~%
-class Create~a < ActiveRecord::Migration[6.1]
+                    (with-nesting (with-nesting (seed-data-import-statement entity out)))))))
+    (format stream "
+class Create~a < ActiveRecord::Migration[~a]
   def up~%~a~%~a~%    ~a
   end
   def down
     drop_table :~a
   end
-end~%" (plural entity) create change (or import "") (schema-name entity))))
+end~%" (plural entity) (let ((platform (gui-platform *implementation*))) (format nil "~a.~a" (major-version platform) (minor-version platform)))
+       create change (or import "") (schema-name entity))))
 
 ;;;===========================================================================
 ;;; Local variables:

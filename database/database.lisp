@@ -35,7 +35,7 @@
                    (not (tenant-scoped-entity? ent))
                    (not (eq (tenant-entity) ent)))
           (terpri seed-file)
-          (create-seed-data ent seed-file)
+          (seed-data-import-statement ent seed-file)
           (terpri seed-file))))))
 
 

@@ -20,35 +20,28 @@
             (sort weak #'string-lessp :key #'name))))
 
 ;;; WIP in soft_sim data-set.lisp COLUMNS DATA-ROWS MAKE-DATA-SEED
-(defun columns (arg) arg)
-(defun data-rows (arg) arg)
-(defun make-data-seed (arg1 arg2) (values arg1 arg2))
+(defun columns (seed-data ent) (mapcar #'(lambda (col) (find-field col ent)) (car seed-data)))
+(defun data-rows (seed-data) (cdr seed-data))
+(defun make-data-seed (arg1 arg2) (values arg2 arg1))
 (defun create-seed-method () "db_import!")
 
-(defun create-seed-data (ent stream &optional data-seed)
-  (let* ((data (or data-seed (make-data-seed ent (ignore-errors (seed-data ent))))))
+(defun seed-data-import-statement (ent stream &optional data-seed)
+  (let ((data (or data-seed (make-data-seed ent (ignore-errors (seed-data ent)))))
+        (fmt-str (format nil "~~a.~~a([~~%~~{~a~~a~~^,~~%~~}~~%])" (with-nesting (make-indent)))))
     (when data
-      (format stream "~a.~a([~%~{~a~^,~%~}~%])" (model-name ent) (create-seed-method) 
-              (let* ((columns (columns data))
+      (format stream fmt-str (model-name ent) (create-seed-method)
+              (let* ((columns (columns data ent))
                      (column-count (length columns)))
-                (mapcar #'(lambda(row)
-                            (format nil "     {~{~a~^, ~}}"
-                                    (remove nil
-                                       (loop for i from 0 to (1- column-count)
-                                             collect (when (nth i row)
-                                                       (format nil "~a: ~a" (schema-name (nth i columns))
-                                                               (unparse-attribute-value
-                                                                (nth i columns)
-                                                                (nth i row))))))))
-                        (data-rows data))))
+                (mapcar #'(lambda (line) (ruby:unparse-hash line :one-line t))
+                        (mapcar #'(lambda (row) (mapcar #'list (mapcar #'schema-name columns) row)) (data-rows data)))))
       (format stream
-              (format nil "~%ActiveRecord::Base.connection.reset_pk_sequence!('~a')~%"
-                      (schema-name ent))))))
+              (format nil "~%~aActiveRecord::Base.connection.reset_pk_sequence!('~a')~%"
+                      (make-indent) (schema-name ent))))))
 
 (defun data-seeds (arg) arg "not implemented in soft_sim yet")
 (defun unparse-data-set (data-set &optional (stream t))
   (dolist (data-seed (reverse (data-seeds data-set)))
-    (create-seed-data (entity data-seed) stream data-seed)))
+    (seed-data-import-statement (entity data-seed) stream data-seed)))
 
 (defun create-test-data-file (data-set &optional stream)
   (let ((file (test-data-file-path (snake-case (name data-set))))
