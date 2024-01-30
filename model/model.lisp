@@ -44,8 +44,7 @@
 (defmethod model-state-methods ((ent entity))
   (mapcar #'(lambda(state)
               (ruby:unparse-method (strcat "is_" (snake-case (name state)) "?") nil
-                                    (unparse-attribute-references
-                                     (expression (predicate state)) ent)))
+                                   (unparse-attribute-references (expression (predicate state)) ent)))
           (states ent)))
 
 (defmethod format-model-scope ((state entity-state))

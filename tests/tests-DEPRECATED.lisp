@@ -33,14 +33,14 @@
             (div (find-entity :division))
             (comp (find-entity :company)))
         (list
-         (ror::unparse-template-expression (resolve-panel-items div 'status) "@division")
-         (ror::unparse-template-expression (resolve-panel-items div '(Company Name)) "@division")
-         (ror::unparse-template-expression (resolve-panel-items div 'Type) "@division")
-         (ror::unparse-template-expression (resolve-panel-items comp '($strcat Name " - " Type)) "@company")
+         (ror::unparse-template-expression (resolve-panel-items 'status div) "@division")
+         (ror::unparse-template-expression (resolve-panel-items '(Company Name) div) "@division")
+         (ror::unparse-template-expression (resolve-panel-items 'Type div) "@division")
+         (ror::unparse-template-expression (resolve-panel-items '($strcat Name " - " Type) comp) "@company")
          (ror::unparse-template-expression
-          (resolve-panel-items comp '($divide ($add MaxCEOAge MinCEOAge) 2)) "@company")
+          (resolve-panel-items '($divide ($add MaxCEOAge MinCEOAge) 2) comp) "@company")
          (ror::unparse-template-expression
-          (resolve-panel-items div '($divide ($add (Company MaxCEOAge) MaxMDAge) 2)) "@division")))))
+          (resolve-panel-items '($divide ($add (Company MaxCEOAge) MaxMDAge) 2) div) "@division")))))
   '("@division.status" "@division.company.name"
     "@division.company.company_type"
     "(@company.name.to_s + ' - ' + @company.company_type.to_s)"

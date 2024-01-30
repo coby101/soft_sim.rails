@@ -49,9 +49,9 @@
 ;%><table><tr><td bgcolor=<%= @cactus.color %> width=70px height=20px ></td></tr></table><%=
 
 (defun unparse-parent-field (ref-spec context-var)
-  (let* ((field (cadr ref-spec))
+  (let* ((field (cdr ref-spec))
          (relation (car ref-spec))
-         (field-expr (unparse-attribute-references field relation context-var))
+         (field-expr (unparse-attribute-reference field relation context-var))
          (mandatory? (not (required-relation? relation))))
     (if mandatory?
         (let ((record-probe (format nil "~a.~a.blank?"

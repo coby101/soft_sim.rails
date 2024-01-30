@@ -101,11 +101,14 @@
 ;; page columns the screen is divided into and the number of elements sharing this row
 ;; and returns a col-span number
 (defmethod calculate-item-width ((item list) row-cols max-cols)
-  (if (field-reference-expression? item)
+  (if (and (field-reference-expression? item) (atom (cdr item)))
       (calculate-item-width (cadr item) row-cols max-cols)
       (progn
         (warn "trouble in calculate-item-width...? ~a" item)
         1)))
+
+(defmethod calculate-item-width ((item relation) row-elements page-denominator)
+  (calculate-item-width (default-user-key (entity item)) row-elements page-denominator))
 
 (defmethod calculate-item-width ((item attribute) row-elements page-denominator)
   (let ((ideal-share (ideal-screen-share item)))
@@ -512,36 +515,6 @@
           (with-nesting (data-list-headings header))
           (with-nesting (data-list-body content))
           (data-list.close)))
-
-
-
-;; these methods take an item (eg name field, date field, notes field), the number of
-;; page columns the screen is divided into and the number of elements sharing this row
-;; and returns a col-span number
-(defmethod calculate-item-width ((item list) row-cols max-cols)
-  (if (field-reference-expression? item)
-      (calculate-item-width (cadr item) row-cols max-cols)
-      (progn
-        (warn "trouble in calculate-item-width...? ~a" item)
-        1)))
-
-(defmethod calculate-item-width ((item attribute) row-elements page-denominator)
-  (let ((ideal-share (ideal-screen-share item)))
-    (cond
-      ((= 1 row-elements) (ceiling (* ideal-share page-denominator)))
-      ((> row-elements 6) (floor (* ideal-share page-denominator)))
-      (t (max 1 (round (* ideal-share page-denominator)))))))
-
-(defmethod calculate-item-width ((item string) row-elements page-denominator)
-  (if (= row-elements 1)
-      page-denominator
-      (1+ (- page-denominator row-elements))))
-
-(defmethod calculate-item-width ((item multi-valued-attribute) row-elements page-denominator)
-  (min page-denominator
-       (apply #'+ (mapcar #'(lambda (att)
-                              (calculate-item-width att row-elements page-denominator))
-                          (user-attributes (child-entity item))))))
 
 (defun translate-long-name (view)
   (format nil "t('~a.long_name')" (snake-case (name view))))

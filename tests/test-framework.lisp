@@ -14,6 +14,9 @@
   (load (asdf:system-relative-pathname 'rails-generator "tests/view/package.lisp"))
   (load (asdf:system-relative-pathname 'rails-generator "tests/view/view.lisp"))
 
+  (load (asdf:system-relative-pathname 'rails-generator "tests/unparsing/package.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/unparsing/attribute-references.lisp"))
+
   (load (asdf:system-relative-pathname 'rails-generator "tests/database/package.lisp"))
   (load (asdf:system-relative-pathname 'rails-generator "tests/database/expected-results.lisp"))
   (load (asdf:system-relative-pathname 'rails-generator "tests/database/migrations.lisp"))
@@ -22,9 +25,9 @@
 )
 
 (defun test-application ()
-  (define-project tests
+  (define-project rails-tests
     :org         "Rails Generator"
-    :name        "Test Application"
+    :name        "Rails Generator Test Application"
     :gui        ("Rails" :version "7.1.1")
     :description "")
 
@@ -51,7 +54,7 @@
     :repeated-attributes
     ((("Phone" "Ph. Num" "Phone Number")
       :components
-      (("PhoneType" :default "main" :domain (Phonetype Name)
+      (("PhoneType" :default "main" :domain (Phonetype . Name)
                     :constraints (($not-null) ($unique)))
        (("Number")  :type phone :nullable? nil)
        (("Comment") :type memo :documentation
@@ -79,13 +82,13 @@
              ("Status" :default "active" :nullable? nil :domain
                        ("active" "dormant" "archived")))
             :default-layouts
-            (:summary (Code Name (OperationalManager FirstLastName) Description)
+            (:summary (Code Name (OperationalManager . FirstLastName) Description)
              :details ((Name Code)
-                       ((OperationalManager FirstLastName) Status)
+                       ((OperationalManager . FirstLastName) Status)
                        (Description))
              :edit-fields ((Code Name OperationalManager) (Description))
              :add-fields ((Code Name) (OperationalManager Status) (Description))
-             :context ((Code Name (OperationalManager FirstLastName))))
+             :context ((Code Name (OperationalManager . FirstLastName))))
             :documentation
             "physically or operationally distinct business units"))
 

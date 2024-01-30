@@ -18,7 +18,7 @@
 
 (defun contains-reachable-values? (exp context)
   (or (contains-constants-only exp)
-      (let ((entity (typecase context
+      (let ((entity (etypecase context
                       (entity context)
                       (relation (entity context))
                       (attribute (my-entity context)))))

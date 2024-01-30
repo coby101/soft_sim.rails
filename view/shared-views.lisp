@@ -256,7 +256,8 @@
                                                ((typep item 'attribute)
                                                 (unparse-formatting expression (logical-type item)))
                                                ((field-reference-expression? item)
-                                                (unparse-formatting expression (logical-type (cadr item))))
+                                                ;; this code is assuming a dotted pair field reference
+                                                (unparse-formatting expression (logical-type (cdr item))))
                                                (t expression))))
                                       (if (and (typep item 'summary-attribute)
                                                (find-aspect (view aspect) (entity (car (path item)))))

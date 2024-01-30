@@ -2,7 +2,7 @@
 (defpackage #:simian.rails-generator.view
   (:use
    #:cl #:unparser #:configuration #:interface #:interrogation #:utilities #:attribute
-   #:entity #:relationship #:implementation #:foundation
+   #:entity #:relationship #:implementation #:foundation #:interrogation
    #:rails-unparser #:rails-config #:authentication #:dependencies)
   (:nicknames #:view)
   (:export

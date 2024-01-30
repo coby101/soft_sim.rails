@@ -93,6 +93,7 @@
    #:translate
    #:translation
    #:ui-label
+   #:unparse-attribute-reference
    #:unparse-attribute-references
    #:unparse-attribute-value
    #:unparse-datatype

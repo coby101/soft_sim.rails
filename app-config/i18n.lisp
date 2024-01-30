@@ -81,6 +81,7 @@
       (terpri yml))))
  ;     (with-nesting (format yml (model-translations))))))
 
+;; FIXME this is appropriate only for *locale* = :en
 (defun global-translations()
   (yml:unparse-pair-tree
    (list :global

@@ -261,7 +261,8 @@
                                  ((typep element 'attribute)
                                   (unparse-formatting expression (logical-type element)))
                                  ((field-reference-expression? element)
-                                  (unparse-formatting expression (logical-type (cadr element))))
+                                  ;; this code is assuming a dotted pair field reference
+                                  (unparse-formatting expression (logical-type (cdr element))))
                                  (t expression))))
     (format nil "~a~a" label
             (html:div (if (and (typep element 'summary-attribute)
@@ -276,6 +277,9 @@
          (parent (model-name (owner (entity aspect)))))
     (format nil "~a<%= ~a.id %>" (replace-all model parent (snake-case parent))
             var)))
+
+(defmethod unparse-form-element ((item relation))
+  (unparse-form-element (find-field (id item) (entity (my-relation item)))))
 
 (defmethod unparse-form-element ((item attribute))
   (html:div

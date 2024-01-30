@@ -67,10 +67,9 @@ this header to make clear the generated content is now obsolete.~a    #
 (defmethod schema-name ((ref list))
   (if (field-reference-spec? ref)
       (strcat (snake-case (name (car ref))) "_"
-              (if (= (length (cdr ref)) 1)
-                  (schema-name (cadr ref))
-                  (schema-name (cdr ref))))
+              (schema-name (cdr ref)))
       (error "can not handle ~a" ref)))
+
 (defmethod schema-name ((att composite-primary-key)) "id")
 (defmethod schema-name ((rel relation))              (snake-case (plural rel)))
 (defmethod schema-name ((ent entity))                (snake-case (plural ent)))
@@ -88,13 +87,13 @@ this header to make clear the generated content is now obsolete.~a    #
   (call-next-method));"id")
 
 (defmethod unparse ((obj list) (language (eql :ruby)))
-  (if (and (= 2 (length obj))
-           (field-reference-expression? obj)
-           (or (eq (entity (car obj)) (my-entity (cadr obj)))
-               (eq (car obj) (my-entity (cadr obj)))))
-      (if (eq (entity (car obj)) (my-entity (cadr obj)))
-          (format nil "~a_~a" (snake-case (name (car obj))) (schema-name (cadr obj))) 
-          (unparse (cadr obj) language))
+  (if (and (field-reference-expression? obj)
+           (atom (cdr obj))
+           (or (eq (entity (car obj)) (my-entity (cdr obj)))
+               (eq (car obj) (my-entity (cdr obj)))))
+      (if (eq (entity (car obj)) (my-entity (cdr obj)))
+          (format nil "~a_~a" (snake-case (name (car obj))) (schema-name (cdr obj))) 
+          (unparse (cdr obj) language))
       (unparse-array obj language)))
 
 (defmethod controller-name ((aspect aspect))
