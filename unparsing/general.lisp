@@ -167,13 +167,21 @@ this header to make clear the generated content is now obsolete.~a    #
   (format nil "helper.number_with_precision(~a, :precision => 2, :delimiter => ',')"
           (unparse-expression (car args) language)))
 
+;; the following specializations override the native ruby ones
+;; a better approach might be to use :rails as the language and
+;; define specific operator methods as desired but handle most things with
+;; (defmethod unparse-expression ((operator symbol) (language :rails)) (unparse-expression operator :ruby))
 (defmethod unparse-expression ((operator (eql :not-null)) (language (eql :ruby)) &optional args)
-  (let ((field-var (unparse-expression (first args) language)))
-    (format nil "~a.present?" field-var)))
+  (format nil "~a.present?" (unparse-expression (first args) language)))
 
 (defmethod unparse-expression ((operator (eql :null)) (language (eql :ruby)) &optional args)
-  (let ((field-var (unparse-expression (first args) language)))
-    (format nil "~a.blank?" field-var)))
+  (format nil "~a.blank?" (unparse-expression (first args) language)))
+
+(defmethod unparse-expression ((operator (eql :is-true)) (language (eql :ruby)) &optional args)
+  (format nil "~a.true?" (unparse-expression (car args) language)))
+
+(defmethod unparse-expression ((operator (eql :is-false)) (language (eql :ruby)) &optional args)
+  (format nil "~a.false?" (unparse-expression (car args) language)))
 
 (defmethod unparse-attribute-value ((attribute attribute) (value t))
   (ruby:unparse-data (data-type attribute) value))
