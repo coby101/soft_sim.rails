@@ -1,0 +1,1 @@
+This directory is for code that is very focused on producing small snippets of code that other functions and methods will assemble into larger blocks or source code files.
