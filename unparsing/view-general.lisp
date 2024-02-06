@@ -10,12 +10,12 @@
   (format nil "<%~a ~a %>" (if output? "=" "") code))
 
 (defmethod unparse-erb (output? (obj t))
-  (unparse-erb output? (unparse obj :ruby)))
+  (unparse-erb output? (unparse obj :rails)))
 
 (defmethod unparse-erb (output? (obj list))
   (if (or (typep (car obj) 'operator) (operator-symbol? (car obj)))
-      (unparse-erb output? (unparse-expression (car obj) :ruby (cdr obj)))
-      (unparse-expression (unparse obj :ruby) :ruby output?)))
+      (unparse-erb output? (unparse-expression (car obj) :rails (cdr obj)))
+      (unparse-expression (unparse obj :rails) :ruby output?)))
 
 ;; this is not debugged yet, but not used seriously yet either
 (defmethod unparse-formatting ((data t) (type (eql :checkbox)))
@@ -57,7 +57,7 @@
         (let ((record-probe (format nil "~a.~a.blank?"
                                     context-var (instance-name relation))))
           (ruby:unparse-if-statement (as-literal record-probe) (as-literal (t.no-parent)) field-expr))
-        (unparse-expression field-expr :ruby))))
+        (unparse-expression field-expr :rails))))
 
 (defun unparse-url-heirarchy (entity view &key (obj-ref :symbol) include-self?)
   (let ((fmt-str (ecase obj-ref

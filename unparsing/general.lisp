@@ -86,7 +86,15 @@ this header to make clear the generated content is now obsolete.~a    #
 (defmethod schema-name ((att primary-key))
   (call-next-method));"id")
 
-(defmethod unparse ((obj list) (language (eql :ruby)))
+(defmethod unparse ((obj t) (language (eql :rails)))
+  "if there is no rails specialization then dispatch any unparse to :ruby"
+  (unparse obj :ruby))
+
+(defmethod unparse-expression ((obj symbol) (language (eql :rails)) &optional args)
+  "if there is no rails specialization then dispatch any unparse-expression to :ruby"
+  (unparse-expression obj :ruby args))
+
+(defmethod unparse ((obj list) (language (eql :rails)))
   (if (and (field-reference-expression? obj)
            (atom (cdr obj))
            (or (eq (entity (car obj)) (my-entity (cdr obj)))
@@ -108,82 +116,78 @@ this header to make clear the generated content is now obsolete.~a    #
        (or (nullable? att)
            (not (default-value att)))))
 
-(defmethod unparse ((obj entity) (language (eql :ruby)))
+(defmethod unparse ((obj entity) (language (eql :rails)))
   ;; snake-case is a bit arbitrary but a common convention
   (schema-name obj))
 
-(defmethod unparse ((obj attribute) (language (eql :ruby)))
+(defmethod unparse ((obj attribute) (language (eql :rails)))
   (snake-case (name obj)))
 
-(defmethod unparse ((obj relation) (language (eql :ruby))) (call-next-method)); (unparse (keywordify (schema-name obj)) language))
+(defmethod unparse ((obj relation) (language (eql :rails))) (call-next-method)); (unparse (keywordify (schema-name obj)) language))
 
-(defmethod unparse-expression ((obj attribute) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((obj attribute) (language (eql :rails)) &optional args)
   (when args
     (error "we shouldn't have any args here...? (~a)" args))
   (schema-name obj))
 
-(defmethod unparse-expression ((operator (eql :rows)) (language (eql :ruby)) &optional args) 
+(defmethod unparse-expression ((operator (eql :rows)) (language (eql :rails)) &optional args) 
   (let ((class (model-name (car args)))
         (where (if (cadr args)
                    (format nil ".where(\"~a\")" (unparse-expression (cadr args) :sql))
                    "")))
     (format nil "~a~a.count" class where)))
 
-(defmethod unparse-expression ((operator (eql :unchanged)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :unchanged)) (language (eql :rails)) &optional args)
 ;; this check fails on ($literal "supplier_id")
 ;  (unless (or (typep (car args) 'string) (typep (car args) 'attribute))
 ;    (error "$UNCHANGED is only appropriate for an attribute expression"))
   (format nil "~a_change_to_be_saved == nil" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql :new-value)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :new-value)) (language (eql :rails)) &optional args)
   (format nil "~a" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql :old-value)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :old-value)) (language (eql :rails)) &optional args)
  ; (unless (or (typep (car args) 'string) (typep (car args) 'attribute))
  ;   (error "$OLD_VALUE is only appropriate for an attribute expression"))  
   (format nil "~a_change_to_be_saved ? ~:*~a_change_to_be_saved.first : ~:*~a" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql :stop-delete)) (language (eql :ruby)) &optional args) 
+(defmethod unparse-expression ((operator (eql :stop-delete)) (language (eql :rails)) &optional args) 
   (format nil "errors.add(:~a, ~s)" (unparse (primary-key (my-entity (car args))) language)
           "deletion is not allowed"))
 
 ;;Record.count(:all, :conditions => {:created_at => start_date..end_date, :finished_at => nil })
-(defmethod unparse-expression ((operator (eql :max-rows)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :max-rows)) (language (eql :rails)) &optional args)
   (unparse-expression
    :<= language (list (list :rows (car args) (caddr args)) (cadr args))))
 
-(defmethod unparse-expression ((operator (eql :min-rows)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :min-rows)) (language (eql :rails)) &optional args)
   (unparse-expression
    :>= language (list (list :rows (car args) (caddr args)) (cadr args))))
 
-(defmethod unparse-expression ((operator (eql :rows-eql)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :rows-eql)) (language (eql :rails)) &optional args)
   (unparse-expression
    := language (list (list :rows (car args) (caddr args)) (cadr args))))
 
-(defmethod unparse-expression ((operator (eql :as-money)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :as-money)) (language (eql :rails)) &optional args)
   (format nil "number_to_currency(~a)" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql :as-quantity)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :as-quantity)) (language (eql :rails)) &optional args)
   (format nil "helper.number_with_precision(~a, :precision => 2, :delimiter => ',')"
           (unparse-expression (car args) language)))
 
-;; the following specializations override the native ruby ones
-;; a better approach might be to use :rails as the language and
-;; define specific operator methods as desired but handle most things with
-;; (defmethod unparse-expression ((operator symbol) (language :rails)) (unparse-expression operator :ruby))
-(defmethod unparse-expression ((operator (eql :not-null)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :not-null)) (language (eql :rails)) &optional args)
   (format nil "~a.present?" (unparse-expression (first args) language)))
 
-(defmethod unparse-expression ((operator (eql :null)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :null)) (language (eql :rails)) &optional args)
   (format nil "~a.blank?" (unparse-expression (first args) language)))
 
-(defmethod unparse-expression ((operator (eql :is-true)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :is-true)) (language (eql :rails)) &optional args)
   (format nil "~a.true?" (unparse-expression (car args) language)))
 
-(defmethod unparse-expression ((operator (eql :is-false)) (language (eql :ruby)) &optional args)
+(defmethod unparse-expression ((operator (eql :is-false)) (language (eql :rails)) &optional args)
   (format nil "~a.false?" (unparse-expression (car args) language)))
 
-(defmethod unparse-field-reference-expression ((obj list) (language (eql :ruby)))
+(defmethod unparse-field-reference-expression ((obj list) (language (eql :rails)))
   (labels ((name-list (cons)
              (if (atom cons)
                  (list (format nil "~a" (schema-name cons)))

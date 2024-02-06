@@ -102,11 +102,11 @@
   (if (or (typep (car obj) 'operator) (operator-symbol? (car obj)))
       (progn
         (when args (error "we shouldn't have any args here...? (~a)" args))
-        (unparse-expression (car obj) :ruby (cdr obj)))
-      (unparse obj :ruby))) ;; not sure this UNPARSE will ever be appropriate...
+        (unparse-expression (car obj) :rails (cdr obj)))
+      (unparse obj :rails))) ;; not sure this UNPARSE will ever be appropriate...
 
 (defmethod unparse-find-condition ((operator (eql '$eql)) &optional args)
-  (format nil "~a: ~a" (unparse-expression (car args) :ruby) (unparse-expression (cadr args) :ruby)))
+  (format nil "~a: ~a" (unparse-expression (car args) :rails) (unparse-expression (cadr args) :rails)))
 
 (defun unparse-find-record (entity conditions)
   (format nil "~a.find_by(~{~a~^, ~})" (model-name entity)

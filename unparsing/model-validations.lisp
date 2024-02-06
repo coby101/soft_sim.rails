@@ -19,16 +19,16 @@
       (when (vulnerable-to-null? test)
         (incf *nesting-level*)
 	    (format code "~%~aunless ~{~a.blank?~^ || ~}" (make-indent)
-                (mapcar #'(lambda (att) (unparse att :ruby)) (remove-duplicates nullable-atts))))
+                (mapcar #'(lambda (att) (unparse att :rails)) (remove-duplicates nullable-atts))))
 	  (with-nesting
           (format code "~%~aif ~a" (make-indent)
                   (unparse-expression
-                   (unparse-attribute-references test context) :ruby))
+                   (unparse-attribute-references test context) :rails))
         (with-nesting
             (format code "~%~aerrors.add(:~a, ~s)"
                     (make-indent) (if (typep context 'attribute)
-                                      (unparse context :ruby)
-                                      (unparse (primary-key context) :ruby))
+                                      (unparse context :rails)
+                                      (unparse (primary-key context) :rails))
                     (or error-msg
                         (format nil "The check to ensure that ~a has failed"
                                 (unparse-expression (negate-expression test) :english)))))
@@ -124,7 +124,7 @@ These variables are available to message strings:
            (arg (second conditional))
            (option (if (member operator '($if $when)) "if" "unless"))
            (expr (if (symbolp arg)
-                     (strcat ":" (unparse-expression arg :ruby))
+                     (strcat ":" (unparse-expression arg :rails))
                      (ruby:unparse-lambda nil arg))))
       (list option expr))))
 

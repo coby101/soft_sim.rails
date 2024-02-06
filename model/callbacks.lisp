@@ -62,7 +62,7 @@
   (let* ((attributes (cached-calculations entity))
          (expressions (mapcar #'(lambda (att)
                                   (format nil "self.~a = ~a" (schema-name att)
-                                          (unparse-expression (unparse-attribute-references (expression att) entity) :ruby)))
+                                          (unparse-expression (unparse-attribute-references (expression att) entity) :rails)))
                               attributes)))
     (when attributes
       (format nil "def set_cached_calculations ~{~%    ~a~}~%  end~%" expressions))))
@@ -157,7 +157,7 @@
          (model (model-name entity))
          (left-key (car (associates entity)))
          (left-key-name (strcat (instance-name left-key) "_id"))
-         (left-key-ref (unparse-expression (unparse-attribute-references (cons left-key (primary-key left-key)) entity) :ruby))
+         (left-key-ref (unparse-expression (unparse-attribute-references (cons left-key (primary-key left-key)) entity) :rails))
          (right-key (cadr (associates entity)))
          (right-key-name (strcat (instance-name right-key) "_id"))
          (right-key-ref (unparse-path (primary-key right-key) context :bad-start nil)))

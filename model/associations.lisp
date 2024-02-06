@@ -23,7 +23,7 @@
         (progn
           (setf association-type "has_many")
           (push (list "foreign_key"
-                      (unparse (strcat (instance-name (name (my-relation my-relation))) "_id") :ruby))
+                      (unparse (strcat (instance-name (name (my-relation my-relation))) "_id") :rails))
                 association-options))
         (progn
           (when (eql :independent (dependency (rhs relationship)))
@@ -143,7 +143,7 @@
       (unparse-model-association "has_many" (model-plural child)
                            (list "through" (strcat ":" (model-plural assoc-ent))))
       (unparse-model-association "has_and_belongs_to_many" (model-plural child)
-                           (list "join_table" (unparse (model-plural assoc-ent) :ruby)))))
+                           (list "join_table" (unparse (model-plural assoc-ent) :rails)))))
 
 (defmethod format-model-association ((rel many-to-many) (side (eql :right)))
   (let ((assoc-ent (associated-entity rel)))
@@ -184,7 +184,7 @@ all of this seems completely unused, delete it when emotionally ready..
         (progn
           (setf association-type "has_many")
           (push (list "foreign_key"
-                      (unparse (strcat (instance-name (name (my-relation my-relation))) "_id") :ruby))
+                      (unparse (strcat (instance-name (name (my-relation my-relation))) "_id") :rails))
                 association-options))
         (setf association-type "belongs_to"))
     (unless (string= relation-name model-name)
@@ -249,7 +249,7 @@ all of this seems completely unused, delete it when emotionally ready..
       (unparse-migration-association "has_many" (model-plural child)
                            (list "through" (strcat ":" (model-plural assoc-ent))))
       (unparse-migration-association "has_and_belongs_to_many" (model-plural child)
-                           (list "join_table" (unparse (model-plural assoc-ent) :ruby)))))
+                           (list "join_table" (unparse (model-plural assoc-ent) :rails)))))
 
 
 (defmethod format-migration-association ((rel specialization) (side (eql :right)))

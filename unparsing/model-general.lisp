@@ -52,7 +52,7 @@
 
 (defun unparse-callback-registration (event timing method &rest options)
   (let* ((args (mapcar #'(lambda(opt)
-                           (format nil "~a: :~a" (car opt) (unparse (if (eq (cadr opt) t) (cadr opt) (cadr opt)) :ruby)))
+                           (format nil "~a: :~a" (car opt) (unparse (if (eq (cadr opt) t) (cadr opt) (cadr opt)) :rails)))
                        options)))
     (format nil "~a_~a :~a~{, ~a~}" timing event method args)))
 #|
@@ -71,7 +71,7 @@
       ((or (stringp default)
            (numberp default))
        default)
-      (t (format nil "-> (obj) { \"~a\" }" (unparse-expression default :ruby))))))
+      (t (format nil "-> (obj) { \"~a\" }" (unparse-expression default :rails))))))
 
 (defun unparse-find_calendar_entities (calendar-relationships)
   (apply #'ruby:unparse-method "find_calendar_entities" nil
@@ -113,12 +113,12 @@
     (unless (typep default 'attribute)
       (error "unhandled default value ~a" (type-of default)))
     (if (eq (my-entity default) context)
-      (unparse-expression (unparse-attribute-reference default context) :ruby)
+      (unparse-expression (unparse-attribute-reference default context) :rails)
       (unparse-expression
        (list '$unless
              (as-literal (format nil "~{~a~^.~}.nil?" (mapcar #'instance-name (butlast (path-to-attribute context default)))))
              (unparse-attribute-reference default context))
-       :ruby))))
+       :rails))))
 
 (defmethod unparse-summary-expression ((att attribute))
   (error "this method is not appropriate for non-summary attributes"))

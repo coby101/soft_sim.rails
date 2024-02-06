@@ -135,7 +135,7 @@
 
 (defmethod unparse-template-element ((item formula) (aspect aspect) &key obj-var labeled? css-class-string)
   (declare (ignorable obj-var labeled? css-class-string aspect))
-  (unparse-expression (unparse-attribute-references (expression item) (context item) obj-var) :ruby))
+  (unparse-expression (unparse-attribute-references (expression item) (context item) obj-var) :rails))
 
 (defmethod unparse-template-element ((item string) (aspect t) &key obj-var labeled? css-class-string)
   (declare (ignorable obj-var labeled? css-class-string aspect))
@@ -236,7 +236,7 @@
               item)))
 
 (defmethod unparse-template-expression ((item formula) &optional obj-var)
-  (unparse-expression (unparse-attribute-references (expression item) (context item) obj-var) :ruby))
+  (unparse-expression (unparse-attribute-references (expression item) (context item) obj-var) :rails))
 
 ;; can adjust the class value here according to logical type
 (defmethod unparse-template-label ((item attribute))
