@@ -17,7 +17,9 @@
          exp))
 
 (defun contains-reachable-values? (exp context)
-  (or (contains-constants-only exp)
+  (or ;; exprssions have already been resolved as reachable in post-parsing processes
+     (field-reference-expression? exp)
+     (contains-constants-only exp)
       (let ((entity (etypecase context
                       (entity context)
                       (relation (entity context))

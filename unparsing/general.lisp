@@ -183,6 +183,20 @@ this header to make clear the generated content is now obsolete.~a    #
 (defmethod unparse-expression ((operator (eql :is-false)) (language (eql :ruby)) &optional args)
   (format nil "~a.false?" (unparse-expression (car args) language)))
 
+(defmethod unparse-field-reference-expression ((obj list) (language (eql :ruby)))
+  (labels ((name-list (cons)
+             (if (atom cons)
+                 (list (format nil "~a" (schema-name cons)))
+                 (list* (format nil "~a" (car cons)) (name-list (cdr cons))))))
+    (format nil "~{~a~^.~}" (name-list obj))))
+
+(defmethod unparse-field-reference-expression ((obj list) (language (eql :english)))
+  (labels ((name-list (cons)
+             (if (atom cons)
+                 (list (format nil "~a" (schema-name cons)))
+                 (list* (format nil "~a" (car cons)) (name-list (cdr cons))))))
+    (format nil "~{~a's~^ ~}" (name-list obj))))
+
 (defmethod unparse-attribute-value ((attribute attribute) (value t))
   (ruby:unparse-data (data-type attribute) value))
 

@@ -157,7 +157,7 @@
          (model (model-name entity))
          (left-key (car (associates entity)))
          (left-key-name (strcat (instance-name left-key) "_id"))
-         (left-key-ref (unparse-expression (unparse-attribute-reference (primary-key left-key) context) :ruby))
+         (left-key-ref (unparse-expression (unparse-attribute-references (cons left-key (primary-key left-key)) entity) :ruby))
          (right-key (cadr (associates entity)))
          (right-key-name (strcat (instance-name right-key) "_id"))
          (right-key-ref (unparse-path (primary-key right-key) context :bad-start nil)))

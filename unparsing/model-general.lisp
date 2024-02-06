@@ -23,6 +23,7 @@
                        (and (typep context 'relation) (entity context)))))
        (when (or (null model) (eq model (my-entity exp)))
          exp)))
+    ((field-reference-expression? exp) (last-cdr exp))
     ((listp exp) (mapcar #'(lambda (i) (extract-attributes-from-expression i context))
                          exp))
     (t nil)))
