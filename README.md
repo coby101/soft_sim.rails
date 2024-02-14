@@ -24,3 +24,20 @@ for just exploring you can also try:
 ````
 (generate (soft-sim.tests:load-demo))
 ````
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(this repo has about 8000 lines of lisp code in about 70 files as of 07/02/2024)

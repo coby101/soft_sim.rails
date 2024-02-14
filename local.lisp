@@ -12,8 +12,9 @@
   (soft-sim.tests:load-tests)
   (rails-tests:load-tests)
   (soft-sim.tests:print-all-tests)
-  (rails:generate (soft-sim.tests:load-demo))
-  )
+  (let ((foundation:*application* (soft-sim.tests:load-demo)))
+    (documentation:document foundation:*application* :detailed :plaintext nil)
+    (rails:generate)))
 
 ;;;===========================================================================
 ;;; Local variables:
