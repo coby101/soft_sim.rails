@@ -1,6 +1,6 @@
-This directory contains the code that produces migrations, seeds.rb and schema.rb.  After (rails:generate) you will find seeds and schema in `<*implementation-directory*>/<your-project>/ror/db/`
+This directory contains the code that produces migrations, seeds.rb and schema.rb.  After (rails:generate) you will find seeds.rb and schema.rb in `<*implementation-directory*>/<your-project>/ror/db/`
 
-As an example, given the simian specification forms below (taken from the demo application in the soft-sim repo), after loading and executing `(rails:generate)`, the app/db/schema.rb file, whose contents is produced by `(database::create_table (find-entity :employee))`, will look like the Ruby on Rails code presented further below.
+As an example, given the simian specification forms below (taken from the demo application in the soft-sim repo), after loading and executing `(rails:generate)`, the app/db/schema.rb file, whose contents is produced by `(database::schema.rb)`, will look like the Ruby on Rails code presented further below.
 
 After that, there are also a couple of additional examples from seeds.rb and calls to `(add-entity-migration <entity>)`
 ```lisp
@@ -56,7 +56,7 @@ After that, there are also a couple of additional examples from seeds.rb and cal
   :rhs-properties (:name "Subordinates" :dependency :independent))
 ```
 
-app/db/schema.rb:
+excerpts from app/db/schema.rb which can be reproduced via example calls like `(database::create_table (find-entity :employee))` and `(database::change_table (find-entity :employee))`:
 
 ```ruby
 # ############################################################################## #
