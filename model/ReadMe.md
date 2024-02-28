@@ -1,0 +1,428 @@
+This directory contains the code that produces all the generated files that belong in the app/models directory of your rails implementation.  After (rails:generate) you will find them in `<*implementation-directory*>/<your-project>/ror/app/models/`
+
+As an example, given the following simian specification forms (taken from the demo application in the soft-sim repo):
+```lisp
+(define-lookup-table ("PhoneType") :keep-history? nil
+  :documentation  "a set of standard labels for phone contact numbers"
+  :seed-data ((Name Description)
+              ("Home" "Primary home phone number")
+              ("Work" "Primary work phone number")
+              ("Mobile" "Personal mobile phone number")
+              ("Work Mobile" "Company provided mobile phone number")))
+
+(define-entity ("Employee")
+  :documentation "personal and company related data for individuals working for the organization"
+  :attributes ((:entity-code)
+               :name-fields
+               :address-fields
+               :birthdate)
+  :repeated-attributes
+  ((("Phone" "Ph. Num" "Phone Number")
+    :components
+    (("PhoneType" :default "Work" :domain (Phonetype . Name) :constraints (($not-null) ($unique)))
+     (("Number")  :type phone :nullable? nil)
+     (("Comment") :type memo :documentation "Any additional free form comments or notes")))))
+
+(define-aggregation :parent-dependent
+    :name "CorporateStructure"
+    :parent (("Company")
+             :attributes
+             ((:entity-code) (:entity-name) :description
+              (:entity-type ("retail" "engineering" "holding") "construction"))
+             :documentation "the top level in the heirarchy of business structure")
+    :child (("Division")
+            :attributes
+            ((:entity-code)
+             (:entity-name)
+             :description
+             ("Status" :default "active" :nullable? nil :domain ("active" "dormant" "archived")))
+            :documentation "physically or operationally distinct business units"))
+
+(define-relationship ((Company (0 1)) ("hires" "are employed by") (Employee (0 *)))
+    :name ("CompanyStaff")
+    :lhs-properties (:name "Employer" :dependency :independent)
+    :rhs-properties (:name ("Staff" :plural "Staff") :dependency :independent))
+
+(define-relationship ((Employee (1 1)) ("is the operational manager of" "are managed by") (Division (0 *)))
+    :name ("OperationalManager")
+    :lhs-properties (:dependency :independent :name "OperationalManager")
+    :rhs-properties (:dependency :changeable))
+
+(define-recursive-relationship Employee (0 1) ("supervises" "are supervised by") (0 *)
+  :name ("StaffReport" :short "Reporting Structure" :long "Staff Reporting Structure")
+  :lhs-properties (:name "Manager")
+  :rhs-properties (:name "Subordinates" :dependency :independent))
+```
+
+The epp/models/employee.rb file looks like this:
+```ruby
+class Employee < ApplicationRecord
+
+  #  callbacks
+  before_destroy :prevent_orphaned_records, prepend: :true
+
+  #  relationships
+  has_many :subordinatess, class_name: "Employee", foreign_key: 'manager_id'
+  belongs_to :manager, class_name: "Employee", optional: true
+  has_many :divisions, foreign_key: "operational_manager_id"
+  belongs_to :employer, class_name: "Company", optional: true
+  has_many :employee_phones, dependent: :destroy
+  validates_associated :employee_phones
+  accepts_nested_attributes_for :employee_phones, allow_destroy: true, reject_if: :all_blank
+
+  #  validations
+
+  validate :less_than_birth_date_current_date
+  def less_than_birth_date_current_date
+    unless birth_date.blank?
+      if (birth_date >= Date.today)
+        errors.add(:birth_date, "The check to ensure that Employee Date of Birth NIL the current date has failed")
+      end
+    end
+  end
+
+  validates :country, format:
+    { message: "This should be a short string (30 or fewer characters) and it can't include any unusual characters (dashes, slashes, dots, underscores and spaces are okay)",
+      with: /\A[0-9a-zA-Z\/_ -.]{0,30}\z/,
+      allow_blank: true}
+  validates :given_name, presence: { }
+  validates :code, presence: { }
+  validates :code, uniqueness: { message: "all %{model} records must have a unique Employee Code value. \"%{value}\" is taken" }
+  validates :code, presence: { }
+  validates :code, format: { with: /\A[a-zA-Z0-9_.-]{0,15}\z/ }
+  validates :sys_editor, presence: { }
+  validates :sys_editor, format:
+    { message: "This should be a short string (30 or fewer characters) and it can't include any unusual characters (dashes, slashes, dots, underscores and spaces are okay)",
+      with: /\A[0-9a-zA-Z\/_ -.]{0,30}\z/}
+  validates :sys_mod_time, presence: { }
+  validates :sys_creator, presence: { }
+  validates :sys_creator, format:
+    { message: "This should be a short string (30 or fewer characters) and it can't include any unusual characters (dashes, slashes, dots, underscores and spaces are okay)",
+      with: /\A[0-9a-zA-Z\/_ -.]{0,30}\z/}
+  validates :sys_add_time, presence: { }
+
+  #  derived attributes
+  def fam_given_name
+        if (family_name.nil?)
+      given_name
+    else
+      (family_name.to_s + ' ' + given_name.to_s)
+    end
+  end
+
+  def sur_first_name
+        if (family_name.nil?)
+      given_name
+    else
+      (family_name.to_s + ', ' + given_name.to_s)
+    end
+  end
+
+  def first_last_name
+        if (family_name.nil?)
+      given_name
+    else
+      (given_name.to_s + ' ' + family_name.to_s)
+    end
+  end
+
+  def user_select_data
+    (family_name.to_s + ', ' + given_name.to_s)
+  end
+
+
+  def check_deleteable?
+    self.divisions.empty?
+  end
+
+  #  private callback methods
+  private
+
+  def prevent_orphaned_records
+    errors.add(:base, "You can not delete a Employee when there are Divisions attached") unless divisions.blank?
+    throw :abort if !divisions.blank?
+  end
+
+
+  def self.meta_data
+    {
+      :attributes =>
+      {
+        :address1 =>
+        {
+          :logical_type => :google_address,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :address2 =>
+        {
+          :logical_type => :short_text,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :address3 =>
+        {
+          :logical_type => :short_text,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :birth_date =>
+        {
+          :logical_type => :birth_date,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :date
+          },
+          :default => '-> (obj) { "(Date.today - 30)" }',
+          :nullable? => true
+        },
+        :code =>
+        {
+          :logical_type => :user_key,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => false
+        },
+        :country =>
+        {
+          :logical_type => :label,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => 'AU',
+          :nullable? => true
+        },
+        :divisions =>
+        {
+          :logical_type => :count,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :integer
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :employee_phones =>
+        {
+          :logical_type => :count,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :integer
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :employer_id =>
+        {
+          :logical_type => :foreign_key,
+          :domain =>
+          {
+            :domain_type => ':referential_enumeration',
+            :data_type => :integer,
+            :source => [Company, ':id']
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :fam_given_name =>
+        {
+          :logical_type => :short_text,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :family_name =>
+        {
+          :logical_type => :name,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :first_last_name =>
+        {
+          :logical_type => :short_text,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :given_name =>
+        {
+          :logical_type => :name,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => false
+        },
+        :lattitude =>
+        {
+          :logical_type => :mathematical_parameter,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :float
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :locality =>
+        {
+          :logical_type => :name,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :longitude =>
+        {
+          :logical_type => :mathematical_parameter,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :float
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :manager_id =>
+        {
+          :logical_type => :foreign_key,
+          :domain =>
+          {
+            :domain_type => ':referential_enumeration',
+            :data_type => :integer,
+            :source => [Employee, ':id']
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :middle_name =>
+        {
+          :logical_type => :name,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :nick_name =>
+        {
+          :logical_type => :name,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :post_code =>
+        {
+          :logical_type => :short_text,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :state =>
+        {
+          :logical_type => :name,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :subordinates =>
+        {
+          :logical_type => :count,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :integer
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :sur_first_name =>
+        {
+          :logical_type => :short_text,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        },
+        :user_select_data =>
+        {
+          :logical_type => :string,
+          :domain =>
+          {
+            :domain_type => :user_controlled,
+            :data_type => :string
+          },
+          :default => nil,
+          :nullable? => true
+        }
+      },
+      :read_only? => false,
+      :keep_history? => true,
+      :select_display_method => nil,
+      :select_data => nil,
+      :children => [Employee, Employee, Division],
+      :parents => [Employee, Company]
+    }
+  end
+
+end
+```
