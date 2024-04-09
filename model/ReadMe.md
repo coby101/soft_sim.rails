@@ -1,6 +1,8 @@
 This directory contains the code that produces all the generated files that belong in the app/models directory of your rails implementation.  After (rails:generate) you will find them in `<*implementation-directory*>/<your-project>/ror/app/models/`
 
-As an example, given the simian specification forms below (taken from the demo application in the soft-sim repo), after loading and executing `(rails:generate)`, the app/models/employee.rb file, whose contents is produced by `(model:write-model-class (find-entity :employee))`, will look like the Ruby on Rails code presented further below:
+As an example, given the simian specification forms below (taken from the demo application in the soft-sim repo), after loading and executing `(rails:generate)`, the app/models/employee.rb file, whose contents is produced by `(model:write-model-class (find-entity :employee))`, will look like the Ruby on Rails code presented further below.
+
+(todo: replace english language in user facing error messages in favour of I18n translation)
 ```lisp
 (define-lookup-table ("PhoneType") :keep-history? nil
   :documentation  "a set of standard labels for phone contact numbers"
