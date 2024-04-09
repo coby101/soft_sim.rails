@@ -43,19 +43,24 @@ class << self
     base_data[:attributes]
   end
 
-  def parents        = meta_data[:parents]
-  def tenant_scoped? = (parents || []).include?(DBTenant)
-  def children       = meta_data[:children]
-  def user_managed?  = !meta_data[:read_only?]
+  def children    = meta_data[:children]
+  def parents      = meta_data[:parents]
   def auditable?    = meta_data[:keep_history?]
-  def select_value = meta_data[:select_value] || :id
-  def select_text  = meta_data[:select_display_method] || select_value
-  def foreign_keys    = parents&.flatten&.map { |c| (c.name.underscore + '_id').to_sym } || []
-  def list_attributes    = attributes.keys
-  def default_sort_method   = meta_data[:sort_by] || :id
-  def attribute_meta_data(key) = attributes[key] || {}
+  def select_text    = meta_data[:select_display_method] || select_value
+  def select_value    = meta_data[:select_value] || :id
+  def foreign_keys     = parents&.flatten&.map { |c| (c.name.underscore + '_id').to_sym } || []
+  def user_managed?     = !meta_data[:read_only?]
+  def tenant_scoped?     = (parents || []).include?(DBTenant)
+  def list_attributes     = attributes.keys
+  def default_sort_method  = meta_data[:sort_by] || :id
 
-  def attribute_property(attribute, property) = attribute_meta_data(attribute)[property] rescue nil
+  def attribute_meta_data(key)
+    attributes[key] || {}
+  end
+
+  def attribute_property(attribute, property)
+    attribute_meta_data(attribute)[property] rescue nil
+  end
 
   def nullable?(attribute)  = data_type(attribute) == :boolean || attribute_property(attribute, :nullable?)
   def use_type(attribute)    = attribute_property(attribute, :logical_type)
@@ -125,8 +130,8 @@ class << self
     concerns = included_modules.select { |mod| mod.to_s.exclude?(':') && mod != Kernel }
     base_data[:attributes] = {} if base_data[:attributes].nil?
     # visit each concern and add any shared attributes
-    concerns.each do |mod|
-      shared = mod.derived_attributes rescue {}
+    concerns.each do |module|
+      shared = module.derived_attributes rescue {}
       shared.each do |att, properties|
         base_data[:attributes][att] = properties
       end
