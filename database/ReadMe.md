@@ -53,7 +53,7 @@ After that, there are also a couple of additional examples from seeds.rb and cal
 (define-recursive-relationship Employee (0 1) ("supervises" "are supervised by") (0 *)
   :name ("StaffReport" :short "Reporting Structure" :long "Staff Reporting Structure")
   :lhs-properties (:name "Manager")
-  :rhs-properties (:name "Subordinates" :dependency :independent))
+  :rhs-properties (:name "Subordinate" :dependency :independent))
 ```
 
 excerpts from app/db/schema.rb which can be reproduced via example calls like `(database::create_table (find-entity :employee))` and `(database::change_table (find-entity :employee))`:
@@ -159,7 +159,7 @@ ActiveRecord::Schema.define() do
   end
 
   ```
- From app/db/schema.rb:
+ From app/db/seeds.rb:
 
 ```ruby
 CompanyType.db_import!([
