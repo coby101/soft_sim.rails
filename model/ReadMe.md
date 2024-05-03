@@ -53,7 +53,7 @@ As an example, given the simian specification forms below (taken from the demo a
 (define-recursive-relationship Employee (0 1) ("supervises" "are supervised by") (0 *)
   :name ("StaffReport" :short "Reporting Structure" :long "Staff Reporting Structure")
   :lhs-properties (:name "Manager")
-  :rhs-properties (:name "Subordinates" :dependency :independent))
+  :rhs-properties (:name "subordinate" :dependency :independent))
 ```
 
 app/models/employee.rb:
@@ -70,7 +70,7 @@ class Employee < ApplicationRecord
   before_destroy :prevent_orphaned_records, prepend: :true
 
   #  relationships
-  has_many :subordinatess, class_name: "Employee", foreign_key: 'manager_id'
+  has_many :subordinates, class_name: "Employee", foreign_key: 'manager_id'
   belongs_to :manager, class_name: "Employee", optional: true
   has_many :divisions, foreign_key: "operational_manager_id"
   belongs_to :employer, class_name: "Company", optional: true
