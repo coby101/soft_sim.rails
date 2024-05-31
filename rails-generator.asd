@@ -74,6 +74,11 @@
                  (:file "seeds")
                  (:file "migrations")
                  (:file "database")))
+               (:module services
+                :components
+                ((:file "package")
+                 (:file "export")
+                 (:file "import")))
                (:module app-tasks
                 :components
                 ((:file "package")

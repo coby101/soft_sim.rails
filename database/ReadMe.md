@@ -40,17 +40,17 @@ After that, there are also a couple of additional examples from seeds.rb and cal
              ("Status" :default "active" :nullable? nil :domain ("active" "dormant" "archived")))
             :documentation "physically or operationally distinct business units"))
 
-(define-relationship ((Company (0 1)) ("hires" "are employed by") (Employee (0 *)))
+(define-relationship ((Company (0 1) "hires") (Employee (0 *) "are employed by"))
     :name ("CompanyStaff")
     :lhs-properties (:name "Employer" :dependency :independent)
     :rhs-properties (:name ("Staff" :plural "Staff") :dependency :independent))
 
-(define-relationship ((Employee (1 1)) ("is the operational manager of" "are managed by") (Division (0 *)))
+(define-relationship ((Employee (1 1) "is the operational manager of") (Division (0 *) "are managed by"))
     :name ("OperationalManager")
     :lhs-properties (:dependency :independent :name "OperationalManager")
     :rhs-properties (:dependency :changeable))
 
-(define-recursive-relationship Employee (0 1) ("supervises" "are supervised by") (0 *)
+(define-recursive-relationship Employee ((0 1) "supervises") ((0 *) "are supervised by")
   :name ("StaffReport" :short "Reporting Structure" :long "Staff Reporting Structure")
   :lhs-properties (:name "Manager")
   :rhs-properties (:name "Subordinate" :dependency :independent))

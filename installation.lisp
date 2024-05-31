@@ -30,6 +30,7 @@
    #:routes-file-path
    #:schema-file-path
    #:seed-file-path
+   #:service-directory
    #:task-file-path
    #:test-data-file-path
    ))
@@ -38,6 +39,9 @@
 
 (defun model-directory ()
   (implementation-subdirectory "ror" "app" "models"))
+
+(defun service-directory ()
+  (implementation-subdirectory "ror" "app" "services"))
 
 (defun model-file-path (entity)
   (merge-pathnames (make-pathname :name (if (typep entity 'entity) (snake-case (name entity)) entity)

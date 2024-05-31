@@ -1,0 +1,1 @@
+This directory is intended for code that generates classes, methods, general code or other data that code generated in other areas will depend on.

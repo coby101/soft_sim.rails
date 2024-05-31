@@ -11,6 +11,10 @@
   (load (asdf:system-relative-pathname 'rails-generator "tests/controller/package.lisp"))
   (load (asdf:system-relative-pathname 'rails-generator "tests/controller/controller.lisp"))
 
+  (load (asdf:system-relative-pathname 'rails-generator "tests/services/package.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/services/import.lisp"))
+  (load (asdf:system-relative-pathname 'rails-generator "tests/services/export.lisp"))
+
   (load (asdf:system-relative-pathname 'rails-generator "tests/view/package.lisp"))
   (load (asdf:system-relative-pathname 'rails-generator "tests/view/view.lisp"))
 
@@ -94,18 +98,18 @@
               "physically or operationally distinct business units"))
 
     (define-relationship
-        ((Company (0 1)) ("hires" "are employed by") (Employee (0 *)))
+        ((Company (0 1) "hires") (Employee (0 *) "are employed by"))
         :name ("CompanyStaff")
         :lhs-properties (:name "Employer" :dependency :independent)
         :rhs-properties (:name ("Staff" :plural "Staff") :dependency :independent))
 
     (define-relationship
-        ((Employee (1 1)) ("is the operational manager of" "are managed by") (Division (0 *)))
+        ((Employee (1 1) "is the operational manager of") (Division (0 *) "are managed by"))
         :name ("OperationalManager")
         :lhs-properties (:dependency :independent :name "OperationalManager")
         :rhs-properties (:dependency :changeable))
 
-    (define-recursive-relationship Employee (0 1) ("supervises" "are supervised by") (0 *)
+    (define-recursive-relationship Employee ((0 1) "supervises") ((0 *) "are supervised by")
       :name ("StaffReport" :short "Reporting Structure" :long "Staff Reporting Structure")
       :lhs-properties (:name "Manager")
       :rhs-properties (:name "Subordinates" :dependency :independent))
