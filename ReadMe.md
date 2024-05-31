@@ -39,7 +39,7 @@ for just exploring you can also try:
 ## Example
 
 ## Specification
-From the soft_sim repo demo/applicationlisp file, this is an example specification file contents:
+From the soft_sim repo demo/application.lisp file, this is an example specification file contents:
 ``` lisp
 (use-package :simian-builder)
 
