@@ -1,5 +1,6 @@
 # soft_sim.rails
 
+## Overview
 Ruby on Rails code generator for use with the soft_sim application parser. Once a Software Simian application object model is in your lisp memory, `rails:generate` will use the entity, attribute, relationship and user interface requirements embodied within and produce:
 * a fully populated app/models directory
 * a fully populated app/controllers directory
@@ -12,6 +13,7 @@ It is sufficient to produce a functional Rails application.
 
 \<Coming Soon\> Depending on your application requirements, you will have app/service and app/model/concerns files as well.\</Coming Soon\>
 
+## Usage
 With Quicklisp installed in your lisp environment, navigate to its `local-projects` directory. Execute:
 
 - `git clone https://github.com/coby101/soft_sim`
