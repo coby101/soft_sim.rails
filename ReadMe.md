@@ -36,7 +36,7 @@ for just exploring you can also try:
 ```
 (generate (soft-sim.tests:load-demo))
 ```
-
+## Product
 After executing the above, the rails generator will have produced these files:
 ```
 <you>:~/soft-sim/implementations/demo/ror$ find . -name '*.rb' | xargs wc -l
