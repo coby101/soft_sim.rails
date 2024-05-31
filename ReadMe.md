@@ -62,6 +62,7 @@ From the soft_sim repo demo/application.lisp file, this is an example specificat
               ("Mobile" "Personal mobile phone number")
               ("Work Mobile" "Company provided mobile phone number")))
 
+;;; note: :name-fields, :address-fields etc are predefined attribute specifications among many in \<soft-sim\>lib/reusable-field-specs.lisp
 (define-entity ("Employee")
   :documentation
   "personal and company related data for individuals working for the organization"
