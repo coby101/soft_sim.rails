@@ -36,7 +36,137 @@ for just exploring you can also try:
 ```
 (generate (soft-sim.tests:load-demo))
 ```
-## Product
+## Example
+
+## Specification
+From the soft_sim repo demo/applicationlisp file, this is an example specification file contents:
+``` lisp
+(use-package :simian-builder)
+
+(define-project demo
+  :org         "Simian Software"
+  :name        "Demo Web Application"
+  :nick-name   "Demo"
+  :description "Demo Web application for the testing and review of Software ~
+                Simian application generating facilities"
+  :gui ("Rails" :version "7.1.1")
+  :db  ("PostgreSQL" :version "16.1")
+  :os  ("Linux" :code-name "Debian (bullseye)" :version 11)
+  :include-frameworks (:calendar :meta-data :geo-political))
+
+(define-lookup-table ("PhoneType") :keep-history? nil
+  :documentation  "a set of standard labels for phone contact numbers"
+  :seed-data ((Name Description)
+              ("Home" "Primary home phone number")
+              ("Work" "Primary work phone number")
+              ("Mobile" "Personal mobile phone number")
+              ("Work Mobile" "Company provided mobile phone number")))
+
+(define-entity ("Employee")
+  :documentation
+  "personal and company related data for individuals working for the organization"
+  :attributes ((:entity-code)
+               :name-fields
+               :address-fields
+               :birthdate)
+  :importable (GivenName FamilyName BirthDate)  
+  :exportable (Code GivenName FamilyName BirthDate)  
+  :default-layouts
+  (:summary (Code :casual-full-name :short-address)
+   :details ((Code Nickname GivenName FamilyName)
+             :full-address)
+   :context ((Code FirstLastName)))
+  :repeated-attributes
+  ((("Phone" "Ph. Num" "Phone Number")
+    :components
+    (("PhoneType" :default "Work" :domain (Phonetype . Name)
+                  :constraints (($not-null) ($unique)))
+     (("Number")  :type phone :nullable? nil)
+     (("Comment") :type memo :documentation
+      "Any additional free form comments or notes")))))
+
+(define-aggregation :parent-dependent
+    :name "CorporateStructure"
+    :parent (("Company")
+             :attributes
+             ((:entity-code) (:entity-name) :description
+              (:entity-type ("retail" "engineering" "holding") "construction"))
+             :default-layouts
+             (:summary (Code Name Type Description)
+              :details ((Name Code Type)
+                        (Description)
+                        (Divisions Staff))
+              :add-fields ((Code Name Type) (Description))
+              :context ((Code Name Type)))
+             :documentation "the top level in the heirarchy of business structure")
+    :child (("Division")
+            :attributes
+            ((:entity-code)
+             (:entity-name)
+             :description
+             ("Status" :default "active" :nullable? nil :domain
+                       ("active" "dormant" "archived")))
+            :default-layouts
+            (:summary (Code Name (OperationalManager . FirstLastName) Description)
+             :details ((Name Code)
+                       ((OperationalManager . FirstLastName) Status)
+                       (Description))
+             :edit-fields ((Code Name OperationalManager) (Description))
+             :add-fields ((Code Name) (OperationalManager) (Description))
+             :context ((Code Name (OperationalManager . FirstLastName))))
+            :documentation
+            "physically or operationally distinct business units"))
+
+(define-relationship
+    ((Company (0 1)) ("hires" "are employed by") (Employee (0 *)))
+    :name ("CompanyStaff")
+    :lhs-properties (:name "Employer" :dependency :independent)
+    :rhs-properties (:name ("Staff" :plural "Staff") :dependency :independent))
+
+(define-relationship
+    ((Employee (1 1)) ("is the operational manager of" "are managed by") (Division (0 *)))
+    :name ("OperationalManager")
+    :lhs-properties (:dependency :independent :name "OperationalManager")
+    :rhs-properties (:dependency :changeable))
+
+(define-recursive-relationship Employee (0 1) ("supervises" "are supervised by") (0 *)
+  :name ("StaffReport" :short "Reporting Structure" :long "Staff Reporting Structure")
+  :lhs-properties (:name "Manager")
+  :rhs-properties (:name "Subordinates" :dependency :independent))
+
+;; these are here only to test/demonstrate irregular (Cacti) and uncountable (Staff) entity names
+;; and was an early ruby on rails generating concern given the importance of convention in Rails apps
+(define-entity ("Staff" :plural "Staff") :attributes (("Name" :type id-name) ("Code" :type code)))
+(define-entity ("Cactus" :plural "Cacti") :attributes (("Color" :type color) (("Prickly" "Prickly?" "Is It Prickly?") :type checkbox)))
+
+(define-role ("staff" :short "Staff Member" :long "Company Staff Member"))
+
+;; interface generation is in a very unstable state and no longer useful
+(define-application-space ("Config" "Configuration" "Configuration and Setup Data") :parent-space nil)
+(define-application-space ("Info" "Information" "Company Reference Information") :parent-space nil)
+(define-application-space ("Corp" "Company Reference" "Company Reference Information") :parent-space Info)
+(define-application-space ("Comp" "Company Setup" "Company Setup Management") :parent-space Config)
+
+(define-view ("CompanyList" "Our Company" "Our Company Structure") :roles (staff)
+  :application-space Corp
+  :layouts
+  ((Company :operations (:create :show :list))
+   (Division :operations (:create :show :list))
+   (Employee :operations (:show :list)))
+  :description "provides access to basic company data and a company's division components.  It also ~
+                provides a view of publically available contact information for company staff members")
+
+(define-view ("CompanyManagement" "Company Setup" "Manage Company Structure") :roles (staff)
+  :application-space ("Config" "Corp")
+  :layouts
+  ((Company :operations (:create :show :list))
+   (Division :operations (:create :show :list))
+   (Employee :operations (:show :list)))
+  :description "provides access to basic company data and a company's division components.  It also ~
+                provides a view of publically available contact information for company staff members")
+```
+
+### Product
 After executing the above, the rails generator will have produced these files:
 ```
 <you>:~/soft-sim/implementations/demo/ror$ find . -name '*.rb' | xargs wc -l
