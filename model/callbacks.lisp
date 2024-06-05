@@ -1,7 +1,8 @@
 ;;;===========================================================================
 ;;;
 ;;;   Code for registering and writing model callbacks
-;;;
+;;;    - this is in need of refactoring as well as
+;;;      belonging in a summarizable concern file
 ;;;===========================================================================
 
 (in-package #:model)
@@ -17,30 +18,6 @@
 (defun summary-update-method-name (parent)
   (format nil "trigger_~a_summary_updates"
           (instance-name parent)))
-
-;; these three functions should be methods in classes/entities.lisp
-;;BEGIN
-(defun calendar-links (ent)
-  (remove-if-not
-   #'(lambda(r)
-       (and (typep r 'one-to-many)
-            (eq ent (entity (rhs r)))
-            (member (entity (lhs r)) (calendar-entities))
-            (not (member (entity (rhs r)) (calendar-entities)))))
-   (relationships ent)))
-
-(defun interdependent-defaulting-fields (entity)
-  (remove-if-not
-   #'(lambda (f)
-       (let ((default (default-value f)))
-         (and default (typep default 'attribute))))
-   (attributes entity)))
-
-(defun find-calendar-entities (entity)
-  (let ((calendar-links (calendar-links entity)))                     ;; don't have time to sort this
-    (when (and calendar-links (not (typep entity 'reporting-entity)) (not (string-equal "Budget" (name entity)))) 
-      (unparse-find_calendar_entities calendar-links))))
-;; END
 
 (defun set-interdependent-defaults (entity)
   (let* ((attributes (interdependent-defaulting-fields entity))
