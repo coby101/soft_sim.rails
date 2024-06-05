@@ -44,9 +44,7 @@
     (unless (string= relation-name model-name)
       (push (list "class_name" (format nil "~s" model-name)) association-options))
     (apply #'unparse-model-association
-                                   "belongs_to"
-                                   (instance-name relation-name)
-                                   association-options)))
+           "belongs_to" (instance-name relation-name) association-options)))
 
 (defmethod format-model-association ((rel xor-relationship) (side (eql :right)))
   (let* ((lhs (lhs rel))
@@ -55,21 +53,18 @@
          (association-options '(("polymorphic" "true"))))
     (when (eql :independent (dependency (rhs rel)))
       (push (list "optional" "true") association-options))
-    (apply #'unparse-model-association
-                                   "belongs_to"
-                                   (instance-name relation-name)
-                                   association-options)))
+    (apply #'unparse-model-association 
+           "belongs_to" (instance-name relation-name) association-options)))
 
 (defmethod format-model-association ((rel aggregation) (side (eql :right)))
   (let* ((main-declaration (call-next-method))
          (parent (entity (lhs rel)))
-         (ancestors (mapcar #'lhs
-                            (remove-if-not #'(lambda (r)
-                                               (and (not (typep r 'many-to-many))
-                                                    (eq parent (entity (rhs r)))
-                                                    (not (member (entity (lhs r)) (parents (entity (rhs rel)))))
-                                                    ))
-                                           (relationships parent)))))
+         (ancestors 
+          (mapcar #'lhs (remove-if-not #'(lambda (r)
+                                            (and (not (typep r 'many-to-many))
+                                                 (eq parent (entity (rhs r)))
+                                                 (not (member (entity (lhs r)) (parents (entity (rhs rel)))))))
+                        (relationships parent)))))
     (format nil "~a~{~%  ~a~}" main-declaration
             (when ancestors
               (loop for anc in ancestors
@@ -157,13 +152,14 @@
 (defmethod declare-model-association ((rel shared-relation))
   (format-model-association (car (relationships rel)) (my-side rel)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;;  Associations for migration/schema code
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #|
+
 all of this seems completely unused, delete it when emotionally ready..
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  Associations for migrations and schema.rb code
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun unparse-migration-association (type relation &rest options)
   (format nil "~a :~a~{, ~a~}" type relation
           (mapcar #'(lambda(opt)

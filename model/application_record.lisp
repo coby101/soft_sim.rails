@@ -9,7 +9,8 @@
 
 (defun check_deletable?(&optional (stream t))
   (indent-block stream "
-# used in many model files as a pre-check to deny users the chance to delete records with dependent relations
+# overridden in many model files as a pre-check to alert users that a particular record
+# will fail validation if a destroy is attempted, due to existing dependent records
 def check_deleteable?
   true
 end
@@ -17,7 +18,7 @@ end
 
 (defun db_import!(&optional (stream t))
   (indent-block stream "
-# used in seeds.rb so can be reloaded during development without creating duplicate records
+# used in seeds.rb so seeds can be reloaded during development without creating duplicate records
 def self.db_import!(data)
   return true unless data.present?
   data.each do |atts|
@@ -28,13 +29,17 @@ end
 
 (defun polymorphic_reference(&optional (stream t))
   (indent-block stream "
+# used for forms and controllers to unambiguously identify records involved in polymorphic relationships
 def polymorphic_reference
   \"#{self.class.name}:#{self.id}\"
 end
 "))
 
 (defun meta-data-class-methods(&optional (stream t))
+  (format stream "~aclass BadMetaData < StandardError; end~%" (make-indent))
   (indent-block stream "
+# these methods allow for a great deal of abstraction in view helpers and general services as 
+# object.class can be interrogated for data relevant to alot of formating and behaviour
 class << self
 
   def attributes
@@ -54,13 +59,8 @@ class << self
   def list_attributes     = attributes.keys
   def default_sort_method  = meta_data[:sort_by] || :id
 
-  def attribute_meta_data(key)
-    attributes[key] || {}
-  end
-
-  def attribute_property(attribute, property)
-    attribute_meta_data(attribute)[property] rescue nil
-  end
+  def attribute_meta_data(key) = (attributes[key] || {})
+  def attribute_property(attribute, property) = attribute_meta_data(attribute)[property] rescue nil
 
   def nullable?(attribute)  = data_type(attribute) == :boolean || attribute_property(attribute, :nullable?)
   def use_type(attribute)    = attribute_property(attribute, :logical_type)
@@ -70,6 +70,10 @@ class << self
   def is_foreign_key?(attribute) = attribute.in?(foreign_keys)
   def attribute_domain(attribute) = attribute_property(attribute, :domain) || {}
 
+  # default attribute values can be:
+  #  - literal data (eg. 'current' or 100)
+  #  - a reference to another attribute or a specific method to call on an object
+  #  - a Proc object that will be passed a class instance
   def default_value(attribute, instance = nil)
     spec = attribute_property(attribute, :default)
     if    spec.class == Proc   then instance && spec.call(instance)
@@ -78,6 +82,9 @@ class << self
     end
   end
 
+  # if a numerical or date attribute was defined with a constrained value range, form templates
+  # will use these minimum_ and maximum_value methods to similarily constrain user interfaces
+  # as with default_value, the property value can be literal data, a method, or a Proc
   def minimum_value(attribute, instance = nil)
     spec = attribute_property(attribute, :minimum_value)
     if    spec.class == Proc   then instance && spec.call(instance)
@@ -94,6 +101,8 @@ class << self
     end
   end
 
+  # for referential enumerations, attribute_select_display_method and attribute_select_value_method
+  # provide form helpers with data needed to properly populate a select box field
   def attribute_select_display_method(attribute)
     source = attribute_domain(attribute)[:source]
     if source.first.is_a?(Class)
@@ -162,8 +171,7 @@ end
 	    (check_deletable? out)
 	    (polymorphic_reference out)  
 	    (meta-data-class-methods out)
-	    (terpri out)
-	    (format out "~aclass BadMetaData < StandardError; end~%" (make-indent)))
+	    (terpri out))
       (format out "~aend~%" (make-indent)))))
 
 ;;;===========================================================================

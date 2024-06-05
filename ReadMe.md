@@ -34,7 +34,7 @@ To generate a rails implementation from an application specification, where the 
 
 for just exploring you can also try:
 ```
-(generate (soft-sim.tests:load-demo))
+(generate (soft-sim:load-demo))
 ```
 ## Example
 
