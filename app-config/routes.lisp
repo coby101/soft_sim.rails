@@ -1,13 +1,17 @@
 ;;;===========================================================================
 ;;;
-;;;   Code for generating routes.rb. The approach taken below produces very
-;;;   detailed route specifications and is not very conventional at all. It
-;;;   will likely be significantly refactored to take advantage of all the 
-;;;   rails magic afforded by sticky with convention.
+;;;   Code for generating routes.rb. There are two types of unparsing avalable
+;;;   and are chosen via the 'fully-resolved?' parameter passed to 'wirte-routes'
+;;;   The fully resolved approach produces very detailed route specifications and
+;;;   is not a very conventional approach but it provides for "reaching inside" 
+;;;   where no conventional routes are wanted. With 'fully-resolved' nil, the 
+;;;   rails magic provided by 'resources' is written instead.
 ;;;
 ;;;===========================================================================
 
 (in-package #:app-config)
+
+(defvar *unparse-fully-resolved-routes* nil)
 
 (defun framework-routes ()
   (append
@@ -127,24 +131,86 @@
                     (format nil fmt-str (apply #'append (mapcar #'unparse-routes views)))))
                   "")
               (make-indent)))))
+;(setf space (car (spaces *application*)))
 
-(defun write-routes (stream &optional (app *application*))
+(defun unparse-aspect-resources (tree &optional (stream t))
+  (if (null tree)
+    (format stream "")
+    (let* ((aspect (car tree))
+           (actions (implemented-actions aspect)))
+      (format stream "resources :~a, only: %i[~{~a~^ ~}]" (schema-name (entity aspect)) (remove-duplicates (mapcar #'controller-method actions) :test #'string-equal))
+      (if (or (cdr tree) nil) ;;(member :list actions)) the :list action is PCMD specific
+          (format stream " do~%"))
+      (if nil ;;(member :list actions)) the :list action is PCMD specific
+          (format stream "~a  collection do get :list end" (make-indent)))
+      (if (cdr tree)
+          (with-nesting
+            (dolist (subtree (cdr tree))
+              (format stream "~a" (make-indent))
+              (unparse-aspect-resources subtree stream)
+              (format stream "~%" ))))
+      (if (or (cdr tree)  nil) ;;(member :list actions)) the :list action is PCMD specific
+              (format stream "~aend" (make-indent))))))
+
+(defun unparse-view-resources (view &optional (stream t))
+  (let ((heirarchy (view-heirarchy view)))
+    (if heirarchy
+        (unparse-aspect-resources heirarchy stream)
+        (format stream ""))))
+
+#|
+scope '/affiliates' do
+  resources :clients, policy_for: 'clients' do
+    collection do
+      get :list
+      post :import
+      get :download_template_file
+    end
+    resources :client_notes, only: [:update, :destroy]
+    resources :client_contacts, only: [:update, :destroy]
+    resources :projects, only: [:show, :index, :destroy] do
+      collection do get :list end
+    end
+  end
+  resources :subcontracts, policy_for: 'subcontracts' do
+    collection do get :list end
+    end
+  end
+|#
+
+(defun unparse-route-scope (space &optional (stream t))
+  (format stream "scope '/~a' do" (snake-case (name space)))
+  (with-nesting
+     (dolist (view (views space))
+       (format stream "~%~a" (make-indent))
+       (unparse-view-resources view stream)))
+  (format stream "~%end~%"))
+
+(defun write-resources-file (space)
+  (with-open-file (resource-file (route-resource-filepath (string-downcase (name space))) :direction :output :if-exists :supersede)
+    (unparse-route-scope space resource-file)))
+
+(defun write-routes (stream &key (app *application*) (fully-resolved? nil))
   (format stream "~%~{  ~a~%~}~%~%" (framework-routes))
   ;; (when *dev-mode*
   ;;   (dolist (view (mapcar #'create-default-view (schema-entities app)))
   ;;     (comment-out stream "routes for the ~s view" (long-name view))
   ;;     (format stream "~{  ~a~%~}~%"
   ;;             (mapcan #'unparse-routes (aspects view)))))
-  (dolist (view (views app))
-    (comment-out stream "routes for the ~s view" (long-name view))
-    (format stream "~{  ~a~%~}~%"
-            (mapcan #'unparse-routes (aspects view)))))
+  (if fully-resolved?
+   (dolist (view (views app))
+     (format stream "  # routes for the ~s view~%" (long-name view))
+     (format stream "~{  ~a~%~}~%" (mapcan #'unparse-routes (aspects view))))
+   (dolist (space (spaces app))
+     (format stream "  # routes for the ~s application space~%" (long-name space))
+     (format stream "  draw :~a~%" (string-downcase (name space)))
+     (write-resources-file space))))
 
 (defun routes.rb (&optional (app *application*))
   (with-open-file (routes (routes-file-path) :direction :output :if-exists :supersede)
     (format-file-notice routes "routes.rb")
     (format routes "~%Rails.application.routes.draw do~%")
-    (write-routes routes app)
+    (write-routes routes :app app :fully-resolved? *unparse-fully-resolved-routes*)
     (format routes "~%end~%")))
 
 ;;;===========================================================================

@@ -17,6 +17,7 @@
   (:nicknames #:rails-config #:app-config)
   (:export
    #:*locale*
+   #:*unparse-fully-resolved-routes*
    #:*show-button-text*
    #:*delete-conf*
    #:inflections.rb

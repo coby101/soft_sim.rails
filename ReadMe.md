@@ -169,6 +169,7 @@ From the soft_sim repo demo/application.lisp file, this is an example specificat
 
 ### Product
 After executing the above, the rails generator will have produced these files:
+(NB controller and view directories are not represented here pending refactor)
 ```
 <you>:~/soft-sim/implementations/demo/ror$ find . -name '*.rb' | xargs wc -l
     20 ./app/controllers/framework_controller.rb
@@ -220,10 +221,17 @@ After executing the above, the rails generator will have produced these files:
    147 ./app/models/view.rb
    584 ./db/schema.rb
   3861 ./db/seeds.rb
-    55 ./config/routes.rb
+    25 ./config/routes.rb
+     2 ./config/routes/info.rb
+     6 ./config/routes/config.rb
+    10 ./config/routes/corp.rb
+     2 ./config/routes/comp.rb
+     2 ./config/routes/dev.rb
     11 ./config/initializers/inflections.rb
     53 ./load.rb
-  9736 total
+  9741 total
+<you>:~/soft-sim/implementations/demo/ror$ find . -name '*.yml' | xargs wc -l
+    2286 ./config/locales/generated.en.yml
 ```
 
 Subdirectory ReadMe files will have example file contents

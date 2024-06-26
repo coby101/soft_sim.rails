@@ -5,8 +5,7 @@
 ;;;===========================================================================
 
 (defpackage #:simian.rails-generator.implementation
-  (:use
-   #:cl #:rails-unparser #:unparser #:configuration #:utilities #:entity #:foundation #:interface)
+  (:use #:cl #:rails-unparser #:unparser #:configuration #:utilities #:entity #:foundation #:interface)
   (:nicknames #:implementation)
   (:export
    #:controller-directory
@@ -27,6 +26,7 @@
    #:layout-file-path
    #:model-directory
    #:model-file-path
+   #:route-resource-filepath
    #:routes-file-path
    #:schema-file-path
    #:seed-file-path
@@ -105,27 +105,35 @@
    (make-pathname :name (strcat panel ".html") :type "erb")
    (layout-directory aspect)))
 
-(defun routes-file-path()
+(defun routes-file-path ()
   (merge-pathnames
    (make-pathname :name "routes" :type "rb")
    (implementation-subdirectory "ror" "config")))
 
-(defun task-file-path(name)
+(defun routes-directory ()
+  (implementation-subdirectory "ror" "config" "routes"))
+
+(defun route-resource-filepath (name)
+  (merge-pathnames
+   (make-pathname :name name :type "rb")
+   (routes-directory)))
+
+(defun task-file-path (name)
   (merge-pathnames
    (make-pathname :name name :type "rake")
    (implementation-subdirectory "ror" "lib" "tasks")))
 
-(defun test-data-file-path(name)
+(defun test-data-file-path (name)
   (merge-pathnames
    (make-pathname :name name :type "rb")
    (implementation-subdirectory "ror" "db" "data")))
 
-(defun schema-file-path()
+(defun schema-file-path ()
   (merge-pathnames
    (make-pathname :name "schema" :type "rb")
    (db-directory)))
 
-(defun seed-file-path(&optional (name "seeds"))
+(defun seed-file-path (&optional (name "seeds"))
   (merge-pathnames
    (make-pathname :name name :type "rb")
    (db-directory)))
