@@ -1,6 +1,6 @@
 # soft_sim.rails
 
-## Package: simian.rails-generator.model (:nicknames #:model)
+### Package: simian.rails-generator.model (:nicknames #:model)
 
 This package contains the code that produces all the generated files that belong in the app/models directory of your rails implementation.  After (rails:generate) you will find them in `<*implementation-directory*>/<your-project>/ror/app/models/`
 
